@@ -14,28 +14,35 @@ interface SeriesProgress {
 async function getSeriesProgress(userId: string | undefined): Promise<SeriesProgress[]> {
   const supabase = await createClient()
 
-  // Get all main series (series-1, series-2, etc.) with totals
-  const { data: seriesData } = await supabase
+  // Get all SCPs and group by series on the client side
+  const { data: allScps } = await supabase
     .from('scps')
-    .select('series')
-    .like('series', 'series-%')
+    .select('id, series')
     .order('series')
 
-  if (!seriesData) return []
+  if (!allScps) return []
 
-  // Group by series and count
-  const seriesCounts = seriesData.reduce((acc, { series }) => {
-    acc[series] = (acc[series] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  // Filter to only main series and count
+  const seriesCounts = allScps
+    .filter((s) => s.series.match(/^series-\d+$/))
+    .reduce((acc, { series }) => {
+      acc[series] = (acc[series] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
 
   // If no user, return with 0 read count
   if (!userId) {
-    return Object.entries(seriesCounts).map(([series, total]) => ({
-      series,
-      total,
-      read: 0,
-    }))
+    return Object.entries(seriesCounts)
+      .sort((a, b) => {
+        const aNum = parseInt(a[0].split('-')[1])
+        const bNum = parseInt(b[0].split('-')[1])
+        return aNum - bNum
+      })
+      .map(([series, total]) => ({
+        series,
+        total,
+        read: 0,
+      }))
   }
 
   // Get read counts per series for this user
@@ -46,11 +53,17 @@ async function getSeriesProgress(userId: string | undefined): Promise<SeriesProg
     .eq('is_read', true)
 
   if (!progressData) {
-    return Object.entries(seriesCounts).map(([series, total]) => ({
-      series,
-      total,
-      read: 0,
-    }))
+    return Object.entries(seriesCounts)
+      .sort((a, b) => {
+        const aNum = parseInt(a[0].split('-')[1])
+        const bNum = parseInt(b[0].split('-')[1])
+        return aNum - bNum
+      })
+      .map(([series, total]) => ({
+        series,
+        total,
+        read: 0,
+      }))
   }
 
   // Get the series for each read SCP
@@ -62,17 +75,23 @@ async function getSeriesProgress(userId: string | undefined): Promise<SeriesProg
 
   const readCounts =
     readScps?.reduce((acc, { series }) => {
-      if (series.startsWith('series-')) {
+      if (series.match(/^series-\d+$/)) {
         acc[series] = (acc[series] || 0) + 1
       }
       return acc
     }, {} as Record<string, number>) || {}
 
-  return Object.entries(seriesCounts).map(([series, total]) => ({
-    series,
-    total,
-    read: readCounts[series] || 0,
-  }))
+  return Object.entries(seriesCounts)
+    .sort((a, b) => {
+      const aNum = parseInt(a[0].split('-')[1])
+      const bNum = parseInt(b[0].split('-')[1])
+      return aNum - bNum
+    })
+    .map(([series, total]) => ({
+      series,
+      total,
+      read: readCounts[series] || 0,
+    }))
 }
 
 export default async function SeriesPage() {
