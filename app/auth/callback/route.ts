@@ -4,11 +4,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
-  const token_hash = requestUrl.searchParams.get('token_hash')
-  const type = requestUrl.searchParams.get('type')
+  const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') ?? '/'
 
-  if (token_hash && type) {
+  if (code) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,18 +26,14 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { error } = await supabase.auth.verifyOtp({
-      type: type as 'email',
-      token_hash,
-    })
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      // Redirect to the next URL or home on success
       return NextResponse.redirect(new URL(next, request.url))
     }
   }
 
-  // Return the user to login with error
+  // Return to login with error
   return NextResponse.redirect(
     new URL('/login?error=Could not verify magic link', request.url)
   )
