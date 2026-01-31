@@ -14,75 +14,49 @@ interface SeriesProgress {
 async function getSeriesProgress(userId: string | undefined): Promise<SeriesProgress[]> {
   const supabase = await createClient()
 
-  // Get ALL SCPs - remove the 1000 row limit
-  const { data: allScps } = await supabase
-    .from('scps')
-    .select('id, series')
-    .range(0, 10000) // Fetch up to 10k rows (covers all SCPs)
-
-  if (!allScps) return []
-
-  // Manually filter and count - client-side grouping
-  const mainSeries = allScps.filter(scp => /^series-\d+$/.test(scp.series))
-
-  // Group by series
-  const seriesMap = new Map<string, Set<string>>()
-  mainSeries.forEach(scp => {
-    if (!seriesMap.has(scp.series)) {
-      seriesMap.set(scp.series, new Set())
-    }
-    seriesMap.get(scp.series)!.add(scp.id)
-  })
-
-  console.log('Series found:', Array.from(seriesMap.keys())) // Debug log
-
-  // If no user, return with 0 read
   if (!userId) {
-    return Array.from(seriesMap.entries())
-      .map(([series, scpIds]) => ({
-        series,
-        total: scpIds.size,
-        read: 0,
-      }))
+    // For non-authenticated users, just get totals
+    const { data: allScps } = await supabase
+      .from('scps')
+      .select('series')
+      .like('series', 'series-%')
+
+    if (!allScps) return []
+
+    const seriesCounts = allScps.reduce((acc, { series }) => {
+      if (/^series-\d+$/.test(series)) {
+        acc[series] = (acc[series] || 0) + 1
+      }
+      return acc
+    }, {} as Record<string, number>)
+
+    return Object.entries(seriesCounts)
       .sort((a, b) => {
-        const aNum = parseInt(a.series.replace('series-', ''))
-        const bNum = parseInt(b.series.replace('series-', ''))
+        const aNum = parseInt(a[0].replace('series-', ''))
+        const bNum = parseInt(b[0].replace('series-', ''))
         return aNum - bNum
       })
+      .map(([series, total]) => ({ series, total, read: 0 }))
   }
 
-  // Get all read SCPs for this user
-  const allScpIds = Array.from(new Set(mainSeries.map(s => s.id)))
-  const { data: progressData } = await supabase
-    .from('user_progress')
-    .select('scp_id')
-    .eq('user_id', userId)
-    .eq('is_read', true)
-    .in('scp_id', allScpIds)
+  // For authenticated users, use RPC for efficient aggregation
+  const { data, error } = await supabase.rpc('get_series_progress', {
+    user_id_param: userId,
+  })
 
-  const readScpIds = new Set(progressData?.map(p => p.scp_id) || [])
+  if (error) {
+    console.error('RPC error:', error)
+    return []
+  }
 
-  // Calculate read count per series
-  const result = Array.from(seriesMap.entries())
-    .map(([series, scpIds]) => {
-      const scpIdArray = Array.from(scpIds)
-      const readCount = scpIdArray.filter(id => readScpIds.has(id)).length
+  if (!data) return []
 
-      return {
-        series,
-        total: scpIdArray.length,
-        read: readCount,
-      }
-    })
-    .sort((a, b) => {
-      const aNum = parseInt(a.series.replace('series-', ''))
-      const bNum = parseInt(b.series.replace('series-', ''))
-      return aNum - bNum
-    })
-
-  console.log('Series progress:', result) // Debug log
-
-  return result
+  // Sort by series number
+  return data.sort((a: SeriesProgress, b: SeriesProgress) => {
+    const aNum = parseInt(a.series.replace('series-', ''))
+    const bNum = parseInt(b.series.replace('series-', ''))
+    return aNum - bNum
+  })
 }
 
 export default async function SeriesPage() {
