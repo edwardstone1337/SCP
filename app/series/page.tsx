@@ -14,84 +14,74 @@ interface SeriesProgress {
 async function getSeriesProgress(userId: string | undefined): Promise<SeriesProgress[]> {
   const supabase = await createClient()
 
-  // Get all SCPs and group by series on the client side
+  // Get all series that match the pattern series-N
   const { data: allScps } = await supabase
     .from('scps')
     .select('id, series')
-    .order('series')
 
   if (!allScps) return []
 
-  // Filter to only main series and count
-  const seriesCounts = allScps
-    .filter((s) => s.series.match(/^series-\d+$/))
-    .reduce((acc, { series }) => {
-      acc[series] = (acc[series] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
+  // Manually filter and count - client-side grouping
+  const mainSeries = allScps.filter(scp => /^series-\d+$/.test(scp.series))
 
-  // If no user, return with 0 read count
+  // Group by series
+  const seriesMap = new Map<string, Set<string>>()
+  mainSeries.forEach(scp => {
+    if (!seriesMap.has(scp.series)) {
+      seriesMap.set(scp.series, new Set())
+    }
+    seriesMap.get(scp.series)!.add(scp.id)
+  })
+
+  console.log('Series found:', Array.from(seriesMap.keys())) // Debug log
+
+  // If no user, return with 0 read
   if (!userId) {
-    return Object.entries(seriesCounts)
-      .sort((a, b) => {
-        const aNum = parseInt(a[0].split('-')[1])
-        const bNum = parseInt(b[0].split('-')[1])
-        return aNum - bNum
-      })
-      .map(([series, total]) => ({
+    return Array.from(seriesMap.entries())
+      .map(([series, scpIds]) => ({
         series,
-        total,
+        total: scpIds.size,
         read: 0,
       }))
+      .sort((a, b) => {
+        const aNum = parseInt(a.series.replace('series-', ''))
+        const bNum = parseInt(b.series.replace('series-', ''))
+        return aNum - bNum
+      })
   }
 
-  // Get read counts per series for this user
+  // Get all read SCPs for this user
+  const allScpIds = Array.from(new Set(mainSeries.map(s => s.id)))
   const { data: progressData } = await supabase
     .from('user_progress')
-    .select('scp_id, is_read')
+    .select('scp_id')
     .eq('user_id', userId)
     .eq('is_read', true)
+    .in('scp_id', allScpIds)
 
-  if (!progressData) {
-    return Object.entries(seriesCounts)
-      .sort((a, b) => {
-        const aNum = parseInt(a[0].split('-')[1])
-        const bNum = parseInt(b[0].split('-')[1])
-        return aNum - bNum
-      })
-      .map(([series, total]) => ({
+  const readScpIds = new Set(progressData?.map(p => p.scp_id) || [])
+
+  // Calculate read count per series
+  const result = Array.from(seriesMap.entries())
+    .map(([series, scpIds]) => {
+      const scpIdArray = Array.from(scpIds)
+      const readCount = scpIdArray.filter(id => readScpIds.has(id)).length
+
+      return {
         series,
-        total,
-        read: 0,
-      }))
-  }
-
-  // Get the series for each read SCP
-  const readScpIds = progressData.map((p) => p.scp_id)
-  const { data: readScps } = await supabase
-    .from('scps')
-    .select('series')
-    .in('id', readScpIds)
-
-  const readCounts =
-    readScps?.reduce((acc, { series }) => {
-      if (series.match(/^series-\d+$/)) {
-        acc[series] = (acc[series] || 0) + 1
+        total: scpIdArray.length,
+        read: readCount,
       }
-      return acc
-    }, {} as Record<string, number>) || {}
-
-  return Object.entries(seriesCounts)
+    })
     .sort((a, b) => {
-      const aNum = parseInt(a[0].split('-')[1])
-      const bNum = parseInt(b[0].split('-')[1])
+      const aNum = parseInt(a.series.replace('series-', ''))
+      const bNum = parseInt(b.series.replace('series-', ''))
       return aNum - bNum
     })
-    .map(([series, total]) => ({
-      series,
-      total,
-      read: readCounts[series] || 0,
-    }))
+
+  console.log('Series progress:', result) // Debug log
+
+  return result
 }
 
 export default async function SeriesPage() {
