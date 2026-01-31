@@ -18,49 +18,27 @@ async function getRangeProgress(
 ): Promise<RangeProgress[]> {
   const supabase = await createClient()
 
-  // Get all SCPs in this series with their ranges
-  const { data: scpsData } = await supabase
-    .from('scps')
-    .select('id, scp_number')
-    .eq('series', seriesId)
-    .order('scp_number')
-
-  if (!scpsData || scpsData.length === 0) return []
-
-  // Group by range
-  const rangeMap = new Map<number, { total: number; scpIds: string[] }>()
-
-  scpsData.forEach(({ id, scp_number }) => {
-    const rangeStart = Math.floor(scp_number / 100) * 100
-    const existing = rangeMap.get(rangeStart)
-
-    if (existing) {
-      existing.total++
-      existing.scpIds.push(id)
-    } else {
-      rangeMap.set(rangeStart, { total: 1, scpIds: [id] })
-    }
+  // Use RPC to avoid URI length issues with large .in() queries
+  const { data, error } = await supabase.rpc('get_range_progress', {
+    series_id_param: seriesId,
+    user_id_param: userId,
   })
 
-  // Get read counts for this user
-  const allScpIds = scpsData.map((s) => s.id)
-  const { data: progressData } = await supabase
-    .from('user_progress')
-    .select('scp_id')
-    .eq('user_id', userId)
-    .eq('is_read', true)
-    .in('scp_id', allScpIds)
+  if (error) {
+    console.error('RPC error:', error)
+    return []
+  }
 
-  const readScpIds = new Set(progressData?.map((p) => p.scp_id) || [])
+  if (!data) return []
 
-  // Calculate read count per range
-  const ranges: RangeProgress[] = []
-  rangeMap.forEach(({ total, scpIds }, rangeStart) => {
-    const read = scpIds.filter((id) => readScpIds.has(id)).length
-    ranges.push({ rangeStart, total, read })
-  })
-
-  return ranges.sort((a, b) => a.rangeStart - b.rangeStart)
+  // Map RPC result to RangeProgress interface
+  return data.map(
+    (row: { range_start: number; total: number; read_count: number }) => ({
+      rangeStart: row.range_start,
+      total: Number(row.total),
+      read: Number(row.read_count),
+    })
+  )
 }
 
 export default async function SeriesRangePage({
