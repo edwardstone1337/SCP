@@ -1,0 +1,2 @@
+-- Optional seed data for local development.
+-- Add your seed SQL here.
