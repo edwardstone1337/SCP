@@ -35,10 +35,9 @@ export async function toggleReadStatus(scpUuid: string, currentStatus: boolean) 
     return { success: false, error: error.message }
   }
 
-  // Revalidate relevant paths to update progress indicators
-  revalidatePath('/series')
-  revalidatePath('/series/[seriesId]', 'page')
-  revalidatePath('/series/[seriesId]/[range]', 'page')
+  // Revalidate all series-related pages
+  // Using 'layout' type revalidates all nested routes
+  revalidatePath('/series', 'layout')
 
   return { success: true, newStatus }
 }
