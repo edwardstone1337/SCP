@@ -42,6 +42,15 @@ const connectionStatus = error?.message.includes('relation') || error?.message.i
           </dl>
         </div>
 
+        <div className="mt-6 text-center">
+          <a
+            href="/login"
+            className="inline-block px-6 py-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
+          >
+            Sign in to start tracking →
+          </a>
+        </div>
+
         <div className="mt-8 text-center">
           <a
             href="/test-data"
