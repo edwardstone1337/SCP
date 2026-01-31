@@ -95,10 +95,10 @@ export default async function Home() {
         {/* Navigation */}
         <div className="mt-8 text-center space-y-4">
           <a
-            href="/test-data"
+            href="/series"
             className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
           >
-            View Database Test →
+            Browse Series →
           </a>
 
           <p className="text-sm text-gray-500">
