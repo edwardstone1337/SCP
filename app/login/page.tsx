@@ -1,13 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSiteUrl } from '@/lib/utils/site-url'
+import { useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const searchParams = useSearchParams()
+
+  // Show error from URL params (e.g., from failed callback)
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error) {
+      setMessage({ type: 'error', text: error })
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
