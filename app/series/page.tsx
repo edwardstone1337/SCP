@@ -14,10 +14,11 @@ interface SeriesProgress {
 async function getSeriesProgress(userId: string | undefined): Promise<SeriesProgress[]> {
   const supabase = await createClient()
 
-  // Get all series that match the pattern series-N
+  // Get ALL SCPs - remove the 1000 row limit
   const { data: allScps } = await supabase
     .from('scps')
     .select('id, series')
+    .range(0, 10000) // Fetch up to 10k rows (covers all SCPs)
 
   if (!allScps) return []
 
