@@ -1,3 +1,4 @@
+import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { ScpReader } from './scp-reader'
@@ -47,5 +48,10 @@ export default async function ScpPage({
     notFound()
   }
 
-  return <ScpReader scp={scpData} />
+  return (
+    <>
+      <Navigation />
+      <ScpReader scp={scpData} />
+    </>
+  )
 }

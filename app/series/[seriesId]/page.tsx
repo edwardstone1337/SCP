@@ -1,3 +1,4 @@
+import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import Link from 'next/link'
@@ -90,7 +91,9 @@ export default async function SeriesRangePage({
   }
 
   return (
-    <main className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
+    <>
+      <Navigation />
+      <main className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -135,5 +138,6 @@ export default async function SeriesRangePage({
         </div>
       </div>
     </main>
+    </>
   )
 }

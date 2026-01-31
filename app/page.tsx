@@ -1,4 +1,6 @@
+import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -16,11 +18,13 @@ export default async function Home() {
     : 'Connected'
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm">
-        <h1 className="text-4xl font-bold mb-8 text-center">
-          SCP Continuum Tracker
-        </h1>
+    <>
+      <Navigation />
+      <main className="flex min-h-screen flex-col items-center justify-center p-24">
+        <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm">
+          <h1 className="text-4xl font-bold mb-8 text-center">
+            SCP Continuum
+          </h1>
 
         <div className="mb-8 text-center">
           <p className="text-xl mb-4">Phase 3: Authentication ✅</p>
@@ -92,14 +96,14 @@ export default async function Home() {
           </dl>
         </div>
 
-        {/* Navigation */}
+        {/* Browse Series - prominent CTA */}
         <div className="mt-8 text-center space-y-4">
-          <a
+          <Link
             href="/series"
-            className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+            className="inline-block px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
           >
             Browse Series →
-          </a>
+          </Link>
 
           <p className="text-sm text-gray-500">
             Ready for Phase 4: The Tracker
@@ -107,5 +111,6 @@ export default async function Home() {
         </div>
       </div>
     </main>
+    </>
   )
 }

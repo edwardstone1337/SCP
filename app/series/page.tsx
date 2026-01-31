@@ -1,3 +1,4 @@
+import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { seriesToRoman } from '@/lib/utils/series'
 import Link from 'next/link'
@@ -73,7 +74,9 @@ export default async function SeriesPage() {
   const seriesProgress = await getSeriesProgress(user.id)
 
   return (
-    <main className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
+    <>
+      <Navigation />
+      <main className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -127,5 +130,6 @@ export default async function SeriesPage() {
         </div>
       </div>
     </main>
+    </>
   )
 }
