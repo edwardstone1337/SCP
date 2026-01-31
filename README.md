@@ -1,8 +1,11 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SCP Continuum Tracker
+
+Next.js 16 + Supabase + TypeScript + Tailwind. Phase 3: Authentication.
 
 ## Getting Started
 
-First, run the development server:
+1. Copy `.env.example` to `.env.local` and add your Supabase URL and anon key.
+2. Run the development server:
 
 ```bash
 npm run dev
@@ -28,6 +31,12 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Supabase
+
+- **Migrations**: `supabase/migrations/` — run with `supabase db push` after linking
+- **Seed SCP data**: `npm run seed` (requires `.env.local`; fetches from scp-data.tedivm.com)
+- **Link runbook**: `docs/supabase-link-runbook.md`
 
 ## Deploy on Vercel
 
