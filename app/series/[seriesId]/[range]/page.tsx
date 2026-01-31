@@ -3,6 +3,8 @@ import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 interface ScpListItem {
   id: string
   scp_id: string

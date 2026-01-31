@@ -3,6 +3,8 @@ import { seriesToRoman } from '@/lib/utils/series'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 interface SeriesProgress {
   series: string
   total: number
