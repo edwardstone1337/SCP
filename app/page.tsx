@@ -6,11 +6,11 @@ export default async function Home() {
   // Test connection by checking Supabase URL
   const { data, error } = await supabase.from('_supabase_test').select('*').limit(1)
   
-  const connectionStatus = error?.message.includes('relation') 
-    ? 'Connected (no tables yet)' 
-    : error 
-    ? `Error: ${error.message}` 
-    : 'Connected'
+const connectionStatus = error?.message.includes('relation') || error?.message.includes('Could not find the table')
+  ? 'Connected (no tables yet)' 
+  : error 
+  ? `Error: ${error.message}` 
+  : 'Connected'
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
