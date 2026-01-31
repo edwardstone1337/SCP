@@ -42,9 +42,14 @@ const connectionStatus = error?.message.includes('relation') || error?.message.i
           </dl>
         </div>
 
-        <p className="mt-8 text-center text-sm text-gray-500">
-          Ready for Phase 2: Data Ingestion
-        </p>
+        <div className="mt-8 text-center">
+          <a
+            href="/test-data"
+            className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+          >
+            View Phase 2 Test →
+          </a>
+        </div>
       </div>
     </main>
   )
