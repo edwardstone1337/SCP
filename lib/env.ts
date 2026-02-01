@@ -1,6 +1,7 @@
 /**
- * Environment variable validation
- * Validates required env vars at startup and provides type-safe access
+ * Environment variable validation (server-side only).
+ * Import this only from server code (e.g. lib/supabase/server.ts).
+ * The browser client uses process.env directly so Next.js can inline NEXT_PUBLIC_* at build time.
  */
 
 function getEnvVar(key: string): string {

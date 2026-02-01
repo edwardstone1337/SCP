@@ -1,12 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Navigation } from '@/components/navigation'
+import { Main } from '@/components/ui/main'
+import { Container } from '@/components/ui/container'
+import { PageHeader } from '@/components/ui/page-header'
+import { Stack } from '@/components/ui/stack'
+import { ScpListItem } from '@/components/ui/scp-list-item'
 
 export const dynamic = 'force-dynamic'
 
-interface ScpListItem {
+interface ScpRow {
   id: string
   scp_id: string
   scp_number: number
@@ -19,7 +23,7 @@ async function getScpsInRange(
   seriesId: string,
   rangeStart: number,
   userId: string | undefined
-): Promise<ScpListItem[]> {
+): Promise<ScpRow[]> {
   const supabase = await createClient()
   
   // Get all SCPs in this range
@@ -87,78 +91,26 @@ export default async function RangeScpListPage({
   return (
     <>
       <Navigation />
-      <main 
-        className="min-h-screen p-6"
-        style={{ 
-          backgroundColor: 'var(--color-background)',
-          color: 'var(--color-text-primary)'
-        }}
-      >
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <Link
-              href={`/series/${seriesId}`}
-              className="inline-flex items-center text-sm mb-4 transition-colors"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              ← Back
-            </Link>
-            
-            <h1 className="text-4xl font-bold mb-1">{formatRange(rangeStart)}</h1>
-          </div>
-
-          {/* SCP List */}
-          <div className="space-y-2">
+      <Main>
+        <Container size="md">
+          <PageHeader
+            title={formatRange(rangeStart)}
+            backHref={`/series/${seriesId}`}
+          />
+          <Stack direction="vertical" gap="tight">
             {scps.map((scp) => (
-              <Link
+              <ScpListItem
                 key={scp.id}
+                scpId={scp.scp_id}
+                title={scp.title}
+                rating={scp.rating}
+                isRead={scp.is_read}
                 href={`/scp/${scp.scp_id}`}
-                className="flex items-center justify-between p-4 rounded-lg border-2 transition-all hover:scale-[1.01]"
-                style={{
-                  backgroundColor: 'var(--color-grey-9)',
-                  borderColor: scp.is_read ? 'var(--color-accent)' : 'var(--color-grey-8)'
-                }}
-              >
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold truncate mb-1">{scp.title}</h3>
-                  <div 
-                    className="flex items-center gap-3 text-sm"
-                    style={{ color: 'var(--color-text-secondary)' }}
-                  >
-                    <span className="flex items-center gap-1">
-                      ★ {scp.rating}
-                    </span>
-                    <span>•</span>
-                    <span className="font-mono">{scp.scp_id}</span>
-                  </div>
-                </div>
-                
-                <div className="ml-4">
-                  {scp.is_read ? (
-                    <div 
-                      className="w-8 h-8 rounded-full flex items-center justify-center border-2"
-                      style={{ 
-                        backgroundColor: 'var(--color-red-1)',
-                        borderColor: 'var(--color-accent)'
-                      }}
-                    >
-                      <span style={{ color: 'var(--color-accent)' }}>✓</span>
-                    </div>
-                  ) : (
-                    <div 
-                      className="w-8 h-8 rounded-full flex items-center justify-center border-2"
-                      style={{ borderColor: 'var(--color-grey-7)' }}
-                    >
-                      <span style={{ color: 'var(--color-grey-7)' }}>👁️</span>
-                    </div>
-                  )}
-                </div>
-              </Link>
+              />
             ))}
-          </div>
-        </div>
-      </main>
+          </Stack>
+        </Container>
+      </Main>
     </>
   )
 }

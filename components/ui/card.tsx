@@ -2,10 +2,20 @@ import { ReactNode, CSSProperties } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
+const PADDING_MAP = {
+  sm: 'var(--spacing-2)',
+  md: 'var(--spacing-3)',
+  lg: 'var(--spacing-4)',
+} as const
+
+type PaddingKey = keyof typeof PADDING_MAP
+
 interface CardProps {
   children: ReactNode
   variant?: 'default' | 'interactive' | 'bordered'
   accentBorder?: boolean
+  /** Card padding: sm=16px, md=24px, lg=32px (default) */
+  padding?: PaddingKey
   href?: string
   className?: string
 }
@@ -14,12 +24,13 @@ export function Card({
   children,
   variant = 'default',
   accentBorder = false,
+  padding = 'lg',
   href,
   className,
 }: CardProps) {
   // Base styles
   const baseStyle: CSSProperties = {
-    padding: 'var(--spacing-card-padding)',
+    padding: PADDING_MAP[padding],
     backgroundColor: 'var(--color-grey-9)',
     borderRadius: 'var(--radius-card)',
     borderWidth: 'var(--border-width-normal)',

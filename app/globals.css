@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Ensure Grid responsive classes are always generated (cols="auto" → 2→3→4) */
+@source inline("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4");
+
 @theme {
   /* Color Tokens - Red Scale (Ant Design) */
   --color-red-1: #2a1215;
@@ -141,6 +144,15 @@
   --spacing-5: 2.5rem;
   --spacing-6: 3rem;
   --spacing-8: 4rem;
+  --spacing-12: 6rem;
+
+  /* SCP Reader / content area */
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+  --line-height-lg: 1.75rem;
+  --color-red-2: #431418;
+  --color-red-7: #e84749;
+  --color-accent-hover: var(--color-red-7);
 
   /* Radius - override Tailwind defaults for component demo */
   --radius-sm: 0.25rem;
@@ -152,11 +164,19 @@
 
   /* Button inline-style tokens (not used by Tailwind utilities) */
   --font-family-sans: var(--font-roboto), system-ui, sans-serif;
+  --font-family-mono: var(--font-roboto-mono), monospace;
+  --font-mono: var(--font-family-mono);
   --transition-base: 200ms ease-in-out;
   --border-width-normal: 2px;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.25rem;
+
+  /* Container inline-style tokens */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
 
   /* Card, Badge, Icon inline-style tokens */
   --radius-card: var(--radius-lg);
@@ -233,4 +253,76 @@ a[data-variant="nav"]:hover {
 /* Card hover states */
 [data-variant="interactive"]:hover {
   transform: scale(1.02);
+}
+
+/* SCP content area – prose-like typography using design tokens */
+.scp-content {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-lg);
+}
+
+.scp-content p {
+  margin-bottom: var(--spacing-2);
+}
+
+.scp-content p:last-child {
+  margin-bottom: 0;
+}
+
+.scp-content h1,
+.scp-content h2,
+.scp-content h3,
+.scp-content h4,
+.scp-content h5,
+.scp-content h6 {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+}
+
+.scp-content h1 { font-size: var(--font-size-2xl); }
+.scp-content h2 { font-size: var(--font-size-xl); }
+.scp-content h3 { font-size: var(--font-size-lg); }
+
+.scp-content a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.scp-content a:hover {
+  color: var(--color-accent-hover);
+}
+
+.scp-content ul,
+.scp-content ol {
+  margin: var(--spacing-2) 0;
+  padding-left: var(--spacing-4);
+}
+
+.scp-content li {
+  margin-bottom: var(--spacing-1);
+}
+
+.scp-content blockquote {
+  border-left: 4px solid var(--color-grey-7);
+  padding-left: var(--spacing-3);
+  margin: var(--spacing-3) 0;
+  color: var(--color-text-secondary);
+}
+
+.scp-content code {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-grey-8);
+  padding: var(--spacing-1);
+  border-radius: var(--radius-sm);
+}
+
+/* Loading spinner keyframes */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

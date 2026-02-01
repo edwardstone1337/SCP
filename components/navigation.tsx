@@ -1,54 +1,64 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/actions/auth'
+import { Container } from '@/components/ui/container'
+import { Link } from '@/components/ui/link'
+import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/logo'
+import { Stack } from '@/components/ui/stack'
+import { Text } from '@/components/ui/typography'
 
 export async function Navigation() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <nav className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <Link 
-            href="/"
-            className="text-xl font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-          >
-            SCP Continuum
-          </Link>
-          
-          <div className="flex items-center gap-6">
-            {user ? (
-              <>
-                <Link
-                  href="/series"
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                >
-                  Series
-                </Link>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {user.email}
-                </span>
-                <form action={signOut}>
-                  <button
-                    type="submit"
-                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </form>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
+    <nav
+      style={{
+        backgroundColor: 'var(--color-grey-9)',
+        borderBottom: '1px solid var(--color-grey-8)',
+        paddingTop: 'var(--spacing-2)',
+        paddingBottom: 'var(--spacing-2)',
+      }}
+    >
+      <Container size="lg">
+        <div
+          style={{
+            paddingLeft: 'var(--spacing-page-padding)',
+            paddingRight: 'var(--spacing-page-padding)',
+          }}
+        >
+          <Stack direction="horizontal" align="center" justify="between" gap="normal">
+            <Link href="/" variant="nav">
+              <Stack direction="horizontal" align="center" gap="tight">
+                <Logo size="sm" />
+                <span>SCP Continuum</span>
+              </Stack>
+            </Link>
+
+            <Stack direction="horizontal" align="center" gap="loose">
+              {user ? (
+                <>
+                  <Link href="/series" variant="default">
+                    Series
+                  </Link>
+                  <Text as="span" variant="secondary" size="sm">
+                    {user.email}
+                  </Text>
+                  <form action={signOut}>
+                    <Button type="submit" variant="ghost" size="sm">
+                      Sign Out
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <Button href="/login" variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              )}
+            </Stack>
+          </Stack>
         </div>
-      </div>
+      </Container>
     </nav>
   )
 }

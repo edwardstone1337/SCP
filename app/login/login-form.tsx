@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSiteUrl } from '@/lib/utils/site-url'
 import { useSearchParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -101,14 +102,14 @@ export function LoginForm() {
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              fullWidth
               disabled={loading || !email}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg
-                       transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Sending...' : 'Send Magic Link'}
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400">
@@ -117,12 +118,9 @@ export function LoginForm() {
         </div>
 
         <div className="mt-6 text-center">
-          <a
-            href="/"
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-          >
+          <Button href="/" variant="ghost" size="sm">
             ← Back to home
-          </a>
+          </Button>
         </div>
       </div>
     </main>

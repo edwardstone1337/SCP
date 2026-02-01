@@ -1,69 +1,71 @@
-import Link from 'next/link'
-import Image from 'next/image'
+import { Main } from '@/components/ui/main'
+import { Container } from '@/components/ui/container'
+import { Logo } from '@/components/ui/logo'
+import { Heading } from '@/components/ui/typography'
+import { Text } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Stack } from '@/components/ui/stack'
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] p-6">
-      {/* Logo */}
-      <div className="mb-12">
-        <Image
-          src="/scp-logo.png"
-          alt="SCP Foundation"
-          width={48}
-          height={48}
-          priority
-        />
-      </div>
+    <Main className="flex flex-col">
+      {/* Logo - mb-12 (48px) */}
+      <Stack style={{ marginBottom: 'var(--spacing-6)' }}>
+        <Logo size="md" />
+      </Stack>
 
       {/* Main Content - Centered */}
-      <div className="flex-1 flex flex-col justify-center max-w-md">
-        {/* Title Block */}
-        <div className="mb-16">
-          <div className="flex items-start gap-4 mb-2">
-            <h1 className="text-5xl font-bold leading-tight tracking-tight">
-              SECURE<br />
-              CONTAIN<br />
-              PROTECT
-            </h1>
-            {/* Red vertical bar */}
-            <div
-              className="w-1 h-20 mt-1"
-              style={{ backgroundColor: 'var(--color-accent)' }}
-            />
-          </div>
-        </div>
+      <Stack
+        justify="center"
+        style={{
+          flex: 1,
+          marginBottom: 'var(--spacing-6)',
+        }}
+      >
+        <Container size="sm" className="max-w-md">
+          <Stack style={{ gap: 'var(--spacing-8)' }}>
+            {/* Title Block - mb-16 (64px) */}
+            <Stack direction="horizontal" align="start" gap="normal">
+              <Heading level={1} className="leading-tight tracking-tight">
+                SECURE<br />
+                CONTAIN<br />
+                PROTECT
+              </Heading>
+              {/* Red accent bar - unique to home, no component */}
+              <div
+                style={{
+                  width: 4,
+                  height: 80,
+                  marginTop: 4,
+                  flexShrink: 0,
+                  backgroundColor: 'var(--color-accent)',
+                }}
+              />
+            </Stack>
 
-        {/* Warning Block */}
-        <div className="mb-12">
-          <p
-            className="text-3xl font-bold mb-4"
-            style={{ color: 'var(--color-accent)' }}
-          >
-            WARNING
-          </p>
-          <h2 className="text-2xl font-bold mb-4 leading-tight">
-            THE FOUNDATION DATABASE<br />IS CLASSIFIED
-          </h2>
-          <p className="text-lg leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-            Access by unauthorized personnel is strictly prohibited.
-            Perpetrators will be tracked, located, and detained
-          </p>
-        </div>
-      </div>
+            {/* Warning Block - mb-12 (48px) */}
+            <Stack style={{ gap: 'var(--spacing-4)' }}>
+              <Heading level={3} accent>
+                WARNING
+              </Heading>
+              <Heading level={4} className="leading-tight">
+                THE FOUNDATION DATABASE<br />IS CLASSIFIED
+              </Heading>
+              <Text variant="secondary" size="lg" className="leading-relaxed">
+                Access by unauthorized personnel is strictly prohibited.
+                Perpetrators will be tracked, located, and detained
+              </Text>
+            </Stack>
+          </Stack>
+        </Container>
+      </Stack>
 
       {/* Continue Button - Bottom */}
-      <div className="mt-auto">
-        <Link
-          href="/series"
-          className="block w-full py-4 text-center text-xl font-bold rounded-lg border-2 transition-colors"
-          style={{
-            borderColor: 'var(--color-accent)',
-            color: 'var(--color-text-primary)'
-          }}
-        >
+      <Stack style={{ marginTop: 'auto' }}>
+        <Button href="/series" variant="primary" fullWidth size="lg">
           Continue
-        </Link>
-      </div>
-    </main>
+        </Button>
+      </Stack>
+    </Main>
   )
 }

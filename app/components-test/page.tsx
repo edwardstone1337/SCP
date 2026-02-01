@@ -4,24 +4,121 @@ import { Link } from '@/components/ui/link'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
+import { ProgressRing } from '@/components/ui/progress-ring'
+import { ProgressText } from '@/components/ui/progress-text'
+import { Main } from '@/components/ui/main'
+import { Container } from '@/components/ui/container'
+import { Stack } from '@/components/ui/stack'
+import { Grid } from '@/components/ui/grid'
+import { StatusIndicator } from '@/components/ui/status-indicator'
+import { Logo } from '@/components/ui/logo'
+import { PageHeader } from '@/components/ui/page-header'
+import { SeriesCard } from '@/components/ui/series-card'
+import { RangeListItem } from '@/components/ui/range-list-item'
+import { ScpListItem } from '@/components/ui/scp-list-item'
 
 export default function ComponentsTestPage() {
   return (
-    <main
-      className="min-h-screen"
-      style={{
-        backgroundColor: 'var(--color-background)',
-        padding: 'var(--spacing-page-padding)',
-      }}
-    >
-      <div
-        className="max-w-4xl mx-auto"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-section-gap)',
-        }}
-      >
+    <Main>
+      <Container>
+        <Stack gap="section">
+        {/* Layout Components */}
+        <section>
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
+            Layout Components
+          </Heading>
+
+          {/* Main - used as page wrapper */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              Main — Full-height page wrapper (this page uses Main)
+            </Text>
+            <Text variant="muted" size="sm">
+              min-height: 100vh, background: var(--color-background), padding:
+              var(--spacing-page-padding) (48px)
+            </Text>
+          </Stack>
+
+          {/* Container sizes */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              Container — Centered content with max-width (size: sm, md, lg, xl)
+            </Text>
+            <Stack direction="horizontal" gap="normal" style={{ flexWrap: 'wrap' }}>
+              {(['sm', 'md', 'lg', 'xl'] as const).map((size) => (
+                <Container key={size} size={size}>
+                  <div
+                    style={{
+                      padding: 'var(--spacing-2)',
+                      backgroundColor: 'var(--color-grey-9)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--color-grey-8)',
+                    }}
+                  >
+                    <Text size="sm">
+                      Container {size} (max {size === 'sm' ? '640' : size === 'md' ? '768' : size === 'lg' ? '1024' : '1280'}px)
+                    </Text>
+                  </div>
+                </Container>
+              ))}
+            </Stack>
+          </Stack>
+
+          {/* Stack - vertical and horizontal */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              Stack — Flexbox with consistent gap (direction, gap, align, justify)
+            </Text>
+            <Stack direction="horizontal" gap="loose" style={{ flexWrap: 'wrap' }}>
+              <Stack gap="tight" align="start">
+                <Text size="sm">Vertical, gap: tight (8px)</Text>
+                <div style={{ width: 40, height: 20, backgroundColor: 'var(--color-accent)' }} />
+                <div style={{ width: 40, height: 20, backgroundColor: 'var(--color-accent)' }} />
+                <div style={{ width: 40, height: 20, backgroundColor: 'var(--color-accent)' }} />
+              </Stack>
+              <Stack gap="normal" align="start">
+                <Text size="sm">Vertical, gap: normal (16px)</Text>
+                <div style={{ width: 40, height: 20, backgroundColor: 'var(--color-accent)' }} />
+                <div style={{ width: 40, height: 20, backgroundColor: 'var(--color-accent)' }} />
+                <div style={{ width: 40, height: 20, backgroundColor: 'var(--color-accent)' }} />
+              </Stack>
+              <Stack direction="horizontal" gap="tight" align="center">
+                <Text size="sm">Horizontal, gap: tight</Text>
+                <div style={{ width: 20, height: 30, backgroundColor: 'var(--color-accent)' }} />
+                <div style={{ width: 20, height: 30, backgroundColor: 'var(--color-accent)' }} />
+                <div style={{ width: 20, height: 30, backgroundColor: 'var(--color-accent)' }} />
+              </Stack>
+            </Stack>
+          </Stack>
+
+          {/* Grid - responsive card grid */}
+          <Stack gap="normal">
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              Grid — Responsive 2→3→4 columns (resize browser to test)
+            </Text>
+            <Grid>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <Card key={n}>
+                  <Heading level={4}>Card {n}</Heading>
+                  <Text variant="secondary" size="sm">
+                    Responsive grid item
+                  </Text>
+                </Card>
+              ))}
+            </Grid>
+            <Text variant="muted" size="sm" style={{ marginTop: 'var(--spacing-2)' }}>
+              Fixed cols=3 example:
+            </Text>
+            <Grid cols={3}>
+              {[1, 2, 3].map((n) => (
+                <Card key={n}>
+                  <Text size="sm">Fixed 3-col item {n}</Text>
+                </Card>
+              ))}
+            </Grid>
+          </Stack>
+        </section>
+
         {/* Headings */}
         <section>
           <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
@@ -346,6 +443,24 @@ export default function ComponentsTestPage() {
                 </Text>
               </Card>
             </div>
+
+            {/* Card padding variants */}
+            <div>
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+                Card padding (sm 16px, md 24px, lg 32px default)
+              </Text>
+              <Stack direction="horizontal" gap="normal" style={{ flexWrap: 'wrap' }}>
+                <Card padding="sm">
+                  <Text size="sm">padding=&quot;sm&quot;</Text>
+                </Card>
+                <Card padding="md">
+                  <Text size="sm">padding=&quot;md&quot;</Text>
+                </Card>
+                <Card padding="lg">
+                  <Text size="sm">padding=&quot;lg&quot;</Text>
+                </Card>
+              </Stack>
+            </div>
           </div>
         </section>
 
@@ -366,6 +481,168 @@ export default function ComponentsTestPage() {
             <Badge variant="default">Default</Badge>
             <Badge variant="accent">Access Granted</Badge>
             <Badge variant="progress">75%</Badge>
+          </div>
+        </section>
+
+        {/* ProgressRing Component */}
+        <section>
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
+            ProgressRing Component
+          </Heading>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Value variants (0%, 10%, 50%, 100%)
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                gap: 'var(--spacing-6)',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
+              {[0, 10, 50, 100].map((v) => (
+                <div key={v} style={{ textAlign: 'center' }}>
+                  <ProgressRing value={v} size="md" />
+                  <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-2)' }}>
+                    {v}%
+                  </Text>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Size variants (xs 48px, sm 64px, md 96px, lg 128px)
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                gap: 'var(--spacing-6)',
+                alignItems: 'flex-end',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <ProgressRing value={50} size="xs" />
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-2)' }}>
+                  xs
+                </Text>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <ProgressRing value={50} size="sm" />
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-2)' }}>
+                  sm
+                </Text>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <ProgressRing value={50} size="md" />
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-2)' }}>
+                  md
+                </Text>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <ProgressRing value={50} size="lg" />
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-2)' }}>
+                  lg
+                </Text>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              With centered content (children)
+            </Text>
+            <div style={{ display: 'flex', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
+              <ProgressRing value={75} size="md">
+                <Text variant="secondary" size="sm">
+                  75%
+                </Text>
+              </ProgressRing>
+              <ProgressRing value={100} size="lg">
+                <Text variant="secondary" size="base">
+                  Done
+                </Text>
+              </ProgressRing>
+            </div>
+          </div>
+        </section>
+
+        {/* ProgressText Component */}
+        <section>
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
+            ProgressText Component
+          </Heading>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Variant: percentage — 0%, partial, 100%
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-2)',
+              }}
+            >
+              <ProgressText read={0} total={100} variant="percentage" />
+              <ProgressText read={25} total={100} variant="percentage" />
+              <ProgressText read={100} total={100} variant="percentage" />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Variant: fraction — 0%, partial, 100%
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-2)',
+              }}
+            >
+              <ProgressText read={0} total={100} variant="fraction" />
+              <ProgressText read={25} total={100} variant="fraction" />
+              <ProgressText read={100} total={100} variant="fraction" />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Variant: both — 0%, partial, 100%
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-2)',
+              }}
+            >
+              <ProgressText read={0} total={100} variant="both" />
+              <ProgressText read={25} total={100} variant="both" />
+              <ProgressText read={100} total={100} variant="both" />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Size variants (sm, md, lg)
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-2)',
+              }}
+            >
+              <ProgressText read={50} total={100} variant="percentage" size="sm" />
+              <ProgressText read={50} total={100} variant="percentage" size="md" />
+              <ProgressText read={50} total={100} variant="percentage" size="lg" />
+            </div>
           </div>
         </section>
 
@@ -488,7 +765,85 @@ export default function ComponentsTestPage() {
             </Text>
           </div>
         </section>
-      </div>
-    </main>
+
+        {/* Page Components */}
+        <section>
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
+            Page Components
+          </Heading>
+
+          {/* Logo */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              Logo — sm (32px), md (48px), lg (64px)
+            </Text>
+            <Stack direction="horizontal" gap="normal" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+              <Logo size="sm" />
+              <Logo size="md" />
+              <Logo size="lg" />
+            </Stack>
+          </Stack>
+
+          {/* PageHeader */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              PageHeader — simple, with back, with back + badge
+            </Text>
+            <Stack gap="loose">
+              <PageHeader title="Simple title" description="Optional description text." />
+              <PageHeader title="With back link" backHref="/series" description="Back link above title." />
+              <PageHeader title="With badge" backHref="/series" badge="Access Granted" description="Badge below title." />
+            </Stack>
+          </Stack>
+
+          {/* StatusIndicator */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              StatusIndicator — read and unread (sm, md)
+            </Text>
+            <Stack direction="horizontal" gap="normal" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+              <StatusIndicator status="read" size="sm" />
+              <StatusIndicator status="read" size="md" />
+              <StatusIndicator status="unread" size="sm" />
+              <StatusIndicator status="unread" size="md" />
+            </Stack>
+          </Stack>
+
+          {/* SeriesCard */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              SeriesCard — 0% and &gt;0% states
+            </Text>
+            <Grid cols={2}>
+              <SeriesCard series="Series I" roman="I" total={100} read={0} href="/series/1" />
+              <SeriesCard series="Series II" roman="II" total={100} read={45} href="/series/2" />
+            </Grid>
+          </Stack>
+
+          {/* RangeListItem */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              RangeListItem — 0% and &gt;0% states
+            </Text>
+            <Stack gap="tight" style={{ maxWidth: 400 }}>
+              <RangeListItem rangeLabel="001–099" total={99} read={0} href="/series/1/001-099" />
+              <RangeListItem rangeLabel="100–199" total={100} read={33} href="/series/1/100-199" />
+            </Stack>
+          </Stack>
+
+          {/* ScpListItem */}
+          <Stack gap="normal" style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
+              ScpListItem — read and unread states
+            </Text>
+            <Stack gap="tight" style={{ maxWidth: 480 }}>
+              <ScpListItem scpId="SCP-173" title="The Sculpture" rating={4} isRead={true} href="/scp/173" />
+              <ScpListItem scpId="SCP-096" title={'The "Shy Guy"'} rating={5} isRead={false} href="/scp/096" />
+            </Stack>
+          </Stack>
+        </section>
+      </Stack>
+    </Container>
+    </Main>
   )
 }

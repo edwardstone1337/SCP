@@ -1,9 +1,12 @@
 import { createBrowserClient } from '@supabase/ssr'
-import { env } from '@/lib/env'
 
+/**
+ * Browser Supabase client. Uses process.env so Next.js can inline NEXT_PUBLIC_*
+ * at build time. Env validation runs only on the server (see server.ts → lib/env.ts).
+ */
 export function createClient() {
   return createBrowserClient(
-    env.supabaseUrl,
-    env.supabaseAnonKey
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 }
