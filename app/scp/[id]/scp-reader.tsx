@@ -35,8 +35,8 @@ export function ScpReader({ scp }: ScpReaderProps) {
       const result = await toggleReadStatus(scp.id, optimisticIsRead)
 
       if (!result.success) {
-        // Revert on error
-        setOptimisticIsRead(optimisticIsRead)
+        // Revert on error - revert to original server value
+        setOptimisticIsRead(scp.is_read)
         alert('Failed to update read status. Please try again.')
       } else {
         // Refresh to update progress indicators
