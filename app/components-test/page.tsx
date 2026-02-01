@@ -3,10 +3,20 @@ import { Heading, Text, Mono, Label } from '@/components/ui/typography'
 export default function ComponentsTestPage() {
   return (
     <main
-      className="min-h-screen p-8"
-      style={{ backgroundColor: 'var(--color-background)' }}
+      className="min-h-screen"
+      style={{
+        backgroundColor: 'var(--color-background)',
+        padding: 'var(--spacing-page-padding)',
+      }}
     >
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div
+        className="max-w-4xl mx-auto"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--spacing-section-gap)',
+        }}
+      >
         {/* Headings */}
         <section>
           <Heading level={2} className="mb-4">
@@ -91,6 +101,102 @@ export default function ComponentsTestPage() {
                 className="px-4 py-2 border rounded"
               />
             </div>
+          </div>
+        </section>
+
+        {/* Spacing System */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Spacing System (8px Grid)
+          </Heading>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-2)',
+            }}
+          >
+            {[0, 1, 2, 3, 4, 5, 6, 8].map((size) => (
+              <div
+                key={size}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--spacing-2)',
+                }}
+              >
+                <Text
+                  variant="secondary"
+                  size="sm"
+                  style={{ width: '120px' }}
+                >
+                  --spacing-{size}
+                </Text>
+                <div
+                  style={{
+                    width: `var(--spacing-${size})`,
+                    height: '24px',
+                    backgroundColor: 'var(--color-accent)',
+                  }}
+                />
+                <Text variant="muted" size="sm">
+                  {size === 0 ? '0' : `${size * 8}px`}
+                </Text>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Border Radius */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Border Radius
+          </Heading>
+
+          <div
+            style={{ display: 'flex', gap: 'var(--spacing-4)' }}
+          >
+            {['sm', 'md', 'lg', 'xl', 'full'].map((radius) => (
+              <div key={radius} style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    backgroundColor: 'var(--color-accent)',
+                    borderRadius: `var(--radius-${radius})`,
+                    marginBottom: 'var(--spacing-2)',
+                  }}
+                />
+                <Text variant="secondary" size="xs">
+                  {radius}
+                </Text>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Card Padding Example */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Semantic Spacing
+          </Heading>
+
+          <div
+            style={{
+              padding: 'var(--spacing-card-padding)',
+              backgroundColor: 'var(--color-grey-9)',
+              borderRadius: 'var(--radius-card)',
+              border: '2px solid var(--color-grey-8)',
+            }}
+          >
+            <Text>This card uses semantic spacing tokens:</Text>
+            <Text variant="secondary" size="sm">
+              padding: var(--spacing-card-padding) = 32px
+            </Text>
+            <Text variant="secondary" size="sm">
+              borderRadius: var(--radius-card) = 12px
+            </Text>
           </div>
         </section>
       </div>

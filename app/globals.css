@@ -59,6 +59,71 @@
   --line-height-3xl: 2.875rem; /* 46px */
   --line-height-4xl: 3.375rem; /* 54px */
   --line-height-5xl: 4rem; /* 64px */
+
+  /* Spacing Primitives - 8px Grid System */
+  --spacing-0: 0;
+  --spacing-1: 0.5rem;    /* 8px */
+  --spacing-2: 1rem;      /* 16px */
+  --spacing-3: 1.5rem;    /* 24px */
+  --spacing-4: 2rem;      /* 32px */
+  --spacing-5: 2.5rem;    /* 40px */
+  --spacing-6: 3rem;      /* 48px */
+  --spacing-7: 3.5rem;    /* 56px */
+  --spacing-8: 4rem;      /* 64px */
+  --spacing-10: 5rem;     /* 80px */
+  --spacing-12: 6rem;     /* 96px */
+  --spacing-16: 8rem;     /* 128px */
+
+  /* Semantic Spacing - Purpose-driven */
+  --spacing-page-padding: var(--spacing-6);        /* 48px - main page padding */
+  --spacing-section-gap: var(--spacing-8);         /* 64px - between major sections */
+  --spacing-card-padding: var(--spacing-4);        /* 32px - inside cards */
+  --spacing-card-gap: var(--spacing-2);            /* 16px - between cards */
+  --spacing-list-gap: var(--spacing-2);            /* 16px - between list items */
+  --spacing-list-gap-tight: var(--spacing-1);      /* 8px - tight lists */
+  --spacing-button-padding-x: var(--spacing-4);    /* 32px - button horizontal */
+  --spacing-button-padding-y: var(--spacing-2);    /* 16px - button vertical */
+  --spacing-input-padding-x: var(--spacing-4);     /* 32px - input horizontal */
+  --spacing-input-padding-y: var(--spacing-2);     /* 16px - input vertical */
+
+  /* Border Radius Primitives */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-full: 9999px;  /* Circular */
+
+  /* Semantic Border Radius */
+  --radius-button: var(--radius-lg);
+  --radius-card: var(--radius-lg);
+  --radius-input: var(--radius-lg);
+  --radius-badge: var(--radius-md);
+
+  /* Border Width */
+  --border-width-thin: 1px;
+  --border-width-normal: 2px;
+  --border-width-thick: 4px;
+
+  /* Layout Primitives */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-toast: 1400;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
 }
 
 /* Base Styles */
