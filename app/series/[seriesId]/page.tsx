@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
@@ -10,6 +11,12 @@ interface RangeProgress {
   rangeStart: number
   total: number
   read: number
+}
+
+interface GetRangeProgressRow {
+  range_start: number
+  total: number
+  read_count: number
 }
 
 async function getRangeProgress(
@@ -46,13 +53,18 @@ async function getRangeProgress(
   })
   
   if (error) {
-    console.error('RPC error:', error)
+    logger.error('Failed to fetch range progress', {
+      error: error instanceof Error ? error.message : String(error),
+      seriesId,
+      userId,
+      context: 'getRangeProgress'
+    })
     return []
   }
   
   if (!data) return []
   
-  return data.map(row => ({
+  return data.map((row: GetRangeProgressRow) => ({
     rangeStart: row.range_start,
     total: Number(row.total),
     read: Number(row.read_count)

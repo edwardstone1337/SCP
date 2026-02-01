@@ -1,3 +1,16 @@
+/**
+ * HTML Sanitization for SCP Content
+ *
+ * IMPORTANT: This sanitization currently only runs CLIENT-SIDE.
+ * The sanitizeHtml function is designed to be used in Client Components only.
+ *
+ * Server-side sanitization is planned for v1.1 using isomorphic-dompurify.
+ *
+ * Current usage:
+ * - app/scp/[id]/scp-reader.tsx (Client Component) ✓
+ *
+ * DO NOT USE in Server Components until server-side sanitization is implemented.
+ */
 import DOMPurify from 'dompurify'
 
 /**

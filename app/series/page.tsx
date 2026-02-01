@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 import { seriesToRoman } from '@/lib/utils/series'
 import Link from 'next/link'
 import { Navigation } from '@/components/navigation'
@@ -45,7 +46,11 @@ async function getSeriesProgress(userId: string | undefined): Promise<SeriesProg
   })
 
   if (error) {
-    console.error('RPC error:', error)
+    logger.error('Failed to fetch series progress', {
+      error: error instanceof Error ? error.message : String(error),
+      userId,
+      context: 'getSeriesProgress'
+    })
     return []
   }
 

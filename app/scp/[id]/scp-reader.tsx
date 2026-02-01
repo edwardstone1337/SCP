@@ -3,7 +3,9 @@
 import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Text } from '@/components/ui/typography'
 import { toggleReadStatus } from './actions'
 
 interface ScpReaderProps {
@@ -22,34 +24,36 @@ interface ScpReaderProps {
 
 export function ScpReader({ scp, userId }: ScpReaderProps) {
   const router = useRouter()
-  const { data: content, isLoading, error } = useScpContent(scp.series, scp.scp_id)
+  const { data: content, isLoading, error: contentError } = useScpContent(scp.series, scp.scp_id)
 
-  // Optimistic UI state
-  const [isPending, startTransition] = useTransition()
+  // Optimistic UI state and error display
   const [optimisticIsRead, setOptimisticIsRead] = useState(scp.is_read)
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, setIsPending] = useState(false)
 
   const handleToggleRead = async () => {
-    // If not logged in, redirect to login
     if (!userId) {
       window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
       return
     }
 
-    // Optimistically update UI
+    setError(null)
+    const previousState = scp.is_read
     setOptimisticIsRead(!optimisticIsRead)
+    setIsPending(true)
 
-    startTransition(async () => {
-      const result = await toggleReadStatus(scp.id, optimisticIsRead)
-
+    try {
+      const result = await toggleReadStatus(scp.id, previousState)
       if (!result.success) {
-        // Revert on error - revert to original server value
-        setOptimisticIsRead(scp.is_read)
-        alert('Failed to update read status. Please try again.')
-      } else {
-        // Refresh to update progress indicators
-        router.refresh()
+        throw new Error(result.error || 'Failed to update read status')
       }
-    })
+      router.refresh()
+    } catch (err) {
+      setOptimisticIsRead(previousState)
+      setError(err instanceof Error ? err.message : 'Failed to update read status')
+    } finally {
+      setIsPending(false)
+    }
   }
 
   return (
@@ -57,12 +61,14 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="max-w-4xl mx-auto p-6">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => router.back()}
-            className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 mb-4"
+            className="mb-4"
           >
             ← Back
-          </button>
+          </Button>
 
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -77,18 +83,30 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
             </div>
 
             {/* Mark as Read Button */}
-            <div className="flex items-center gap-2">
-              <button
+            <div className="flex flex-col gap-2">
+              {error && (
+                <div
+                  style={{
+                    padding: 'var(--spacing-2)',
+                    marginBottom: 'var(--spacing-2)',
+                    backgroundColor: 'var(--color-red-1)',
+                    borderLeft: '4px solid var(--color-accent)',
+                    borderRadius: 'var(--radius-md)',
+                  }}
+                >
+                  <Text variant="secondary" size="sm" className="text-[var(--color-accent)]">
+                    {error}
+                  </Text>
+                </div>
+              )}
+              <Button
+                variant={optimisticIsRead ? 'success' : 'secondary'}
+                size="sm"
                 onClick={handleToggleRead}
                 disabled={isPending}
-                className={`px-4 py-2 border rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  optimisticIsRead
-                    ? 'bg-green-100 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-                    : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
               >
                 {optimisticIsRead ? '✓ Read' : 'Mark as Read'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -103,7 +121,7 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
           </div>
         )}
 
-        {error && (
+        {contentError && (
           <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-red-800 dark:text-red-200">
               Failed to load content. Please try again.

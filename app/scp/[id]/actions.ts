@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 
 export async function toggleReadStatus(scpUuid: string, currentStatus: boolean) {
@@ -35,7 +36,12 @@ export async function toggleReadStatus(scpUuid: string, currentStatus: boolean) 
     })
 
   if (error) {
-    console.error('Error toggling read status:', error)
+    logger.error('Failed to toggle read status', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: user.id,
+      scpId: scpUuid,
+      context: 'toggleReadStatus'
+    })
     return { success: false, error: error.message }
   }
 
