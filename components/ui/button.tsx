@@ -1,11 +1,13 @@
 import { ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
+import { Spinner } from '@/components/ui/spinner'
 
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success'
   size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
+  loading?: boolean
   href?: string
   children: ReactNode
   className?: string
@@ -15,6 +17,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   fullWidth = false,
+  loading = false,
   href,
   children,
   className,
@@ -22,6 +25,7 @@ export function Button({
   type = 'button',
   ...props
 }: ButtonProps) {
+  const isDisabled = disabled || loading
   // Base styles using CSS variables
   const baseStyle: CSSProperties = {
     display: 'inline-flex',
@@ -30,8 +34,8 @@ export function Button({
     fontWeight: 700,
     fontFamily: 'var(--font-family-sans)',
     transition: 'all var(--transition-base)',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.5 : 1,
+    cursor: isDisabled ? 'not-allowed' : 'pointer',
+    opacity: isDisabled ? 0.5 : 1,
     textDecoration: 'none',
     borderWidth: 'var(--border-width-normal)',
     borderStyle: 'solid',
@@ -108,8 +112,8 @@ export function Button({
   // Minimal className for layout utilities only
   const combinedClassName = cn(className)
 
-  // If href is provided, render as Link
-  if (href) {
+  // If href is provided, render as Link (no loading state for links)
+  if (href && !loading) {
     return (
       <Link
         href={href}
@@ -122,17 +126,27 @@ export function Button({
     )
   }
 
+  // When loading, render as disabled button with spinner
+  const buttonContent = loading ? (
+    <>
+      <Spinner size="sm" style={{ marginRight: 'var(--spacing-2)' }} />
+      Loading...
+    </>
+  ) : (
+    children
+  )
+
   // Otherwise render as button
   return (
     <button
       type={type}
-      disabled={disabled}
+      disabled={isDisabled}
       className={combinedClassName}
       style={combinedStyle}
       data-variant={variant}
       {...props}
     >
-      {children}
+      {buttonContent}
     </button>
   )
 }

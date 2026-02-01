@@ -1,5 +1,6 @@
 import { Heading, Text, Mono, Label } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { Link } from '@/components/ui/link'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -343,6 +344,52 @@ export default function ComponentsTestPage() {
             </Text>
             <Button variant="secondary" href="/series">
               Browse Series →
+            </Button>
+          </div>
+
+          {/* Loading */}
+          <div>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Loading State
+            </Text>
+            <Button variant="primary" loading>
+              Loading...
+            </Button>
+          </div>
+        </section>
+
+        {/* Spinner & Loading */}
+        <section>
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
+            Spinner &amp; Loading
+          </Heading>
+
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Spinner sizes (sm 16px, md 24px, lg 32px)
+            </Text>
+            <Stack direction="horizontal" gap="loose" align="center" style={{ flexWrap: 'wrap' }}>
+              <Stack direction="vertical" gap="tight" align="center">
+                <Spinner size="sm" />
+                <Text variant="muted" size="xs">sm</Text>
+              </Stack>
+              <Stack direction="vertical" gap="tight" align="center">
+                <Spinner size="md" />
+                <Text variant="muted" size="xs">md</Text>
+              </Stack>
+              <Stack direction="vertical" gap="tight" align="center">
+                <Spinner size="lg" />
+                <Text variant="muted" size="xs">lg</Text>
+              </Stack>
+            </Stack>
+          </div>
+
+          <div>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
+              Button with loading=true
+            </Text>
+            <Button variant="primary" loading>
+              Submit
             </Button>
           </div>
         </section>
