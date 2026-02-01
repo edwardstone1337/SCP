@@ -24,7 +24,7 @@ export default function ComponentsTestPage() {
       >
         {/* Headings */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Typography System
           </Heading>
 
@@ -42,7 +42,7 @@ export default function ComponentsTestPage() {
 
         {/* Text */}
         <section>
-          <Heading level={3} className="mb-4">
+          <Heading level={3} style={{ marginBottom: 'var(--spacing-4)' }}>
             Text Variants
           </Heading>
 
@@ -55,7 +55,7 @@ export default function ComponentsTestPage() {
 
         {/* Text Sizes */}
         <section>
-          <Heading level={3} className="mb-4">
+          <Heading level={3} style={{ marginBottom: 'var(--spacing-4)' }}>
             Text Sizes
           </Heading>
 
@@ -70,7 +70,7 @@ export default function ComponentsTestPage() {
 
         {/* Mono */}
         <section>
-          <Heading level={3} className="mb-4">
+          <Heading level={3} style={{ marginBottom: 'var(--spacing-4)' }}>
             Monospace
           </Heading>
 
@@ -82,7 +82,7 @@ export default function ComponentsTestPage() {
 
         {/* Labels */}
         <section>
-          <Heading level={3} className="mb-4">
+          <Heading level={3} style={{ marginBottom: 'var(--spacing-4)' }}>
             Labels
           </Heading>
 
@@ -111,7 +111,7 @@ export default function ComponentsTestPage() {
 
         {/* Spacing System */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Spacing System (8px Grid)
           </Heading>
 
@@ -153,13 +153,13 @@ export default function ComponentsTestPage() {
 
         {/* Button Component */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Button Component
           </Heading>
 
           {/* Variants */}
-          <div className="mb-6">
-            <Text variant="secondary" className="mb-3">
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
               Variants
             </Text>
             <div
@@ -178,8 +178,8 @@ export default function ComponentsTestPage() {
           </div>
 
           {/* Sizes */}
-          <div className="mb-6">
-            <Text variant="secondary" className="mb-3">
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
               Sizes (with heights)
             </Text>
             <div
@@ -193,7 +193,7 @@ export default function ComponentsTestPage() {
                 <Button variant="primary" size="sm">
                   Small
                 </Button>
-                <Text variant="muted" size="xs" className="mt-1">
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-1)' }}>
                   ~32px tall
                 </Text>
               </div>
@@ -201,7 +201,7 @@ export default function ComponentsTestPage() {
                 <Button variant="primary" size="md">
                   Medium
                 </Button>
-                <Text variant="muted" size="xs" className="mt-1">
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-1)' }}>
                   ~40px tall
                 </Text>
               </div>
@@ -209,7 +209,7 @@ export default function ComponentsTestPage() {
                 <Button variant="primary" size="lg">
                   Large
                 </Button>
-                <Text variant="muted" size="xs" className="mt-1">
+                <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-1)' }}>
                   ~52px tall
                 </Text>
               </div>
@@ -217,8 +217,8 @@ export default function ComponentsTestPage() {
           </div>
 
           {/* States */}
-          <div className="mb-6">
-            <Text variant="secondary" className="mb-3">
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
               States
             </Text>
             <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
@@ -230,8 +230,8 @@ export default function ComponentsTestPage() {
           </div>
 
           {/* Full Width */}
-          <div className="mb-6">
-            <Text variant="secondary" className="mb-3">
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
               Full Width
             </Text>
             <Button variant="primary" fullWidth>
@@ -240,8 +240,8 @@ export default function ComponentsTestPage() {
           </div>
 
           {/* As Link */}
-          <div className="mb-6">
-            <Text variant="secondary" className="mb-3">
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <Text variant="secondary" style={{ marginBottom: 'var(--spacing-3)' }}>
               As Link (href prop)
             </Text>
             <Button variant="secondary" href="/series">
@@ -252,7 +252,7 @@ export default function ComponentsTestPage() {
 
         {/* Link Component */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Link Component
           </Heading>
 
@@ -265,7 +265,7 @@ export default function ComponentsTestPage() {
           >
             {/* Default */}
             <div>
-              <Text variant="secondary" className="mb-2">
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Default Link
               </Text>
               <Link href="/series" variant="default">
@@ -275,7 +275,7 @@ export default function ComponentsTestPage() {
 
             {/* Back */}
             <div>
-              <Text variant="secondary" className="mb-2">
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Back Link
               </Text>
               <Link href="/series" variant="back">
@@ -285,7 +285,7 @@ export default function ComponentsTestPage() {
 
             {/* Nav */}
             <div>
-              <Text variant="secondary" className="mb-2">
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Navigation Link
               </Text>
               <Link href="/series" variant="nav">
@@ -297,7 +297,7 @@ export default function ComponentsTestPage() {
 
         {/* Card Component */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Card Component
           </Heading>
 
@@ -310,7 +310,7 @@ export default function ComponentsTestPage() {
           >
             {/* Default Card */}
             <div>
-              <Text variant="secondary" className="mb-2">
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Default Card
               </Text>
               <Card>
@@ -323,7 +323,7 @@ export default function ComponentsTestPage() {
 
             {/* Interactive Card (as link) */}
             <div>
-              <Text variant="secondary" className="mb-2">
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Interactive Card (hover me)
               </Text>
               <Card variant="interactive" href="/series">
@@ -336,7 +336,7 @@ export default function ComponentsTestPage() {
 
             {/* Card with accent border */}
             <div>
-              <Text variant="secondary" className="mb-2">
+              <Text variant="secondary" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Card with Accent Border
               </Text>
               <Card accentBorder>
@@ -351,7 +351,7 @@ export default function ComponentsTestPage() {
 
         {/* Badge Component */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Badge Component
           </Heading>
 
@@ -371,7 +371,7 @@ export default function ComponentsTestPage() {
 
         {/* Icon Component */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Icon Component
           </Heading>
 
@@ -439,7 +439,7 @@ export default function ComponentsTestPage() {
 
         {/* Border Radius */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Border Radius
           </Heading>
 
@@ -467,7 +467,7 @@ export default function ComponentsTestPage() {
 
         {/* Card Padding Example */}
         <section>
-          <Heading level={2} className="mb-4">
+          <Heading level={2} style={{ marginBottom: 'var(--spacing-4)' }}>
             Semantic Spacing
           </Heading>
 
