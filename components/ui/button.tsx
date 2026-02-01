@@ -67,9 +67,24 @@ export function Button({
   }
 
   const sizes = {
-    sm: 'text-sm px-3 py-1.5 rounded-md',
-    md: 'text-base px-4 py-2 rounded-lg',
-    lg: 'text-lg px-8 py-4 rounded-lg',
+    sm: [
+      'text-sm',           // 14px text
+      'px-4',              // 16px horizontal (--spacing-2)
+      'py-2',              // 8px vertical (--spacing-1)
+      'rounded-md',
+    ].join(' '),
+    md: [
+      'text-base',         // 16px text
+      'px-6',              // 24px horizontal (--spacing-3)
+      'py-2',              // 8px vertical (--spacing-1) - gives ~40px height
+      'rounded-lg',
+    ].join(' '),
+    lg: [
+      'text-lg',           // 18px text
+      'px-8',              // 32px horizontal (--spacing-4)
+      'py-4',              // 16px vertical (--spacing-2)
+      'rounded-lg',
+    ].join(' '),
   }
 
   const widthClass = fullWidth ? 'w-full' : ''

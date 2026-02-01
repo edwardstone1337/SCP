@@ -176,24 +176,39 @@ export default function ComponentsTestPage() {
           {/* Sizes */}
           <div className="mb-6">
             <Text variant="secondary" className="mb-3">
-              Sizes
+              Sizes (with heights)
             </Text>
             <div
               style={{
                 display: 'flex',
                 gap: 'var(--spacing-2)',
-                alignItems: 'center',
+                alignItems: 'flex-start',
               }}
             >
-              <Button variant="primary" size="sm">
-                Small
-              </Button>
-              <Button variant="primary" size="md">
-                Medium
-              </Button>
-              <Button variant="primary" size="lg">
-                Large
-              </Button>
+              <div style={{ textAlign: 'center' }}>
+                <Button variant="primary" size="sm">
+                  Small
+                </Button>
+                <Text variant="muted" size="xs" className="mt-1">
+                  ~32px tall
+                </Text>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Button variant="primary" size="md">
+                  Medium
+                </Button>
+                <Text variant="muted" size="xs" className="mt-1">
+                  ~40px tall
+                </Text>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Button variant="primary" size="lg">
+                  Large
+                </Button>
+                <Text variant="muted" size="xs" className="mt-1">
+                  ~52px tall
+                </Text>
+              </div>
             </div>
           </div>
 
