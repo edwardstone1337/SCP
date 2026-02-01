@@ -33,11 +33,11 @@ export function Card({
   // Base styles
   const baseStyle: CSSProperties = {
     padding: PADDING_MAP[padding],
-    backgroundColor: 'var(--color-grey-9)',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 'var(--radius-card)',
     borderWidth: 'var(--border-width-normal)',
     borderStyle: 'solid',
-    borderColor: accentBorder ? 'var(--color-accent)' : 'var(--color-grey-8)',
+    borderColor: accentBorder ? 'var(--color-accent)' : 'var(--color-surface-border)',
     ...style,
   }
 
@@ -49,7 +49,7 @@ export function Card({
       transition: 'transform var(--transition-base)',
     },
     bordered: {
-      borderColor: accentBorder ? 'var(--color-accent)' : 'var(--color-grey-7)',
+      borderColor: accentBorder ? 'var(--color-accent)' : 'var(--color-surface-border)',
     },
   }
 

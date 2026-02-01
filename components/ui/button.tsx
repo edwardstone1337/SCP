@@ -51,7 +51,7 @@ export function Button({
     secondary: {
       backgroundColor: 'transparent',
       color: 'var(--color-text-primary)',
-      borderColor: 'var(--color-grey-7)',
+      borderColor: 'var(--color-surface-border)',
     },
     ghost: {
       backgroundColor: 'transparent',
