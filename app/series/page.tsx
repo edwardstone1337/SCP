@@ -2,7 +2,6 @@ import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { seriesToRoman } from '@/lib/utils/series'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,16 +61,10 @@ async function getSeriesProgress(userId: string | undefined): Promise<SeriesProg
 
 export default async function SeriesPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Redirect to login if not authenticated
-  if (!user) {
-    redirect('/login')
-  }
-
-  const seriesProgress = await getSeriesProgress(user.id)
+  // Allow guests - they just see 0% progress
+  const seriesProgress = await getSeriesProgress(user?.id)
 
   return (
     <>

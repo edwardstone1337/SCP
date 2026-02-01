@@ -17,9 +17,10 @@ interface ScpReaderProps {
     url: string
     is_read: boolean
   }
+  userId?: string
 }
 
-export function ScpReader({ scp }: ScpReaderProps) {
+export function ScpReader({ scp, userId }: ScpReaderProps) {
   const router = useRouter()
   const { data: content, isLoading, error } = useScpContent(scp.series, scp.scp_id)
 
@@ -28,6 +29,12 @@ export function ScpReader({ scp }: ScpReaderProps) {
   const [optimisticIsRead, setOptimisticIsRead] = useState(scp.is_read)
 
   const handleToggleRead = async () => {
+    // If not logged in, redirect to login
+    if (!userId) {
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+      return
+    }
+
     // Optimistically update UI
     setOptimisticIsRead(!optimisticIsRead)
 

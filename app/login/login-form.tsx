@@ -26,10 +26,11 @@ export function LoginForm() {
 
     try {
       const supabase = createClient()
+      const redirectTo = searchParams.get('redirect') || '/'
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
+          emailRedirectTo: `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
         },
       })
 

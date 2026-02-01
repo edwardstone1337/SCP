@@ -1,9 +1,9 @@
 import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { ScpReader } from './scp-reader'
 
-async function getScpData(scpId: string, userId: string) {
+async function getScpData(scpId: string, userId: string | undefined) {
   const supabase = await createClient()
 
   // Get SCP metadata
@@ -15,7 +15,14 @@ async function getScpData(scpId: string, userId: string) {
 
   if (!scp) return null
 
-  // Get read status
+  // Get read status only if user is authenticated
+  if (!userId) {
+    return {
+      ...scp,
+      is_read: false,
+    }
+  }
+
   const { data: progress } = await supabase
     .from('user_progress')
     .select('is_read')
@@ -38,11 +45,8 @@ export default async function ScpPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
-
-  const scpData = await getScpData(id, user.id)
+  // Allow guests
+  const scpData = await getScpData(id, user?.id)
 
   if (!scpData) {
     notFound()
@@ -51,7 +55,7 @@ export default async function ScpPage({
   return (
     <>
       <Navigation />
-      <ScpReader scp={scpData} />
+      <ScpReader scp={scpData} userId={user?.id} />
     </>
   )
 }

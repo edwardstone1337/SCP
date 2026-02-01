@@ -2,7 +2,7 @@ import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +17,25 @@ async function getRangeProgress(
   userId: string
 ): Promise<RangeProgress[]> {
   const supabase = await createClient()
+
+  // Guests: get ranges with 0 read (RPC expects UUID)
+  if (!userId) {
+    const { data: scps } = await supabase
+      .from('scps')
+      .select('scp_number')
+      .eq('series', seriesId)
+
+    if (!scps || scps.length === 0) return []
+
+    const rangeMap = new Map<number, number>()
+    for (const s of scps) {
+      const rangeStart = Math.floor(s.scp_number / 100) * 100
+      rangeMap.set(rangeStart, (rangeMap.get(rangeStart) ?? 0) + 1)
+    }
+    return Array.from(rangeMap.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([rangeStart, total]) => ({ rangeStart, total, read: 0 }))
+  }
 
   // Use RPC to avoid URI length issues with large .in() queries
   const { data, error } = await supabase.rpc('get_range_progress', {
@@ -48,13 +67,7 @@ export default async function SeriesRangePage({
 }) {
   const { seriesId } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Validate series exists and is a main series
   const roman = seriesToRoman(seriesId)
@@ -62,7 +75,8 @@ export default async function SeriesRangePage({
     notFound()
   }
 
-  const ranges = await getRangeProgress(seriesId, user.id)
+  // Allow guests - pass user.id or undefined
+  const ranges = await getRangeProgress(seriesId, user?.id || '')
 
   if (ranges.length === 0) {
     notFound()

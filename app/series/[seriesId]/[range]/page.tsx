@@ -2,7 +2,7 @@ import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +33,11 @@ async function getScpsInRange(
 
   if (!scpsData) return []
 
-  // Get read status for these SCPs
+  // Get read status only for authenticated users
+  if (!userId) {
+    return scpsData.map((scp) => ({ ...scp, is_read: false }))
+  }
+
   const scpIds = scpsData.map((s) => s.id)
   const { data: progressData } = await supabase
     .from('user_progress')
@@ -58,10 +62,6 @@ export default async function RangeScpListPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
-
   // Validate series
   const roman = seriesToRoman(seriesId)
   if (!roman) {
@@ -74,7 +74,8 @@ export default async function RangeScpListPage({
     notFound()
   }
 
-  const scps = await getScpsInRange(seriesId, rangeStart, user.id)
+  // Allow guests
+  const scps = await getScpsInRange(seriesId, rangeStart, user?.id || '')
 
   if (scps.length === 0) {
     notFound()
