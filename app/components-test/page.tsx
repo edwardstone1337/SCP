@@ -1,4 +1,5 @@
 import { Heading, Text, Mono, Label } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 
 export default function ComponentsTestPage() {
   return (
@@ -126,13 +127,11 @@ export default function ComponentsTestPage() {
                   gap: 'var(--spacing-2)',
                 }}
               >
-                <Text
-                  variant="secondary"
-                  size="sm"
-                  style={{ width: '120px' }}
-                >
-                  --spacing-{size}
-                </Text>
+                <div style={{ width: '120px', flexShrink: 0 }}>
+                  <Text variant="secondary" size="sm">
+                    --spacing-{size}
+                  </Text>
+                </div>
                 <div
                   style={{
                     width: `var(--spacing-${size})`,
@@ -145,6 +144,90 @@ export default function ComponentsTestPage() {
                 </Text>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Button Component */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Button Component
+          </Heading>
+
+          {/* Variants */}
+          <div className="mb-6">
+            <Text variant="secondary" className="mb-3">
+              Variants
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                gap: 'var(--spacing-2)',
+                flexWrap: 'wrap',
+              }}
+            >
+              <Button variant="primary">Primary</Button>
+              <Button variant="secondary">Secondary</Button>
+              <Button variant="ghost">Ghost</Button>
+              <Button variant="danger">Danger</Button>
+              <Button variant="success">Success</Button>
+            </div>
+          </div>
+
+          {/* Sizes */}
+          <div className="mb-6">
+            <Text variant="secondary" className="mb-3">
+              Sizes
+            </Text>
+            <div
+              style={{
+                display: 'flex',
+                gap: 'var(--spacing-2)',
+                alignItems: 'center',
+              }}
+            >
+              <Button variant="primary" size="sm">
+                Small
+              </Button>
+              <Button variant="primary" size="md">
+                Medium
+              </Button>
+              <Button variant="primary" size="lg">
+                Large
+              </Button>
+            </div>
+          </div>
+
+          {/* States */}
+          <div className="mb-6">
+            <Text variant="secondary" className="mb-3">
+              States
+            </Text>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+              <Button variant="primary">Default</Button>
+              <Button variant="primary" disabled>
+                Disabled
+              </Button>
+            </div>
+          </div>
+
+          {/* Full Width */}
+          <div className="mb-6">
+            <Text variant="secondary" className="mb-3">
+              Full Width
+            </Text>
+            <Button variant="primary" fullWidth>
+              Continue
+            </Button>
+          </div>
+
+          {/* As Link */}
+          <div className="mb-6">
+            <Text variant="secondary" className="mb-3">
+              As Link (href prop)
+            </Text>
+            <Button variant="secondary" href="/series">
+              Browse Series →
+            </Button>
           </div>
         </section>
 
