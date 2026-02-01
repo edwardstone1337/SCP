@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const roboto = Roboto({
+  weight: ["400", "700"],
   subsets: ["latin"],
+  variable: "--font-roboto",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  weight: ["500", "700"],
   subsets: ["latin"],
+  variable: "--font-roboto-mono",
 });
 
 export const metadata: Metadata = {
@@ -24,13 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+    <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

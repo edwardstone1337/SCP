@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Color Tokens - Red Scale (Ant Design) */
+  --color-red-1: #2a1215;
+  --color-red-2: #431418;
+  --color-red-3: #58181c;
+  --color-red-4: #791a1f;
+  --color-red-5: #a61d24;
+  --color-red-6: #d32029;
+  --color-red-7: #e84749;
+  --color-red-8: #f37370;
+  --color-red-9: #f89f9a;
+  --color-red-10: #ffc9c9;
+
+  /* Color Tokens - Grey Scale */
+  --color-grey-1: #ffffff;
+  --color-grey-2: #fafafa;
+  --color-grey-3: #f5f5f5;
+  --color-grey-4: #e8e8e8;
+  --color-grey-5: #d9d9d9;
+  --color-grey-6: #bfbfbf;
+  --color-grey-7: #8c8c8c;
+  --color-grey-8: #595959;
+  --color-grey-9: #262626;
+  --color-grey-10: #000000;
+
+  /* Semantic Colors */
+  --color-background: var(--color-grey-10);
+  --color-text-primary: var(--color-grey-1);
+  --color-text-secondary: #dbdbdb;
+  --color-accent: #e41c2c;
+  --color-accent-hover: var(--color-red-7);
+
+  /* Typography - Font Families */
+  --font-family-sans: var(--font-roboto), system-ui, sans-serif;
+  --font-family-mono: var(--font-roboto-mono), monospace;
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
+
+  /* Typography - Font Sizes */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.25rem; /* 20px */
+  --font-size-xl: 1.5rem; /* 24px */
+  --font-size-2xl: 1.875rem; /* 30px */
+  --font-size-3xl: 2.375rem; /* 38px */
+  --font-size-4xl: 2.875rem; /* 46px */
+  --font-size-5xl: 3.5rem; /* 56px */
+
+  /* Line Heights */
+  --line-height-xs: 1rem; /* 16px */
+  --line-height-sm: 1.375rem; /* 22px */
+  --line-height-base: 1.5rem; /* 24px */
+  --line-height-lg: 1.75rem; /* 28px */
+  --line-height-xl: 2rem; /* 32px */
+  --line-height-2xl: 2.375rem; /* 38px */
+  --line-height-3xl: 2.875rem; /* 46px */
+  --line-height-4xl: 3.375rem; /* 54px */
+  --line-height-5xl: 4rem; /* 64px */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
