@@ -205,3 +205,16 @@ button[data-variant="success"]:not(:disabled):hover,
 a[data-variant="success"]:hover {
   background-color: var(--color-red-2);
 }
+
+/* Link hover states by variant */
+a[data-variant="default"]:hover {
+  color: var(--color-accent);
+}
+
+a[data-variant="back"]:hover {
+  color: var(--color-text-primary);
+}
+
+a[data-variant="nav"]:hover {
+  color: var(--color-accent);
+}

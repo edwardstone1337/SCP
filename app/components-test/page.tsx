@@ -1,5 +1,6 @@
 import { Heading, Text, Mono, Label } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 
 export default function ComponentsTestPage() {
   return (
@@ -243,6 +244,51 @@ export default function ComponentsTestPage() {
             <Button variant="secondary" href="/series">
               Browse Series →
             </Button>
+          </div>
+        </section>
+
+        {/* Link Component */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Link Component
+          </Heading>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-4)',
+            }}
+          >
+            {/* Default */}
+            <div>
+              <Text variant="secondary" className="mb-2">
+                Default Link
+              </Text>
+              <Link href="/series" variant="default">
+                Browse all series
+              </Link>
+            </div>
+
+            {/* Back */}
+            <div>
+              <Text variant="secondary" className="mb-2">
+                Back Link
+              </Text>
+              <Link href="/series" variant="back">
+                ← Back to series
+              </Link>
+            </div>
+
+            {/* Nav */}
+            <div>
+              <Text variant="secondary" className="mb-2">
+                Navigation Link
+              </Text>
+              <Link href="/series" variant="nav">
+                Series
+              </Link>
+            </div>
           </div>
         </section>
 
