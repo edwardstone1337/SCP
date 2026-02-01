@@ -20,11 +20,11 @@ export function Logo({ size = 'md', className }: LogoProps) {
   const dimension = SIZE_MAP[size]
   return (
     <Image
-      src="/scp-logo.png"
+      src="/scp-logo.svg"
       alt="SCP Foundation"
       width={dimension}
       height={dimension}
-      className={cn('object-contain', className)}
+      className={cn('object-contain invert', className)}
     />
   )
 }

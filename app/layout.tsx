@@ -18,6 +18,9 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: "SCP Continuum Tracker",
   description: "Track your SCP Foundation reading progress",
+  icons: {
+    icon: "/scp-logo.svg",
+  },
 };
 
 export default function RootLayout({

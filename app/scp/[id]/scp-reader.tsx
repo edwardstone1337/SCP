@@ -3,16 +3,13 @@
 import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { getRange } from '@/lib/utils/series'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Container } from '@/components/ui/container'
 import { Heading, Mono, Text } from '@/components/ui/typography'
 import { Link } from '@/components/ui/link'
 import { Main } from '@/components/ui/main'
+import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Stack } from '@/components/ui/stack'
-import { toggleReadStatus } from './actions'
 
 interface ScpReaderProps {
   scp: {
@@ -29,39 +26,9 @@ interface ScpReaderProps {
 }
 
 export function ScpReader({ scp, userId }: ScpReaderProps) {
-  const router = useRouter()
   const { data: content, isLoading, error: contentError } = useScpContent(scp.series, scp.scp_id)
 
-  const [optimisticIsRead, setOptimisticIsRead] = useState(scp.is_read)
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, setIsPending] = useState(false)
-
   const backHref = `/series/${scp.series}/${getRange(scp.scp_number)}`
-
-  const handleToggleRead = async () => {
-    if (!userId) {
-      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
-      return
-    }
-
-    setError(null)
-    const previousState = scp.is_read
-    setOptimisticIsRead(!optimisticIsRead)
-    setIsPending(true)
-
-    try {
-      const result = await toggleReadStatus(scp.id, previousState)
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update read status')
-      }
-      router.refresh()
-    } catch (err) {
-      setOptimisticIsRead(previousState)
-      setError(err instanceof Error ? err.message : 'Failed to update read status')
-    } finally {
-      setIsPending(false)
-    }
-  }
 
   return (
     <Main>
@@ -91,30 +58,12 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
                   <Mono size="sm">{scp.scp_id}</Mono>
                 </Stack>
               </Stack>
-              <Stack direction="vertical" gap="tight" align="end">
-                {error && (
-                  <div
-                    style={{
-                      padding: 'var(--spacing-2)',
-                      backgroundColor: 'var(--color-red-2)',
-                      borderLeft: '4px solid var(--color-accent)',
-                      borderRadius: 'var(--radius-md)',
-                    }}
-                  >
-                    <Text variant="secondary" size="sm" style={{ color: 'var(--color-accent)' }}>
-                      {error}
-                    </Text>
-                  </div>
-                )}
-                <Button
-                  variant={optimisticIsRead ? 'success' : 'secondary'}
-                  size="sm"
-                  onClick={handleToggleRead}
-                  disabled={isPending}
-                >
-                  {optimisticIsRead ? '✓ Read' : 'Mark as Read'}
-                </Button>
-              </Stack>
+              <ReadToggleButton
+                scpId={scp.id}
+                isRead={scp.is_read}
+                userId={userId ?? null}
+                size="sm"
+              />
             </Stack>
           </Stack>
         </Container>

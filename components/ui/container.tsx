@@ -1,9 +1,10 @@
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 
-type ContainerSize = 'sm' | 'md' | 'lg' | 'xl'
+type ContainerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 const sizeToToken: Record<ContainerSize, string> = {
+  xs: 'var(--container-xs)',
   sm: 'var(--container-sm)',
   md: 'var(--container-md)',
   lg: 'var(--container-lg)',

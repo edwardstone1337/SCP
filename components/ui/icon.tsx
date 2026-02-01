@@ -16,8 +16,11 @@ export function Icon({ name, size = 'md', className }: IconProps) {
   const style: CSSProperties = {
     width: sizes[size],
     height: sizes[size],
-    display: 'inline-block',
-    lineHeight: 1,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    lineHeight: 0,
   }
 
   const icons = {

@@ -2,13 +2,20 @@ export const dynamic = 'force-dynamic'
 
 import { Suspense } from 'react'
 import { LoginForm } from './login-form'
+import { Main } from '@/components/ui/main'
+import { Stack } from '@/components/ui/stack'
+import { Spinner } from '@/components/ui/spinner'
+import { Text } from '@/components/ui/typography'
 
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-950">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
-      </main>
+      <Main>
+        <Stack direction="vertical" align="center" justify="center" style={{ minHeight: '100vh' }}>
+          <Spinner size="md" />
+          <Text variant="secondary">Loading...</Text>
+        </Stack>
+      </Main>
     }>
       <LoginForm />
     </Suspense>

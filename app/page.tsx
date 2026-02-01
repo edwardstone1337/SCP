@@ -22,7 +22,7 @@ export default function Home() {
           marginBottom: 'var(--spacing-6)',
         }}
       >
-        <Container size="sm" className="max-w-md">
+        <Container size="xs">
           <Stack style={{ gap: 'var(--spacing-8)' }}>
             {/* Title Block - mb-16 (64px) */}
             <Stack direction="horizontal" align="start" gap="normal">

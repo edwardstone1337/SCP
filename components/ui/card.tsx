@@ -18,6 +18,7 @@ interface CardProps {
   padding?: PaddingKey
   href?: string
   className?: string
+  style?: CSSProperties
 }
 
 export function Card({
@@ -27,6 +28,7 @@ export function Card({
   padding = 'lg',
   href,
   className,
+  style,
 }: CardProps) {
   // Base styles
   const baseStyle: CSSProperties = {
@@ -36,6 +38,7 @@ export function Card({
     borderWidth: 'var(--border-width-normal)',
     borderStyle: 'solid',
     borderColor: accentBorder ? 'var(--color-accent)' : 'var(--color-grey-8)',
+    ...style,
   }
 
   // Variant styles

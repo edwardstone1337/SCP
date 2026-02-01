@@ -28,6 +28,10 @@
   --color-grey-9: #262626;
   --color-grey-10: #000000;
 
+  /* Color Tokens - Green Scale (success/feedback) */
+  --color-green-5: #4ade80;
+  --color-green-7: #22c55e;
+
   /* Semantic Colors */
   --color-background: var(--color-grey-10);
   --color-text-primary: var(--color-grey-1);
@@ -109,6 +113,7 @@
   --border-width-thick: 4px;
 
   /* Layout Primitives */
+  --container-xs: 448px;
   --container-sm: 640px;
   --container-md: 768px;
   --container-lg: 1024px;
@@ -173,6 +178,7 @@
   --font-size-lg: 1.25rem;
 
   /* Container inline-style tokens */
+  --container-xs: 448px;
   --container-sm: 640px;
   --container-md: 768px;
   --container-lg: 1024px;
@@ -186,7 +192,10 @@
   --color-grey-8: #595959;
   --color-grey-9: #262626;
   --color-text-secondary: #dbdbdb;
+  --color-text-muted: var(--color-grey-7);
   --color-accent: #e41c2c;
+  --color-green-5: #4ade80;
+  --color-green-7: #22c55e;
   --font-size-xs: 0.75rem;
 }
 
@@ -253,6 +262,33 @@ a[data-variant="nav"]:hover {
 /* Card hover states */
 [data-variant="interactive"]:hover {
   transform: scale(1.02);
+}
+
+/* Input component - design token styles */
+.input-design-tokens {
+  width: 100%;
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--color-grey-9);
+  border: var(--border-width-normal) solid var(--color-grey-7);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-base);
+}
+
+.input-design-tokens::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input-design-tokens:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.input-design-tokens:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* SCP content area – prose-like typography using design tokens */
