@@ -1,6 +1,7 @@
 'use client'
 
 import { useScpContent } from '@/lib/hooks/use-scp-content'
+import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toggleReadStatus } from './actions'
@@ -106,7 +107,7 @@ export function ScpReader({ scp }: ScpReaderProps) {
         {content && (
           <div
             className="prose dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: content.raw_content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
           />
         )}
       </div>
