@@ -157,6 +157,17 @@
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.25rem;
+
+  /* Card, Badge, Icon inline-style tokens */
+  --radius-card: var(--radius-lg);
+  --radius-badge: var(--radius-md);
+  --spacing-card-padding: var(--spacing-4);
+  --color-grey-7: #8c8c8c;
+  --color-grey-8: #595959;
+  --color-grey-9: #262626;
+  --color-text-secondary: #dbdbdb;
+  --color-accent: #e41c2c;
+  --font-size-xs: 0.75rem;
 }
 
 /* Base Styles */
@@ -217,4 +228,9 @@ a[data-variant="back"]:hover {
 
 a[data-variant="nav"]:hover {
   color: var(--color-accent);
+}
+
+/* Card hover states */
+[data-variant="interactive"]:hover {
+  transform: scale(1.02);
 }

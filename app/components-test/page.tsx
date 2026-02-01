@@ -1,6 +1,9 @@
 import { Heading, Text, Mono, Label } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Icon } from '@/components/ui/icon'
 
 export default function ComponentsTestPage() {
   return (
@@ -288,6 +291,148 @@ export default function ComponentsTestPage() {
               <Link href="/series" variant="nav">
                 Series
               </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Card Component */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Card Component
+          </Heading>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-4)',
+            }}
+          >
+            {/* Default Card */}
+            <div>
+              <Text variant="secondary" className="mb-2">
+                Default Card
+              </Text>
+              <Card>
+                <Heading level={4}>Card Title</Heading>
+                <Text variant="secondary">
+                  This is a default card with padding and rounded corners.
+                </Text>
+              </Card>
+            </div>
+
+            {/* Interactive Card (as link) */}
+            <div>
+              <Text variant="secondary" className="mb-2">
+                Interactive Card (hover me)
+              </Text>
+              <Card variant="interactive" href="/series">
+                <Heading level={4}>Clickable Card</Heading>
+                <Text variant="secondary">
+                  This card scales on hover and works as a link.
+                </Text>
+              </Card>
+            </div>
+
+            {/* Card with accent border */}
+            <div>
+              <Text variant="secondary" className="mb-2">
+                Card with Accent Border
+              </Text>
+              <Card accentBorder>
+                <Heading level={4}>Important Card</Heading>
+                <Text variant="secondary">
+                  This card has a red accent border.
+                </Text>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Badge Component */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Badge Component
+          </Heading>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 'var(--spacing-2)',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <Badge variant="default">Default</Badge>
+            <Badge variant="accent">Access Granted</Badge>
+            <Badge variant="progress">75%</Badge>
+          </div>
+        </section>
+
+        {/* Icon Component */}
+        <section>
+          <Heading level={2} className="mb-4">
+            Icon Component
+          </Heading>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 'var(--spacing-4)',
+              alignItems: 'center',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-1)',
+                alignItems: 'center',
+              }}
+            >
+              <Icon name="check" size="sm" />
+              <Text variant="muted" size="xs">
+                check sm
+              </Text>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-1)',
+                alignItems: 'center',
+              }}
+            >
+              <Icon name="eye" size="md" />
+              <Text variant="muted" size="xs">
+                eye md
+              </Text>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-1)',
+                alignItems: 'center',
+              }}
+            >
+              <Icon name="star" size="lg" />
+              <Text variant="muted" size="xs">
+                star lg
+              </Text>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-1)',
+                alignItems: 'center',
+              }}
+            >
+              <Icon name="arrow-back" size="md" />
+              <Text variant="muted" size="xs">
+                arrow md
+              </Text>
             </div>
           </div>
         </section>
