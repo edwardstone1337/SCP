@@ -1,63 +1,69 @@
-import { createClient } from '@/lib/supabase/server'
-import { Navigation } from '@/components/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
-export default async function Home() {
-  const supabase = await createClient()
-
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser()
-
+export default function Home() {
   return (
-    <>
-      <Navigation />
-      <main className="flex min-h-screen flex-col items-center justify-center p-24">
-        <div className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm">
-          <h1 className="text-4xl font-bold mb-8 text-center">
-            SCP Continuum Tracker
-          </h1>
+    <main className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] p-6">
+      {/* Logo */}
+      <div className="mb-12">
+        <Image
+          src="/scp-logo.png"
+          alt="SCP Foundation"
+          width={48}
+          height={48}
+          priority
+        />
+      </div>
 
-          <div className="mb-8 text-center">
-            <p className="text-xl mb-4">Track Your SCP Reading Progress</p>
-            <p className="text-gray-600 dark:text-gray-400">
-              Browse 9,324 SCPs across 10 series and never lose your place
-            </p>
-          </div>
-
-          {/* Auth Status - Simple */}
-          {user && (
-            <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-900 mb-6 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Signed in as <span className="font-mono">{user.email}</span>
-              </p>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="mt-8 text-center space-y-4">
-            {user ? (
-              <Link
-                href="/series"
-                className="inline-block px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
-              >
-                Browse Series →
-              </Link>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-gray-600 dark:text-gray-400">
-                  Sign in to start tracking your progress
-                </p>
-                <Link
-                  href="/login"
-                  className="inline-block px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
-                >
-                  Sign In →
-                </Link>
-              </div>
-            )}
+      {/* Main Content - Centered */}
+      <div className="flex-1 flex flex-col justify-center max-w-md">
+        {/* Title Block */}
+        <div className="mb-16">
+          <div className="flex items-start gap-4 mb-2">
+            <h1 className="text-5xl font-bold leading-tight tracking-tight">
+              SECURE<br />
+              CONTAIN<br />
+              PROTECT
+            </h1>
+            {/* Red vertical bar */}
+            <div
+              className="w-1 h-20 mt-1"
+              style={{ backgroundColor: 'var(--color-accent)' }}
+            />
           </div>
         </div>
-      </main>
-    </>
+
+        {/* Warning Block */}
+        <div className="mb-12">
+          <p
+            className="text-3xl font-bold mb-4"
+            style={{ color: 'var(--color-accent)' }}
+          >
+            WARNING
+          </p>
+          <h2 className="text-2xl font-bold mb-4 leading-tight">
+            THE FOUNDATION DATABASE<br />IS CLASSIFIED
+          </h2>
+          <p className="text-lg leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            Access by unauthorized personnel is strictly prohibited.
+            Perpetrators will be tracked, located, and detained
+          </p>
+        </div>
+      </div>
+
+      {/* Continue Button - Bottom */}
+      <div className="mt-auto">
+        <Link
+          href="/series"
+          className="block w-full py-4 text-center text-xl font-bold rounded-lg border-2 transition-colors"
+          style={{
+            borderColor: 'var(--color-accent)',
+            color: 'var(--color-text-primary)'
+          }}
+        >
+          Continue
+        </Link>
+      </div>
+    </main>
   )
 }
