@@ -1,8 +1,8 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react'
+import { ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
-interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
+interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success'
   size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
@@ -22,85 +22,101 @@ export function Button({
   type = 'button',
   ...props
 }: ButtonProps) {
-  const baseStyles = [
-    'inline-flex items-center justify-center',
-    'font-bold',
-    'transition-colors',
-    'disabled:opacity-50 disabled:cursor-not-allowed',
-  ]
-
-  const variants = {
-    primary: [
-      'bg-[var(--color-accent)]',
-      'text-[var(--color-text-primary)]',
-      'border-2 border-[var(--color-accent)]',
-      'hover:bg-[var(--color-accent-hover)]',
-      'hover:border-[var(--color-accent-hover)]',
-    ],
-    secondary: [
-      'bg-transparent',
-      'text-[var(--color-text-primary)]',
-      'border-2 border-[var(--color-grey-7)]',
-      'hover:border-[var(--color-accent)]',
-      'hover:text-[var(--color-accent)]',
-    ],
-    ghost: [
-      'bg-transparent',
-      'text-[var(--color-text-secondary)]',
-      'border-2 border-transparent',
-      'hover:text-[var(--color-text-primary)]',
-      'hover:bg-[var(--color-grey-9)]',
-    ],
-    danger: [
-      'bg-transparent',
-      'text-[var(--color-text-secondary)]',
-      'border-2 border-transparent',
-      'hover:text-[var(--color-accent)]',
-      'hover:border-[var(--color-accent)]',
-    ],
-    success: [
-      'bg-[var(--color-red-1)]',
-      'text-[var(--color-accent)]',
-      'border-2 border-[var(--color-accent)]',
-      'hover:bg-[var(--color-red-2)]',
-    ],
+  // Base styles using CSS variables
+  const baseStyle: CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 700,
+    fontFamily: 'var(--font-family-sans)',
+    transition: 'all var(--transition-base)',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    textDecoration: 'none',
+    borderWidth: 'var(--border-width-normal)',
+    borderStyle: 'solid',
   }
 
-  const sizes = {
-    sm: [
-      'text-sm',           // 14px text
-      'px-4',              // 16px horizontal (--spacing-2)
-      'py-2',              // 8px vertical (--spacing-1)
-      'rounded-md',
-    ].join(' '),
-    md: [
-      'text-base',         // 16px text
-      'px-6',              // 24px horizontal (--spacing-3)
-      'py-2',              // 8px vertical (--spacing-1) - gives ~40px height
-      'rounded-lg',
-    ].join(' '),
-    lg: [
-      'text-lg',           // 18px text
-      'px-8',              // 32px horizontal (--spacing-4)
-      'py-4',              // 16px vertical (--spacing-2)
-      'rounded-lg',
-    ].join(' '),
+  // Variant styles
+  const variantStyles: Record<string, CSSProperties> = {
+    primary: {
+      backgroundColor: 'var(--color-accent)',
+      color: 'var(--color-text-primary)',
+      borderColor: 'var(--color-accent)',
+    },
+    secondary: {
+      backgroundColor: 'transparent',
+      color: 'var(--color-text-primary)',
+      borderColor: 'var(--color-grey-7)',
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+      color: 'var(--color-text-secondary)',
+      borderColor: 'transparent',
+    },
+    danger: {
+      backgroundColor: 'transparent',
+      color: 'var(--color-text-secondary)',
+      borderColor: 'transparent',
+    },
+    success: {
+      backgroundColor: 'var(--color-red-1)',
+      color: 'var(--color-accent)',
+      borderColor: 'var(--color-accent)',
+    },
   }
 
-  const widthClass = fullWidth ? 'w-full' : ''
+  // Size styles using our spacing tokens
+  const sizeStyles: Record<string, CSSProperties> = {
+    sm: {
+      fontSize: 'var(--font-size-sm)',
+      paddingLeft: 'var(--spacing-2)',   // 16px
+      paddingRight: 'var(--spacing-2)',  // 16px
+      paddingTop: 'var(--spacing-1)',    // 8px
+      paddingBottom: 'var(--spacing-1)', // 8px
+      borderRadius: 'var(--radius-button)',
+    },
+    md: {
+      fontSize: 'var(--font-size-base)',
+      paddingLeft: 'var(--spacing-3)',   // 24px
+      paddingRight: 'var(--spacing-3)',  // 24px
+      paddingTop: 'var(--spacing-1)',    // 8px - gives ~40px height
+      paddingBottom: 'var(--spacing-1)', // 8px
+      borderRadius: 'var(--radius-button)',
+    },
+    lg: {
+      fontSize: 'var(--font-size-lg)',
+      paddingLeft: 'var(--spacing-4)',   // 32px
+      paddingRight: 'var(--spacing-4)',  // 32px
+      paddingTop: 'var(--spacing-2)',    // 16px
+      paddingBottom: 'var(--spacing-2)', // 16px
+      borderRadius: 'var(--radius-button)',
+    },
+  }
 
-  const combinedClassName = cn(
-    ...baseStyles,
-    ...variants[variant],
-    sizes[size],
-    widthClass,
-    className
-  )
+  // Width style
+  const widthStyle: CSSProperties = fullWidth ? { width: '100%' } : {}
+
+  // Combine all styles
+  const combinedStyle: CSSProperties = {
+    ...baseStyle,
+    ...variantStyles[variant],
+    ...sizeStyles[size],
+    ...widthStyle,
+  }
+
+  // Minimal className for layout utilities only
+  const combinedClassName = cn(className)
 
   // If href is provided, render as Link
   if (href) {
     return (
-      <Link href={href} className={combinedClassName}>
+      <Link
+        href={href}
+        className={combinedClassName}
+        style={combinedStyle}
+        data-variant={variant}
+      >
         {children}
       </Link>
     )
@@ -112,6 +128,8 @@ export function Button({
       type={type}
       disabled={disabled}
       className={combinedClassName}
+      style={combinedStyle}
+      data-variant={variant}
       {...props}
     >
       {children}

@@ -126,6 +126,39 @@
   --transition-slow: 300ms ease-in-out;
 }
 
+/*
+ * Design tokens in :root ensure availability for inline styles.
+ * Tailwind v4 only emits @theme variables used by utility classes,
+ * so tokens referenced only in style={{}} need explicit :root definitions.
+ */
+:root {
+  /* Spacing - 8px grid (ensure all used in components-test) */
+  --spacing-0: 0;
+  --spacing-1: 0.5rem;
+  --spacing-2: 1rem;
+  --spacing-3: 1.5rem;
+  --spacing-4: 2rem;
+  --spacing-5: 2.5rem;
+  --spacing-6: 3rem;
+  --spacing-8: 4rem;
+
+  /* Radius - override Tailwind defaults for component demo */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  --radius-button: var(--radius-lg);
+
+  /* Button inline-style tokens (not used by Tailwind utilities) */
+  --font-family-sans: var(--font-roboto), system-ui, sans-serif;
+  --transition-base: 200ms ease-in-out;
+  --border-width-normal: 2px;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+}
+
 /* Base Styles */
 * {
   margin: 0;
@@ -141,4 +174,34 @@ body {
   line-height: var(--line-height-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Button hover states by variant */
+button[data-variant="primary"]:not(:disabled):hover,
+a[data-variant="primary"]:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+button[data-variant="secondary"]:not(:disabled):hover,
+a[data-variant="secondary"]:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+button[data-variant="ghost"]:not(:disabled):hover,
+a[data-variant="ghost"]:hover {
+  background-color: var(--color-grey-9);
+  color: var(--color-text-primary);
+}
+
+button[data-variant="danger"]:not(:disabled):hover,
+a[data-variant="danger"]:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+button[data-variant="success"]:not(:disabled):hover,
+a[data-variant="success"]:hover {
+  background-color: var(--color-red-2);
 }
