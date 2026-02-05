@@ -16,9 +16,10 @@ interface ScpItem {
 interface ScpListWithToggleProps {
   scps: ScpItem[]
   isAuthenticated: boolean  // Hide toggle for guests (all items are unread anyway)
+  userId?: string | null    // For ReadToggleButton auth
 }
 
-export function ScpListWithToggle({ scps, isAuthenticated }: ScpListWithToggleProps) {
+export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWithToggleProps) {
   const [hideRead, setHideRead] = useState(false)
   
   const filteredScps = hideRead ? scps.filter(scp => !scp.is_read) : scps
@@ -57,11 +58,13 @@ export function ScpListWithToggle({ scps, isAuthenticated }: ScpListWithTogglePr
         {filteredScps.map((scp) => (
           <ScpListItem
             key={scp.id}
+            id={scp.id}
             scpId={scp.scp_id}
             title={scp.title}
             rating={scp.rating}
             isRead={scp.is_read}
             href={`/scp/${scp.scp_id}`}
+            userId={userId ?? null}
           />
         ))}
       </Stack>

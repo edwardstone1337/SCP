@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { ProgressRing } from '@/components/ui/progress-ring'
-import { ProgressText } from '@/components/ui/progress-text'
+import { Text } from '@/components/ui/text'
 import { Mono } from '@/components/ui/typography'
 import { CSSProperties } from 'react'
 
@@ -34,9 +34,7 @@ export function RangeListItem({
 
   const rightStyle: CSSProperties = {
     display: 'flex',
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 'var(--spacing-2)',
     flexShrink: 0,
   }
 
@@ -51,8 +49,11 @@ export function RangeListItem({
       <div style={rowStyle}>
         <Mono size="sm">{rangeLabel}</Mono>
         <div style={rightStyle}>
-          <ProgressRing size="xs" value={percentage} />
-          <ProgressText read={read} total={total} size="sm" />
+          <ProgressRing size="sm" value={percentage}>
+            <Text size="xs" style={{ fontWeight: 600 }}>
+              {percentage}%
+            </Text>
+          </ProgressRing>
         </div>
       </div>
     </Card>

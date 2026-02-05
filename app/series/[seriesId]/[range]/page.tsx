@@ -103,7 +103,7 @@ export default async function RangeScpListPage({
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />
           <PageHeader title={formatRange(rangeStart)} />
-          <ScpListWithToggle scps={scps} isAuthenticated={!!user?.id} />
+          <ScpListWithToggle scps={scps} isAuthenticated={!!user?.id} userId={user?.id} />
         </Container>
       </Main>
     </>

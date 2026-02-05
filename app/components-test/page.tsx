@@ -14,7 +14,6 @@ import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Grid } from '@/components/ui/grid'
-import { StatusIndicator } from '@/components/ui/status-indicator'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Input } from '@/components/ui/input'
 import { Message } from '@/components/ui/message'
@@ -636,21 +635,6 @@ export default function ComponentsTestPage() {
               </Stack>
             </div>
 
-            {/* StatusIndicator */}
-            <div>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
-                StatusIndicator
-              </Heading>
-              <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
-                read and unread (sm, md)
-              </Text>
-              <Stack direction="horizontal" gap="normal" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
-                <StatusIndicator status="read" size="sm" />
-                <StatusIndicator status="read" size="md" />
-                <StatusIndicator status="unread" size="sm" />
-                <StatusIndicator status="unread" size="md" />
-              </Stack>
-            </div>
           </section>
 
           {/* ========== ORGANISMS ========== */}
@@ -711,8 +695,24 @@ export default function ComponentsTestPage() {
                 read and unread states
               </Text>
               <Stack gap="tight" style={{ maxWidth: 480 }}>
-                <ScpListItem scpId="SCP-173" title="The Sculpture" rating={4} isRead={true} href="/scp/173" />
-                <ScpListItem scpId="SCP-096" title={'The "Shy Guy"'} rating={5} isRead={false} href="/scp/096" />
+                <ScpListItem
+                  id="00000000-0000-0000-0000-000000000001"
+                  scpId="SCP-173"
+                  title="The Sculpture"
+                  rating={4}
+                  isRead={true}
+                  href="/scp/173"
+                  userId="demo-user-id"
+                />
+                <ScpListItem
+                  id="00000000-0000-0000-0000-000000000002"
+                  scpId="SCP-096"
+                  title={'The "Shy Guy"'}
+                  rating={5}
+                  isRead={false}
+                  href="/scp/096"
+                  userId={null}
+                />
               </Stack>
             </div>
           </section>
