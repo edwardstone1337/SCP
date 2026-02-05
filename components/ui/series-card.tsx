@@ -25,7 +25,6 @@ export function SeriesCard({
   className,
 }: SeriesCardProps) {
   const percentage = total > 0 ? Math.round((read / total) * 100) : 0
-  const hasProgress = percentage > 0
 
   const contentStyle: CSSProperties = {
     display: 'flex',
@@ -37,7 +36,6 @@ export function SeriesCard({
   return (
     <Card
       variant="interactive"
-      accentBorder={hasProgress}
       padding="md"
       href={href}
       className={className}

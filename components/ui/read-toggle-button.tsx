@@ -87,7 +87,7 @@ export function ReadToggleButton({
         </div>
       )}
       <Button
-        variant={displayIsRead ? 'success' : 'secondary'}
+        variant={displayIsRead ? 'secondary' : 'primary'}
         size={size}
         onClick={handleClick}
         loading={isPending}

@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Phase 6 (Polish & Features)
+
+#### Added
+
+- docs/SYSTEM-ARCHITECTURE.md: technical architecture (routes, DB, auth, design system, features, security, dev workflow, backlog)
+- Select component: styled native select matching design system
+- Sorting on SCP lists: Oldest First, Newest First, Top Rated, Lowest Rated
+- Sorting on Saved page: Recently Saved, Oldest Saved + standard options
+- BackToTop component: shows after 400px scroll, hides near bottom
+- Themed loading messages: context-based (reader, series, saved, auth)
+- Custom 404 page: SCP-themed "DOCUMENT NOT FOUND"
+- arrow-up icon for back-to-top button
+
+#### Changed
+
+- Renamed app from "SCP Continuum Tracker" to "SCP Reader"
+- ScpListItem card fully clickable (not just title)
+- Auth error messages: "Sign in to track progress" / "Sign in to save articles"
+- Removed emoji from "All articles read" message
+- Button component merges caller styles instead of replacing
+- BookmarkButton and ReadToggleButton use stopPropagation for nested interactivity
+
+#### Security
+
+- RLS enabled on scps table (SELECT for all, no write for anon)
+- Seed script uses SUPABASE_SERVICE_ROLE_KEY (not anon key)
+
+#### Fixed
+
+- Bookmark revalidation uses route ID (e.g., "SCP-173") not UUID
+- Duplicate SCP number display removed from list items
+
+---
+
 ### Added
 
 - Saved (bookmarks): `/saved` page (auth required, redirect to login); lists bookmarked SCPs with sort (Recently Saved, Oldest Saved, number, rating); `SavedList` + `ScpListItem` with Save/Read toggles

@@ -43,9 +43,6 @@ export function ProgressText({
   size = 'md',
   className,
 }: ProgressTextProps) {
-  const progress = total > 0 ? read / total : 0
-  const hasProgress = progress > 0
-
   const formatters: Record<VariantKey, (r: number, t: number) => string> = {
     percentage: formatPercentage,
     fraction: formatFraction,
@@ -56,7 +53,7 @@ export function ProgressText({
   const style: CSSProperties = {
     fontFamily: 'var(--font-mono)',
     fontSize: SIZE_MAP[size],
-    color: hasProgress ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+    color: 'var(--color-text-secondary)',
   }
 
   return (

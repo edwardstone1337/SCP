@@ -530,6 +530,7 @@ export default function ComponentsTestPage() {
                     <Heading level={4}>Important Card</Heading>
                     <Text variant="secondary">This card has a red accent border.</Text>
                   </Card>
+                  <Text variant="muted" size="xs" style={{ marginTop: 'var(--spacing-1)' }}>Use for progress/emphasis; do not use for read status on list items.</Text>
                 </div>
                 <div>
                   <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-2)' }}>Padding variants (sm, md, lg)</Text>
@@ -627,7 +628,7 @@ export default function ComponentsTestPage() {
                 ReadToggleButton
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
-                Mark as Read / Mark as Unread (requires auth; demo uses mock IDs)
+                Mark as Read (primary) / Mark as Unread (secondary, with border). Requires auth; demo uses mock IDs.
               </Text>
               <Stack direction="horizontal" gap="loose" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
                 <div>

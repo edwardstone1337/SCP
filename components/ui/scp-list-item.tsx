@@ -61,7 +61,6 @@ export function ScpListItem({
   return (
     <Card
       variant="interactive"
-      accentBorder={isRead}
       padding="sm"
       href={href}
       className={className}

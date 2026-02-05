@@ -22,7 +22,6 @@ export function RangeListItem({
   className,
 }: RangeListItemProps) {
   const percentage = total > 0 ? Math.round((read / total) * 100) : 0
-  const hasProgress = percentage > 0
 
   const rowStyle: CSSProperties = {
     display: 'flex',
@@ -41,7 +40,6 @@ export function RangeListItem({
   return (
     <Card
       variant="interactive"
-      accentBorder={hasProgress}
       padding="sm"
       href={href}
       className={className}

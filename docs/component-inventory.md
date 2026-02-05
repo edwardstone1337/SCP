@@ -33,6 +33,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 <Button variant="danger" type="submit">Sign Out</Button>
 ```
 
+**States:** primary, secondary, ghost, danger, success; disabled. See components-test page for visual examples.
+
 **Dependencies:** None.
 
 ---
@@ -79,6 +81,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 <Badge variant="accent">Access Granted</Badge>
 <Badge variant="progress">{percentage}%</Badge>
 ```
+
+**States:** default, accent (e.g. “Access Granted”), progress (percentage).
 
 **Dependencies:** None.
 
@@ -184,6 +188,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 <SeriesCard series="series-1" roman="I" total={100} read={25} href="/series/series-1" />
 ```
 
+**States:** *0% read* — no progress, grey border; *partial progress* (e.g. 25%) — accent border + partial ring; *100% read* — accent border + full ring. Note: accent border = “has progress”, not “read” per se.
+
 **Dependencies:** Link, Badge (or inline progress), Typography.
 
 ---
@@ -207,6 +213,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 ```tsx
 <RangeListItem rangeStart={0} rangeLabel="001–099" total={99} read={10} href="/series/series-1/0" />
 ```
+
+**States:** *0% read* — grey border, empty ring; *partial* — accent border, partial ring; *100%* — accent border, full ring.
 
 **Dependencies:** Link, ProgressRing, Badge / Text.
 
@@ -233,6 +241,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 <ScpListItem scpId="scp-001" title="..." rating={4} scpIdDisplay="SCP-001" isRead={false} href="/scp/scp-001" />
 ```
 
+**States:** *Unread* — eye icon, grey border; *Read* — check icon, no accent border (read is indicated by icon only).
+
 **Dependencies:** Link, Icon (check/eye), Typography.
 
 ---
@@ -254,6 +264,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 ```tsx
 <ProgressRing percentage={33} size="lg" />
 ```
+
+**States:** 0%, partial (e.g. 33%, 50%), 100%; sizes xs, sm, md, lg. See components-test page for visual examples.
 
 **Dependencies:** None (or Badge for label).
 
@@ -279,6 +291,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 <ProgressText read={10} total={99} variant="count" />
 ```
 
+**States:** 0%, partial, 100%; variants percentage, fraction, both.
+
 **Dependencies:** Typography.
 
 ---
@@ -292,7 +306,7 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 - `as` (string, optional) — `'div' | 'a'`. Default: `'div'`.
 - `href` (string, optional) — if `as='a'`.
 - `variant` (string, optional) — `'default' | 'interactive' | 'bordered'`.
-- `accentBorder` (boolean, optional) — use accent when e.g. progress &gt; 0.
+- `accentBorder` (boolean, optional) — use for progress or emphasis (e.g. series/range has progress). Do not use for read status on list items; read is indicated by icon only on ScpListItem.
 - `children` (ReactNode, required).
 - `className` (string, optional).
 
@@ -305,6 +319,8 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
   ...
 </Card>
 ```
+
+**States:** default (static, grey border), interactive (hover scale, link), bordered (explicit border), accent border (progress/emphasis only — not used for read on list items).
 
 **Dependencies:** None.
 
@@ -547,6 +563,12 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 ```
 
 **Dependencies:** None.
+
+---
+
+## Component states (reference)
+
+Components with explicit state documentation above: **Button**, **Badge**, **SeriesCard**, **RangeListItem**, **ScpListItem**, **ProgressRing**, **ProgressText**, **Card**. For live visual examples of many states (Card variants, ProgressRing values/sizes, ProgressText, Buttons), see the components-test page.
 
 ---
 
