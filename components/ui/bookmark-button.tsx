@@ -88,7 +88,9 @@ export function BookmarkButton({
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
           <Icon name={displayIsBookmarked ? 'bookmark-filled' : 'bookmark'} size="sm" />
-          {displayIsBookmarked ? 'Saved' : 'Save'}
+          <span className="button-label">
+            {displayIsBookmarked ? 'Saved' : 'Save'}
+          </span>
         </span>
       </Button>
     </div>

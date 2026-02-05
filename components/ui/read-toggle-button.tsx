@@ -91,6 +91,7 @@ export function ReadToggleButton({
         size={size}
         onClick={handleClick}
         loading={isPending}
+        aria-label={displayIsRead ? 'Mark as Unread' : 'Mark as Read'}
       >
         {displayIsRead ? 'Mark as Unread' : 'Mark as Read'}
       </Button>

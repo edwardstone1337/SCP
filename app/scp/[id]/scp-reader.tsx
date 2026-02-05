@@ -85,7 +85,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                 <div />
               )}
             </Stack>
-            <Stack direction="horizontal" justify="between" align="start" gap="loose">
+            <div className="reader-header-row">
               <Stack direction="vertical" gap="tight">
                 <Heading level={1}>{scp.title}</Heading>
                 <Stack direction="horizontal" gap="tight" align="center">
@@ -98,22 +98,24 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                   <Mono size="sm">{scp.scp_id}</Mono>
                 </Stack>
               </Stack>
-              <Stack direction="horizontal" gap="tight">
-                <BookmarkButton
-                  scpId={scp.id}
-                  scpRouteId={scp.scp_id}
-                  isBookmarked={scp.is_bookmarked}
-                  userId={userId ?? null}
-                  size="sm"
-                />
-                <ReadToggleButton
-                  scpId={scp.id}
-                  isRead={scp.is_read}
-                  userId={userId ?? null}
-                  size="sm"
-                />
-              </Stack>
-            </Stack>
+              <div className="reader-header-actions">
+                <Stack direction="horizontal" gap="tight">
+                  <BookmarkButton
+                    scpId={scp.id}
+                    scpRouteId={scp.scp_id}
+                    isBookmarked={scp.is_bookmarked}
+                    userId={userId ?? null}
+                    size="sm"
+                  />
+                  <ReadToggleButton
+                    scpId={scp.id}
+                    isRead={scp.is_read}
+                    userId={userId ?? null}
+                    size="sm"
+                  />
+                </Stack>
+              </div>
+            </div>
           </Stack>
         </Container>
       </header>

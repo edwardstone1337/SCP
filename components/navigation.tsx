@@ -40,7 +40,7 @@ export async function Navigation() {
               </Stack>
             </Link>
 
-            <Stack direction="horizontal" align="center" gap="loose">
+            <Stack direction="horizontal" align="center" gap="normal">
               {user ? (
                 <>
                   <Link
@@ -57,9 +57,9 @@ export async function Navigation() {
                   >
                     Saved
                   </Link>
-                  <Text as="span" variant="secondary" size="sm">
-                    {user.email}
-                  </Text>
+                  <span className="nav-email">
+                    <Text size="sm" variant="secondary">{user.email}</Text>
+                  </span>
                   <form action={signOut}>
                     <Button type="submit" variant="ghost" size="sm">
                       Sign Out
