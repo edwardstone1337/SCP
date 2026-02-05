@@ -16,6 +16,7 @@ import { Stack } from '@/components/ui/stack'
 import { Grid } from '@/components/ui/grid'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Message } from '@/components/ui/message'
 import { Logo } from '@/components/ui/logo'
 import { PageHeader } from '@/components/ui/page-header'
@@ -378,6 +379,27 @@ export default function ComponentsTestPage() {
                   />
                 </div>
               </Stack>
+            </div>
+
+            {/* Select */}
+            <div style={{ marginTop: 'var(--spacing-6)' }}>
+              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+                Select
+              </Heading>
+              <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
+                Native select matching Input styling
+              </Text>
+              <div style={{ maxWidth: 200 }}>
+                <Select
+                  options={[
+                    { value: 'option1', label: 'Option 1' },
+                    { value: 'option2', label: 'Option 2' },
+                    { value: 'option3', label: 'Option 3' },
+                  ]}
+                  value="option1"
+                  onChange={() => {}}
+                />
+              </div>
             </div>
           </section>
 

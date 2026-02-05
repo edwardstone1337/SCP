@@ -1,7 +1,7 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { Heading, Text, Mono } from '@/components/ui/typography'
+import { Heading, Text } from '@/components/ui/typography'
 import { Icon } from '@/components/ui/icon'
 import { Link } from '@/components/ui/link'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
@@ -73,8 +73,6 @@ export function ScpListItem({
           <div style={metaStyle}>
             <Icon name="star" size="sm" className="text-[var(--color-text-secondary)]" />
             <Text variant="secondary" size="sm">{rating}</Text>
-            <Text variant="muted" size="sm">•</Text>
-            <Mono size="sm">{scpId}</Mono>
           </div>
         </div>
         <div style={{ flexShrink: 0 }}>

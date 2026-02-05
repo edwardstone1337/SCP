@@ -3,11 +3,20 @@
 import { useState } from 'react'
 import { Stack } from '@/components/ui/stack'
 import { ScpListItem } from '@/components/ui/scp-list-item'
-import { Text } from '@/components/ui/typography'
+import { Text, Label } from '@/components/ui/typography'
+import { Select } from '@/components/ui/select'
+
+const sortOptions = [
+  { value: 'number-asc', label: 'Oldest First' },
+  { value: 'number-desc', label: 'Newest First' },
+  { value: 'rating-desc', label: 'Top Rated' },
+  { value: 'rating-asc', label: 'Lowest Rated' },
+]
 
 interface ScpItem {
   id: string
   scp_id: string
+  scp_number: number
   title: string
   rating: number
   is_read: boolean
@@ -19,40 +28,84 @@ interface ScpListWithToggleProps {
   userId?: string | null    // For ReadToggleButton auth
 }
 
+function sortScps(scps: ScpItem[], sortBy: string): ScpItem[] {
+  const sorted = [...scps]
+  switch (sortBy) {
+    case 'number-desc':
+      return sorted.sort((a, b) => b.scp_number - a.scp_number)
+    case 'rating-desc':
+      return sorted.sort((a, b) => b.rating - a.rating)
+    case 'rating-asc':
+      return sorted.sort((a, b) => a.rating - b.rating)
+    case 'number-asc':
+    default:
+      return sorted.sort((a, b) => a.scp_number - b.scp_number)
+  }
+}
+
 export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWithToggleProps) {
   const [hideRead, setHideRead] = useState(false)
-  
-  const filteredScps = hideRead ? scps.filter(scp => !scp.is_read) : scps
+  const [sortBy, setSortBy] = useState('number-asc')
+
+  const sortedScps = sortScps(scps, sortBy)
+  const filteredScps = hideRead ? sortedScps.filter(scp => !scp.is_read) : sortedScps
   const readCount = scps.filter(scp => scp.is_read).length
-  
+
   return (
     <div>
-      {/* Toggle - only show for authenticated users with some read items */}
-      {isAuthenticated && readCount > 0 && (
-        <div style={{ marginBottom: 'var(--spacing-2)' }}>
-          <label style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 'var(--spacing-1)',
-            cursor: 'pointer'
-          }}>
+      {/* Controls row */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 'var(--spacing-2)',
+          gap: 'var(--spacing-2)',
+          flexWrap: 'wrap',
+        }}
+      >
+        {/* Sort dropdown - always visible */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
+          <Label htmlFor="sort-select" style={{ whiteSpace: 'nowrap', marginBottom: 0 }}>
+            Sort by
+          </Label>
+          <Select
+            id="sort-select"
+            options={sortOptions}
+            value={sortBy}
+            onChange={setSortBy}
+            aria-label="Sort articles"
+            style={{ width: 'auto', minWidth: '150px' }}
+          />
+        </div>
+
+        {/* Hide read toggle - only for authenticated with read items */}
+        {isAuthenticated && readCount > 0 && (
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-1)',
+              cursor: 'pointer',
+            }}
+          >
             <input
               type="checkbox"
               checked={hideRead}
               onChange={(e) => setHideRead(e.target.checked)}
-              style={{ 
-                width: '18px', 
+              style={{
+                width: '18px',
                 height: '18px',
-                accentColor: 'var(--color-accent)'
+                accentColor: 'var(--color-accent)',
               }}
             />
             <Text variant="secondary" size="sm">
               Hide read ({readCount})
             </Text>
           </label>
-        </div>
-      )}
-      
+        )}
+      </div>
+
       {/* List */}
       <Stack direction="vertical" gap="tight">
         {filteredScps.map((scp) => (

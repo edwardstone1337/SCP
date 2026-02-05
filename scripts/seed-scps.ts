@@ -1,3 +1,12 @@
+/**
+ * SCP Data Seed Script
+ *
+ * Requires SUPABASE_SERVICE_ROLE_KEY (not the anon key).
+ * The service role key bypasses RLS and should NEVER be exposed to the client.
+ *
+ * Get it from: Supabase Dashboard → Settings → API → service_role key
+ * Add it to your .env.local file.
+ */
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 
@@ -5,7 +14,7 @@ import * as dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const API_URL = 'https://scp-data.tedivm.com/data/scp/items/index.json'
 const BATCH_SIZE = 500
 
@@ -31,10 +40,15 @@ interface ScpDbEntry {
 }
 
 async function seedScps() {
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ SUPABASE_SERVICE_ROLE_KEY is required for seeding')
+    process.exit(1)
+  }
+
   console.log('🚀 Starting SCP data ingestion...')
 
-  // Initialize Supabase client
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  // Initialize Supabase client (service role bypasses RLS)
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
   try {
     // Fetch data from API
