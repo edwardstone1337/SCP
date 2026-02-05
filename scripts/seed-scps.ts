@@ -16,6 +16,7 @@ interface ScpApiEntry {
   series: string
   rating: number
   url: string
+  content_file: string
   created_at?: string
 }
 
@@ -26,6 +27,7 @@ interface ScpDbEntry {
   series: string
   rating: number
   url: string
+  content_file: string
 }
 
 async function seedScps() {
@@ -48,6 +50,7 @@ async function seedScps() {
       series: entry.series,
       rating: entry.rating,
       url: entry.url,
+      content_file: entry.content_file,
     }))
 
     console.log(`📊 Total entries to insert: ${entries.length}`)

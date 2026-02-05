@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { getContentFilename } from '@/lib/utils/series'
 
 interface ScpContent {
   raw_content: string
@@ -12,9 +11,8 @@ interface ContentResponse {
   [scpId: string]: ScpContent
 }
 
-async function fetchSeriesContent(series: string): Promise<ContentResponse> {
-  const filename = getContentFilename(series)
-  const url = `https://scp-data.tedivm.com/data/scp/items/${filename}`
+async function fetchScpContent(contentFile: string): Promise<ContentResponse> {
+  const url = `https://scp-data.tedivm.com/data/scp/items/${contentFile}`
 
   const response = await fetch(url)
   if (!response.ok) {
@@ -24,10 +22,11 @@ async function fetchSeriesContent(series: string): Promise<ContentResponse> {
   return response.json()
 }
 
-export function useScpContent(series: string, scpId: string) {
+export function useScpContent(contentFile: string | null, scpId: string) {
   return useQuery({
-    queryKey: ['scp-content', series],
-    queryFn: () => fetchSeriesContent(series),
+    queryKey: ['scp-content', contentFile],
+    queryFn: () => fetchScpContent(contentFile!),
+    enabled: Boolean(contentFile),
     staleTime: 60 * 60 * 1000, // 1 hour (content rarely changes)
     gcTime: 24 * 60 * 60 * 1000, // 24 hours
     select: (data) => data[scpId] || null,

@@ -9,6 +9,7 @@ interface MainProps {
 export function Main({ children, className }: MainProps) {
   return (
     <main
+      id="main"
       className={cn('min-h-screen', className)}
       style={{
         backgroundColor: 'var(--color-background)',

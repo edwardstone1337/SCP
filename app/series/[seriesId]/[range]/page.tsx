@@ -5,6 +5,7 @@ import { Navigation } from '@/components/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { PageHeader } from '@/components/ui/page-header'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Stack } from '@/components/ui/stack'
 import { ScpListItem } from '@/components/ui/scp-list-item'
 
@@ -88,15 +89,21 @@ export default async function RangeScpListPage({
     notFound()
   }
 
+  const rangeEnd = rangeStart + 99
+  const rangeLabel = `${String(rangeStart).padStart(3, '0')}-${String(rangeEnd).padStart(3, '0')}`
+  const breadcrumbItems = [
+    { label: 'Series', href: '/series' },
+    { label: `Series ${roman}` || seriesId, href: `/series/${seriesId}` },
+    { label: rangeLabel }, // Current page, no href
+  ]
+
   return (
     <>
       <Navigation />
       <Main>
         <Container size="md">
-          <PageHeader
-            title={formatRange(rangeStart)}
-            backHref={`/series/${seriesId}`}
-          />
+          <Breadcrumb items={breadcrumbItems} />
+          <PageHeader title={formatRange(rangeStart)} />
           <Stack direction="vertical" gap="tight">
             {scps.map((scp) => (
               <ScpListItem

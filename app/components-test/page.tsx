@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { SeriesCard } from '@/components/ui/series-card'
 import { RangeListItem } from '@/components/ui/range-list-item'
 import { ScpListItem } from '@/components/ui/scp-list-item'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 
 const SECTION_DIVIDER_STYLE: React.CSSProperties = {
   borderTop: '1px solid var(--color-grey-8)',
@@ -386,6 +387,19 @@ export default function ComponentsTestPage() {
             <Heading level={1} style={{ marginBottom: 'var(--spacing-6)' }}>
               Molecules
             </Heading>
+
+            {/* Breadcrumb */}
+            <div style={{ marginBottom: 'var(--spacing-6)' }}>
+              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+                Breadcrumb
+              </Heading>
+              <Breadcrumb items={[
+                { label: 'Series', href: '/series' },
+                { label: 'Series X', href: '/series/series-10' },
+                { label: '9600-9699', href: '/series/series-10/9600' },
+                { label: 'SCP-9600' },
+              ]} />
+            </div>
 
             {/* Button */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>

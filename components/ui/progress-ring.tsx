@@ -21,6 +21,8 @@ export interface ProgressRingProps {
   /** Centered content inside the ring */
   children?: ReactNode
   className?: string
+  /** Accessible name for the progress bar (default: "Progress: X%") */
+  ariaLabel?: string
 }
 
 export function ProgressRing({
@@ -29,6 +31,7 @@ export function ProgressRing({
   strokeWidth: strokeWidthPx = 8,
   children,
   className,
+  ariaLabel,
 }: ProgressRingProps) {
   const dimension = SIZE_MAP[size]
   const viewBoxSize = 100
@@ -38,6 +41,7 @@ export function ProgressRing({
   const circumference = 2 * Math.PI * r
   const clamped = Math.min(100, Math.max(0, value))
   const strokeDashoffset = circumference * (1 - clamped / 100)
+  const label = ariaLabel ?? `Progress: ${clamped}%`
 
   const trackColor = 'var(--color-grey-7)'
   const progressColor = clamped > 0 ? 'var(--color-accent)' : 'transparent'
@@ -60,14 +64,19 @@ export function ProgressRing({
   }
 
   return (
-    <div className={className} style={wrapperStyle}>
+    <div
+      className={className}
+      style={wrapperStyle}
+      role="progressbar"
+      aria-valuenow={clamped}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+    >
       <svg
         viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
         style={svgStyle}
-        aria-valuenow={clamped}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        role="progressbar"
+        aria-hidden
       >
         {/* Track */}
         <circle
@@ -93,9 +102,9 @@ export function ProgressRing({
           style={{ transition: 'stroke-dashoffset var(--transition-base)' }}
         />
       </svg>
-      {children != null && (
+      {children != null ? (
         <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
-      )}
+      ) : null}
     </div>
   )
 }

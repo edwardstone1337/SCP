@@ -13,6 +13,7 @@ export async function Navigation() {
 
   return (
     <nav
+      aria-label="Main navigation"
       style={{
         backgroundColor: 'var(--color-grey-9)',
         borderBottom: '1px solid var(--color-grey-8)',
@@ -28,7 +29,11 @@ export async function Navigation() {
           }}
         >
           <Stack direction="horizontal" align="center" justify="between" gap="normal">
-            <Link href="/" variant="nav">
+            <Link
+              href="/"
+              variant="nav"
+              style={{ minHeight: '44px', display: 'flex', alignItems: 'center' }}
+            >
               <Stack direction="horizontal" align="center" gap="tight">
                 <Logo size="sm" />
                 <span>SCP Continuum</span>
@@ -38,7 +43,11 @@ export async function Navigation() {
             <Stack direction="horizontal" align="center" gap="loose">
               {user ? (
                 <>
-                  <Link href="/series" variant="default">
+                  <Link
+                    href="/series"
+                    variant="default"
+                    style={{ minHeight: '44px', display: 'flex', alignItems: 'center' }}
+                  >
                     Series
                   </Link>
                   <Text as="span" variant="secondary" size="sm">

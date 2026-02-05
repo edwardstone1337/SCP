@@ -45,10 +45,10 @@ export default function Home() {
 
             {/* Warning Block - mb-12 (48px) */}
             <Stack style={{ gap: 'var(--spacing-4)' }}>
-              <Heading level={3} accent>
+              <Heading level={2} accent>
                 WARNING
               </Heading>
-              <Heading level={4} className="leading-tight">
+              <Heading level={3} className="leading-tight">
                 THE FOUNDATION DATABASE<br />IS CLASSIFIED
               </Heading>
               <Text variant="secondary" size="lg" className="leading-relaxed">

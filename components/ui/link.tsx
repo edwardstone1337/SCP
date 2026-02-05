@@ -7,6 +7,7 @@ interface LinkProps {
   variant?: 'default' | 'back' | 'nav'
   children: ReactNode
   className?: string
+  style?: CSSProperties
 }
 
 export function Link({
@@ -14,6 +15,7 @@ export function Link({
   variant = 'default',
   children,
   className,
+  style: styleProp,
 }: LinkProps) {
   // Base styles
   const baseStyle: CSSProperties = {
@@ -42,10 +44,11 @@ export function Link({
     },
   }
 
-  // Combine styles
+  // Combine styles (caller style overrides for touch targets etc.)
   const combinedStyle: CSSProperties = {
     ...baseStyle,
     ...variantStyles[variant],
+    ...styleProp,
   }
 
   return (

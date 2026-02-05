@@ -63,6 +63,7 @@ export function ReadToggleButton({
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--spacing-2)' }}>
       {error && (
         <div
+          role="alert"
           style={{
             padding: 'var(--spacing-2)',
             backgroundColor: 'var(--color-red-2)',

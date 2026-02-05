@@ -26,11 +26,12 @@ export function Button({
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading
-  // Base styles using CSS variables
+  // Base styles using CSS variables (minHeight 44px for touch targets)
   const baseStyle: CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: '44px',
     fontWeight: 700,
     fontFamily: 'var(--font-family-sans)',
     transition: 'all var(--transition-base)',

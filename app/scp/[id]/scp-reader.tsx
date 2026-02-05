@@ -2,11 +2,11 @@
 
 import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
-import { getRange } from '@/lib/utils/series'
+import { getRange, seriesToRoman } from '@/lib/utils/series'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Card } from '@/components/ui/card'
 import { Container } from '@/components/ui/container'
 import { Heading, Mono, Text } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
 import { Main } from '@/components/ui/main'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Stack } from '@/components/ui/stack'
@@ -20,15 +20,29 @@ interface ScpReaderProps {
     rating: number
     series: string
     url: string
+    content_file: string | null
     is_read: boolean
   }
   userId?: string
 }
 
 export function ScpReader({ scp, userId }: ScpReaderProps) {
-  const { data: content, isLoading, error: contentError } = useScpContent(scp.series, scp.scp_id)
+  const { data: content, isLoading, error: contentError } = useScpContent(
+    scp.content_file,
+    scp.scp_id
+  )
 
-  const backHref = `/series/${scp.series}/${getRange(scp.scp_number)}`
+  const roman = seriesToRoman(scp.series)
+  const rangeStart = getRange(scp.scp_number)
+  const rangeEnd = rangeStart + 99
+  const rangeLabel = `${String(rangeStart).padStart(3, '0')}-${String(rangeEnd).padStart(3, '0')}`
+
+  const breadcrumbItems = [
+    { label: 'Series', href: '/series' },
+    { label: roman ? `Series ${roman}` : scp.series, href: `/series/${scp.series}` },
+    { label: rangeLabel, href: `/series/${scp.series}/${rangeStart}` },
+    { label: scp.scp_id },
+  ]
 
   return (
     <Main>
@@ -42,9 +56,7 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
       >
         <Container size="lg">
           <Stack direction="vertical" gap="normal">
-            <Link href={backHref} variant="back">
-              ← Back
-            </Link>
+            <Breadcrumb items={breadcrumbItems} />
             <Stack direction="horizontal" justify="between" align="start" gap="loose">
               <Stack direction="vertical" gap="tight">
                 <Heading level={1}>{scp.title}</Heading>
@@ -74,6 +86,8 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
         <Container size="lg">
           {isLoading && (
             <div
+              role="status"
+              aria-label="Loading content"
               style={{
                 textAlign: 'center',
                 padding: 'var(--spacing-12) 0',
@@ -96,12 +110,22 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
             </div>
           )}
 
-          {contentError && (
-            <Card variant="bordered" accentBorder padding="md">
-              <Text style={{ color: 'var(--color-red-7)' }}>
-                Failed to load content. Please try again.
+          {!scp.content_file && (
+            <Card variant="bordered" padding="md">
+              <Text variant="secondary">
+                Content is not available for this entry.
               </Text>
             </Card>
+          )}
+
+          {contentError && (
+            <div role="alert">
+              <Card variant="bordered" accentBorder padding="md">
+                <Text style={{ color: 'var(--color-red-7)' }}>
+                  Failed to load content. Please try again.
+                </Text>
+              </Card>
+            </div>
           )}
 
           {content && (

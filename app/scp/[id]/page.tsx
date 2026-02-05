@@ -9,7 +9,7 @@ async function getScpData(scpId: string, userId: string | undefined) {
   // Get SCP metadata
   const { data: scp } = await supabase
     .from('scps')
-    .select('id, scp_id, scp_number, title, rating, series, url')
+    .select('id, scp_id, scp_number, title, rating, series, url, content_file')
     .eq('scp_id', scpId)
     .single()
 

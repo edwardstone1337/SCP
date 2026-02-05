@@ -77,7 +77,7 @@ export function LoginForm() {
             {/* Form card */}
             <Card padding="lg" style={{ width: '100%' }}>
               <Stack direction="vertical" gap="normal">
-                <Heading level={3}>Sign in with Magic Link</Heading>
+                <Heading level={2}>Sign in with Magic Link</Heading>
 
                 <form onSubmit={handleLogin}>
                   <Stack direction="vertical" gap="normal">
@@ -112,7 +112,7 @@ export function LoginForm() {
                   </Stack>
                 </form>
 
-                <Text size="xs" variant="muted" style={{ textAlign: 'center' }}>
+                <Text size="sm" variant="muted" style={{ textAlign: 'center' }}>
                   No password required. We'll send you a secure link to sign in.
                 </Text>
               </Stack>

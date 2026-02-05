@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { Navigation } from '@/components/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { PageHeader } from '@/components/ui/page-header'
 import { Stack } from '@/components/ui/stack'
 import { RangeListItem } from '@/components/ui/range-list-item'
@@ -76,14 +77,19 @@ export default async function SeriesRangePage({
     notFound()
   }
 
+  const breadcrumbItems = [
+    { label: 'Series', href: '/series' },
+    { label: `Series ${roman}` },
+  ]
+
   return (
     <>
       <Navigation />
       <Main>
         <Container size="md">
+          <Breadcrumb items={breadcrumbItems} />
           <PageHeader
             title={`Series ${roman}`}
-            backHref="/series"
             badge="Access Granted"
           />
           <Stack direction="vertical" gap="normal">

@@ -149,6 +149,13 @@
   --transition-slow: 300ms ease-in-out;
 }
 
+/* Mobile-responsive spacing */
+@media (max-width: 767px) {
+  :root {
+    --spacing-page-padding: 1.5rem; /* 24px on mobile, 48px on desktop */
+  }
+}
+
 /* Base Styles */
 * {
   margin: 0;
@@ -214,10 +221,26 @@ a[data-variant="nav"]:hover {
   transform: scale(1.02);
 }
 
+/* Focus states - visible indicators for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+[data-variant="interactive"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Input already has border change; add ring for better visibility */
+.input-design-tokens:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+
 /* Input component - design token styles */
 .input-design-tokens {
   width: 100%;
-  padding: var(--spacing-1) var(--spacing-2);
+  min-height: 44px;
+  padding: 0.625rem var(--spacing-2); /* 10px vertical for ~44px total height */
   background-color: var(--color-surface);
   border: var(--border-width-normal) solid var(--color-surface-border);
   border-radius: var(--radius-md);
@@ -246,6 +269,21 @@ a[data-variant="nav"]:hover {
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
   line-height: var(--line-height-lg);
+}
+
+/* Force all text in SCP content to use our theme colors (override API inline styles) */
+.scp-content,
+.scp-content * {
+  color: var(--color-text-primary) !important;
+}
+
+/* Restore link colors */
+.scp-content a {
+  color: var(--color-accent) !important;
+}
+
+.scp-content a:hover {
+  color: var(--color-accent-hover) !important;
 }
 
 .scp-content p {
