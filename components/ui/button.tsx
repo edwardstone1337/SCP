@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
+import { ButtonHTMLAttributes, ReactNode, CSSProperties, forwardRef } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 import { Spinner } from '@/components/ui/spinner'
@@ -14,19 +14,22 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'cla
   style?: CSSProperties
 }
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  fullWidth = false,
-  loading = false,
-  href,
-  children,
-  className,
-  style: callerStyle,
-  disabled,
-  type = 'button',
-  ...props
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = 'primary',
+    size = 'md',
+    fullWidth = false,
+    loading = false,
+    href,
+    children,
+    className,
+    style: callerStyle,
+    disabled,
+    type = 'button',
+    ...props
+  },
+  ref
+) {
   const isDisabled = disabled || loading
   // Base styles using CSS variables (minHeight 44px for touch targets)
   const baseStyle: CSSProperties = {
@@ -142,6 +145,7 @@ export function Button({
   // Otherwise render as button
   return (
     <button
+      ref={ref}
       type={type}
       disabled={isDisabled}
       className={combinedClassName}
@@ -152,4 +156,4 @@ export function Button({
       {buttonContent}
     </button>
   )
-}
+})

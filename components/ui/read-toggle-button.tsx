@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Text } from '@/components/ui/typography'
 import { toggleReadStatus } from '@/app/scp/[id]/actions'
+import { logger } from '@/lib/logger'
 
 export interface ReadToggleButtonProps {
   scpId: string
   isRead: boolean
   userId: string | null
+  /** Text ID for revalidation (e.g. SCP-173). Pass to revalidate current SCP page when toggling on reader. */
+  routeId?: string
   size?: 'sm' | 'md'
   onToggle?: () => void
 }
@@ -18,6 +21,7 @@ export function ReadToggleButton({
   scpId,
   isRead,
   userId,
+  routeId,
   size = 'sm',
   onToggle,
 }: ReadToggleButtonProps) {
@@ -48,7 +52,7 @@ export function ReadToggleButton({
     setIsPending(true)
 
     try {
-      const result = await toggleReadStatus(scpId, isRead)
+      const result = await toggleReadStatus(scpId, isRead, routeId)
       if (result.error) {
         setOptimisticIsRead(isRead)
         const friendlyError = result.error === 'Not authenticated'
@@ -60,6 +64,10 @@ export function ReadToggleButton({
       onToggle?.()
       router.refresh()
     } catch (err) {
+      logger.error('Read status toggle failed', {
+        error: err instanceof Error ? err.message : 'Unknown error',
+        scpId,
+      })
       setOptimisticIsRead(isRead)
       const message = err instanceof Error ? err.message : 'Failed to update read status'
       const friendlyError = message === 'Not authenticated' ? 'Sign in to track progress' : message

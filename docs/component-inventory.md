@@ -1,6 +1,6 @@
 # SCP Reader — Component Inventory
 
-Component library inventory derived from existing pages (Home, Series Grid, Range List, SCP List), design tokens in `app/globals.css`, and shared UI patterns. Use this to build components systematically.
+Component library inventory derived from existing pages (Home, Range List, SCP List), design tokens in `app/globals.css`, and shared UI patterns. Use this to build components systematically.
 
 **Design tokens (reference):** Red scale (`--color-red-1`–`10`), Grey scale (`--color-grey-1`–`10`), semantic `--color-background`, `--color-text-primary`, `--color-text-secondary`, `--color-accent`, `--color-accent-hover`. Typography: Roboto / Roboto Mono, sizes `xs`–`5xl`.
 
@@ -17,18 +17,18 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 - `variant` (string, optional) — `'primary' | 'secondary' | 'ghost' | 'danger' | 'success'`. Default: `'primary'`.
 - `size` (string, optional) — `'sm' | 'md' | 'lg'`. Default: `'md'`.
 - `disabled` (boolean, optional) — disables button.
-- `fullWidth` (boolean, optional) — full width (e.g. Home “Continue”).
+- `fullWidth` (boolean, optional) — full width (e.g. Login “Send Magic Link”).
 - `type` (string, optional) — `'button' | 'submit' | 'reset'`. Default: `'button'`.
 - `children` (ReactNode, required) — label/content.
 - `onClick` (function, optional) — click handler.
 - `className` (string, optional) — extra classes.
 
-**Used in:** Home (Continue), Login (Send Magic Link, Back to home), Navigation (Sign In, Sign Out), SCP Reader (Back, Mark as Read).
+**Used in:** Login (Send Magic Link, Back to home), Navigation (Sign In, Sign Out), SCP Reader (Back, Mark as Read), 404 (Return to Archive, Home).
 
 **Example usage:**
 
 ```tsx
-<Button variant="primary" fullWidth href="/series">Continue</Button>
+<Button variant="primary" fullWidth href="/">Return to Archive</Button>
 <Button variant="secondary" onClick={handleToggleRead}>Mark as Read</Button>
 <Button variant="danger" type="submit">Sign Out</Button>
 ```
@@ -50,13 +50,13 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 - `children` (ReactNode, required).
 - `className` (string, optional).
 
-**Used in:** Home, Series Grid (card links), Range List (Back, range links), SCP List (Back, SCP links), Navigation, Login (Back to home).
+**Used in:** Home (series grid cards), Range List (Back, range links), SCP List (Back, SCP links), Navigation, Login (Back to home), breadcrumbs.
 
 **Example usage:**
 
 ```tsx
-<Link href="/series" variant="back">← Back</Link>
-<AppLink href="/series" variant="nav">Series</AppLink>
+<Link href="/" variant="back">← Back</Link>
+<AppLink href="/" variant="nav">Series</AppLink>
 ```
 
 **Dependencies:** Next.js `Link` (or wrapper around it).
@@ -136,30 +136,9 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 
 ```tsx
 <Heading level={1} accent>WARNING</Heading>
-<Heading level={2}>THE FOUNDATION DATABASE IS CLASSIFIED</Heading>
+<Heading level={2}>SECURE CONTAIN PROTECT</Heading>
 <Text variant="secondary">Select a series to start reading</Text>
 <Mono>{scp_id}</Mono>
-```
-
-**Dependencies:** None.
-
----
-
-### AccentBar
-
-**Variants:** vertical (e.g. next to “SECURE CONTAIN PROTECT”).
-
-**Props:**
-
-- `orientation` (string, optional) — `'vertical' | 'horizontal'`. Default: `'vertical'`.
-- `className` (string, optional).
-
-**Used in:** Home (red bar beside title).
-
-**Example usage:**
-
-```tsx
-<AccentBar orientation="vertical" />
 ```
 
 **Dependencies:** None.
@@ -244,6 +223,66 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 **States:** *Unread* — eye icon, grey border; *Read* — check icon, no accent border (read is indicated by icon only).
 
 **Dependencies:** Link, Icon (check/eye), Typography.
+
+---
+
+### BookmarkButton
+
+**Variants:** default (Save / Saved states; icon toggles).
+
+**Props:**
+
+- `scpId` (string, required) — database UUID for bookmark operations.
+- `scpRouteId` (string, required) — text id for route/revalidation (e.g. `SCP-173`).
+- `isBookmarked` (boolean, required).
+- `userId` (string | null, required) — when null, click redirects to login with return URL.
+- `size` (string, optional) — `'sm' | 'md'`. Default: `'md'`.
+- `onToggle` (function, optional) — callback after successful toggle.
+
+**Used in:** SCP Reader (header + below content), ScpListItem.
+
+**Behavior:** Optimistic update; on error reverts and logs. Full-page redirect to `/login?redirect=...` when unauthenticated. Uses `stopPropagation` when nested in clickable cards.
+
+**Dependencies:** Button, Icon (bookmark/bookmark-filled), `toggleBookmarkStatus` server action.
+
+---
+
+### ReadToggleButton
+
+**Variants:** default (Mark as Read / Unread).
+
+**Props:**
+
+- `scpId` (string, required) — database UUID.
+- `isRead` (boolean, required).
+- `userId` (string | null, required) — when null, click redirects to login.
+- `routeId` (string, optional) — text id (e.g. `SCP-173`) for revalidating current SCP page so reader badge updates.
+- `size` (string, optional) — `'sm' | 'md'`. Default: `'sm'`.
+- `onToggle` (function, optional).
+
+**Used in:** SCP Reader (header + below content), ScpListItem.
+
+**Behavior:** Optimistic toggle; Server Action `toggleReadStatus(scpUuid, currentStatus, routeId?)`; revalidates `/` and when `routeId` provided the reader page. Redirects to login when unauthenticated. `stopPropagation` when nested.
+
+**Dependencies:** Button, Text, `toggleReadStatus` server action.
+
+---
+
+### ScpListWithToggle
+
+**Variants:** default (sort dropdown + optional "Hide read" filter + list).
+
+**Props:**
+
+- `scps` (array, required) — items with `id`, `scp_id`, `scp_number`, `title`, `rating`, `is_read`, `is_bookmarked`.
+- `isAuthenticated` (boolean, required) — when false, "Hide read" is hidden (guests see all as unread).
+- `userId` (string | null, optional) — for ReadToggleButton auth.
+
+**Used in:** Range list (`/series/[seriesId]/[range]`).
+
+**Behavior:** Sort options: Oldest First, Newest First, Top Rated, Lowest Rated. "Hide read" checkbox with proper `htmlFor`/`id` for accessibility. Renders list of ScpListItem.
+
+**Dependencies:** Stack, ScpListItem, Select, Label (Sort by, Hide read).
 
 ---
 
@@ -338,13 +377,13 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 - `badge` (string, optional) — e.g. “Access Granted”.
 - `badgeVariant` (string, optional) — `'default' | 'accent'`.
 
-**Used in:** Series, Range, SCP List, SCP Reader.
+**Used in:** Range, SCP List, SCP Reader (home has themed header, no PageHeader).
 
 **Example usage:**
 
 ```tsx
-<PageHeader title="Series" description="Select a series to start reading" />
-<PageHeader title="Series I" backHref="/series" badge="Access Granted" badgeVariant="accent" />
+<PageHeader title="Series I" description="Range list" backHref="/" />
+<PageHeader title="Series I" backHref="/" badge="Access Granted" badgeVariant="accent" />
 <PageHeader title="001–099" backHref="/series/series-1" />
 ```
 
@@ -370,6 +409,75 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 ```
 
 **Dependencies:** Next.js `Image` (or img), asset `/scp-logo.png`.
+
+---
+
+### BackToTop
+
+**Variants:** default (fixed button, appears after scroll threshold).
+
+**Props:**
+
+- `threshold` (number, optional) — scroll Y in pixels before button appears. Default: `400`.
+- `bottomOffset` (number, optional) — hide when within this many pixels of page bottom. Default: `200`.
+
+**Used in:** SCP Reader (below content).
+
+**Behavior:** Fixed position (bottom-right), smooth scroll to top on click. Uses `--z-sticky`, `--shadow-elevated`. Renders nothing until scroll past threshold and not near bottom.
+
+**Dependencies:** Button, Icon (arrow-up).
+
+---
+
+### DailyFeaturedSection
+
+**Variants:** default (hero-style card for "Today's Featured SCP").
+
+**Props:**
+
+- `scp` (object | null, required) — `{ scp_id, title, rating, series }` or null. Renders nothing when null.
+
+**Used in:** Home (above series grid).
+
+**Behavior:** Section label "Today's Featured SCP"; Link wraps Card (interactive, padding lg) with Mono (scp_id), Heading (title), rating and series (Roman). Deterministic daily selection is done by parent via `getDailyIndex`.
+
+**Dependencies:** Stack, Card, Link, Heading, Mono, Text.
+
+---
+
+### RecentlyViewedSection
+
+**Variants:** default; zero states for guest and empty list.
+
+**Props:**
+
+- `items` (array, required) — `{ scp_id, title, viewed_at }[]` (last 5 from parent).
+- `isAuthenticated` (boolean, required).
+
+**Used in:** Home (below series grid).
+
+**Behavior:** Guest: "Recently Viewed" heading + "Sign in to track your reading history." + Sign In button. Authenticated empty: "Articles you read will appear here." Authenticated with items: list of links (Card, interactive) to each SCP.
+
+**Dependencies:** Stack, Card, Link, Text, Mono, Button.
+
+---
+
+### SavedList
+
+**Location:** `app/saved/saved-list.tsx` (page-level, not in components/ui).
+
+**Variants:** default (sort dropdown + list of bookmarked SCPs).
+
+**Props:**
+
+- `items` (array, required) — `SavedScpItem[]` (`id`, `scp_id`, `scp_number`, `title`, `rating`, `is_read`, `bookmarked_at`).
+- `userId` (string, required).
+
+**Used in:** Saved page (`/saved`).
+
+**Behavior:** Sort options: Recently Saved, Oldest Saved, Oldest/Newest First, Top/Lowest Rated. Renders ScpListItem for each. Client-side sort only.
+
+**Dependencies:** Stack, ScpListItem, Select, Label.
 
 ---
 
@@ -402,20 +510,20 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 
 ### Container
 
-**Variants:** default (max-width + horizontal padding).
+**Variants:** default (max-width from token + horizontal padding via page).
 
 **Props:**
 
-- `maxWidth` (string, optional) — `'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'`.
+- `size` (string, optional) — `'xs' | 'sm' | 'md' | 'lg' | 'xl'`. Default: `'lg'`. Maps to `--container-*` tokens.
 - `children` (ReactNode, required).
 - `className` (string, optional).
 
-**Used in:** Series (`max-w-4xl`), Range/SCP List (`max-w-2xl`), SCP Reader (`max-w-4xl`).
+**Used in:** Home, Range/SCP List, SCP Reader, Saved.
 
 **Example usage:**
 
 ```tsx
-<Container maxWidth="2xl">...</Container>
+<Container size="lg">...</Container>
 ```
 
 **Dependencies:** None.
@@ -424,23 +532,26 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 
 ### Stack
 
-**Variants:** vertical (default), horizontal, gap size.
+**Variants:** vertical (default), horizontal; gap size.
 
 **Props:**
 
 - `direction` (string, optional) — `'vertical' | 'horizontal'`. Default: `'vertical'`.
-- `gap` (string, optional) — `'xs' | 'sm' | 'md' | 'lg'`.
+- `gap` (string, optional) — `'none' | 'tight' | 'normal' | 'loose' | 'section'`. Default: `'normal'`.
+- `align` (string, optional) — `'start' | 'center' | 'end' | 'stretch' | 'baseline'`.
+- `justify` (string, optional) — `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`.
 - `children` (ReactNode, required).
 - `className` (string, optional).
+- `style` (CSSProperties, optional).
 
 **Used in:** All pages (sections, lists).
 
 **Example usage:**
 
 ```tsx
-<Stack gap="lg">
+<Stack direction="horizontal" gap="normal" align="center" justify="between">
   <PageHeader ... />
-  <div className="grid ...">...</div>
+  ...
 </Stack>
 ```
 
@@ -450,21 +561,21 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 
 ### Grid
 
-**Variants:** 2 cols, 3 cols, 4 cols (responsive).
+**Variants:** auto (2→3→4 responsive) or fixed column count.
 
 **Props:**
 
-- `cols` (object, optional) — e.g. `{ default: 2, md: 3, lg: 4 }`.
-- `gap` (string, optional) — `'sm' | 'md' | 'lg'`. Default: `'md'`.
+- `cols` (number | `'auto'`, optional) — `'auto'` gives 2 cols → 3 (md) → 4 (lg); or a fixed number (e.g. `2`).
+- `gap` (string, optional) — CSS gap value. Default: `'var(--spacing-card-gap)'`.
 - `children` (ReactNode, required).
 - `className` (string, optional).
 
-**Used in:** Series Grid.
+**Used in:** Home (series grid), layout.
 
 **Example usage:**
 
 ```tsx
-<Grid cols={{ default: 2, md: 3, lg: 4 }} gap="md">
+<Grid cols="auto">
   {seriesProgress.map(...) => <SeriesCard ... />)}
 </Grid>
 ```
@@ -475,14 +586,23 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 
 ### Navigation
 
-**Variants:** default (logo + nav links + user/actions).
+**Architecture:** Navigation lives in the root layout (`app/layout.tsx`) and appears on all pages. Split into a server wrapper and a client component:
+
+- **Server:** `components/navigation.tsx` — fetches user via `createClient().auth.getUser()`, renders `NavigationClient` with `user`.
+- **Client:** `components/navigation-client.tsx` — logo, "SCP Reader" link, Menu/Close button, full-screen overlay.
+
+**Behavior:**
+
+- Full-screen overlay at all viewport sizes (no separate desktop/mobile layouts). Overlay has class `.nav-overlay`, id `nav-menu`; scrollable when content exceeds viewport (`overflow-y: auto`).
+- Menu contents: Series I–X links in a two-column grid (tighter spacing), Saved (when authenticated), Sign In / Sign Out.
+- Active state: current route highlighted with accent color and `aria-current="page"`; series sub-routes (e.g. `/series/series-3/200`) highlight the parent series link.
+- Minimal nav on `/login`: logo + "SCP Reader" link only (no menu button or overlay).
 
 **Props:**
 
-- `user` (User | null, optional) — from auth.
-- (Optional) `links` (array) — nav items; can be derived from `user`.
+- `user` (User | null) — passed from server wrapper; controls Saved link visibility and Sign In vs Sign Out.
 
-**Used in:** Series, Range, SCP List, SCP Reader (not Home or Login).
+**Used in:** Root layout (all pages).
 
 **Example usage:**
 
@@ -490,7 +610,7 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 <Navigation />
 ```
 
-**Dependencies:** Link, Button (sign out), Typography. Server component; uses `createClient` and `signOut`.
+**Dependencies:** Link, Button, Typography. Server wrapper uses `createClient`; client uses `signOut` server action.
 
 ---
 
@@ -545,6 +665,31 @@ Component library inventory derived from existing pages (Home, Series Grid, Rang
 
 ---
 
+### Select
+
+**Variants:** default (native select styled with design tokens).
+
+**Props:**
+
+- `options` (array, required) — `{ value: string, label: string }[]`.
+- `value` (string, required) — controlled value.
+- `onChange` (value: string) => void (required).
+- `id` (string, optional) — for label association.
+- `className`, `style` (optional).
+- Other native select attributes (e.g. `aria-label`) passed through.
+
+**Used in:** ScpListWithToggle (sort, Hide read context), SavedList (sort).
+
+**Example usage:**
+
+```tsx
+<Select options={sortOptions} value={sortBy} onChange={setSortBy} aria-label="Sort articles" />
+```
+
+**Dependencies:** None (native `<select>` with design tokens).
+
+---
+
 ### Spinner
 
 **Variants:** default.
@@ -577,7 +722,7 @@ Components with explicit state documentation above: **Button**, **Badge**, **Ser
 1. **Typography** (Heading, Text, Mono, Label) — used everywhere.
 2. **Button** — Home, Login, Nav, SCP Reader.
 3. **Link / AppLink** — back links, nav, cards.
-4. **Badge**, **Icon**, **AccentBar** — small atoms.
+4. **Badge**, **Icon** — small atoms.
 5. **Card**, **ProgressRing**, **ProgressText** — shared in lists/grids.
 6. **SeriesCard**, **RangeListItem**, **ScpListItem** — page-specific composites.
 7. **PageHeader**, **Logo**, **Main**, **Container**, **Stack**, **Grid** — layout.

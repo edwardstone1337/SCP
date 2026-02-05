@@ -41,7 +41,7 @@ export default function NotFound() {
           </div>
 
           <Stack direction="horizontal" gap="normal" style={{ marginTop: 'var(--spacing-4)' }}>
-            <Button href="/series" variant="primary">
+            <Button href="/" variant="primary">
               Return to Archive
             </Button>
             <Button href="/" variant="secondary">

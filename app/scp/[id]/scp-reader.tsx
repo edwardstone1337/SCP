@@ -1,5 +1,8 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
+import { useContentLinks } from '@/lib/hooks/use-content-links'
+import { useFootnotes } from '@/lib/hooks/use-footnotes'
 import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { getLoadingMessage } from '@/lib/utils/loading-messages'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
@@ -14,6 +17,7 @@ import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Stack } from '@/components/ui/stack'
 import { BackToTop } from '@/components/ui/back-to-top'
+import { recordView } from './actions'
 
 interface AdjacentScp {
   scp_id: string
@@ -39,10 +43,23 @@ interface ScpReaderProps {
 }
 
 export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
+  const hasRecordedView = useRef(false)
+  const contentContainerRef = useRef<HTMLDivElement>(null)
+
   const { data: content, isLoading, error: contentError } = useScpContent(
     scp.content_file,
     scp.scp_id
   )
+
+  useFootnotes(contentContainerRef, !!content)
+  useContentLinks(contentContainerRef, !!content)
+
+  useEffect(() => {
+    if (!hasRecordedView.current) {
+      hasRecordedView.current = true
+      recordView(scp.id)
+    }
+  }, [scp.id])
 
   const roman = seriesToRoman(scp.series)
   const rangeStart = getRange(scp.scp_number)
@@ -50,7 +67,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
   const rangeLabel = `${String(rangeStart).padStart(3, '0')}-${String(rangeEnd).padStart(3, '0')}`
 
   const breadcrumbItems = [
-    { label: 'Series', href: '/series' },
+    { label: 'Series', href: '/' },
     { label: roman ? `Series ${roman}` : scp.series, href: `/series/${scp.series}` },
     { label: rangeLabel, href: `/series/${scp.series}/${rangeStart}` },
     { label: scp.scp_id },
@@ -109,6 +126,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                   />
                   <ReadToggleButton
                     scpId={scp.id}
+                    routeId={scp.scp_id}
                     isRead={scp.is_read}
                     userId={userId ?? null}
                     size="sm"
@@ -171,6 +189,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
             <>
               <Card padding="lg">
                 <div
+                  ref={contentContainerRef}
                   className="scp-content"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
                 />
@@ -185,6 +204,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                 />
                 <ReadToggleButton
                   scpId={scp.id}
+                  routeId={scp.scp_id}
                   isRead={scp.is_read}
                   userId={userId ?? null}
                   size="sm"

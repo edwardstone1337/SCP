@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import { notFound } from 'next/navigation'
-import { Navigation } from '@/components/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -78,13 +77,12 @@ export default async function SeriesRangePage({
   }
 
   const breadcrumbItems = [
-    { label: 'Series', href: '/series' },
+    { label: 'Series', href: '/' },
     { label: `Series ${roman}` },
   ]
 
   return (
     <>
-      <Navigation />
       <Main>
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />

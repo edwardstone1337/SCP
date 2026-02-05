@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
+import { logger } from '@/lib/logger'
 
 function getSafeRedirect(next: string | null, requestUrl: URL): string {
   const fallback = '/'
@@ -46,10 +47,12 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(new URL(next, request.url))
     }
+    logger.error('Auth code exchange failed', { error: error.message })
   }
 
   // Return to login with error
+  const message = 'Could not verify magic link'
   return NextResponse.redirect(
-    new URL('/login?error=Could not verify magic link', request.url)
+    new URL(`/login?error=${encodeURIComponent(message)}`, request.url)
   )
 }

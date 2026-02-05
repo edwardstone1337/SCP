@@ -1,5 +1,3 @@
-'use client'
-
 import { Link } from '@/components/ui/link'
 import { Heading, Text } from '@/components/ui/typography'
 import { Badge } from '@/components/ui/badge'

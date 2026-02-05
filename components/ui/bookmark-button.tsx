@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { toggleBookmarkStatus } from '@/app/scp/[id]/actions'
+import { logger } from '@/lib/logger'
 
 interface BookmarkButtonProps {
   scpId: string          // Database UUID for bookmark operations
@@ -41,7 +42,7 @@ export function BookmarkButton({
     e.preventDefault()
     e.stopPropagation()
     if (!userId) {
-      router.push(`/login?redirect=${encodeURIComponent(pathname)}`)
+      window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`
       return
     }
 
@@ -49,20 +50,27 @@ export function BookmarkButton({
     setOptimisticBookmarked(!isBookmarked)
     setIsPending(true)
 
-    const result = await toggleBookmarkStatus(scpId, isBookmarked, scpRouteId)
-
-    if (result.error) {
-      setOptimisticBookmarked(isBookmarked)
-      const friendlyError = result.error === 'Not authenticated'
-        ? 'Sign in to save articles'
-        : result.error
-      setError(friendlyError)
-    } else {
+    try {
+      const result = await toggleBookmarkStatus(scpId, isBookmarked, scpRouteId)
+      if (result.error) {
+        setOptimisticBookmarked(isBookmarked)
+        const friendlyError = result.error === 'Not authenticated'
+          ? 'Sign in to save articles'
+          : result.error
+        setError(friendlyError)
+        return
+      }
       router.refresh()
       onToggle?.()
+    } catch (err) {
+      setOptimisticBookmarked(isBookmarked)
+      const message = err instanceof Error ? err.message : 'Failed to update bookmark'
+      logger.error('Bookmark toggle failed', { error: message, scpId })
+      const friendlyError = message === 'Not authenticated' ? 'Sign in to save articles' : message
+      setError(friendlyError)
+    } finally {
+      setIsPending(false)
     }
-
-    setIsPending(false)
   }
 
   return (

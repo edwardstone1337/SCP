@@ -21,6 +21,13 @@ For each changed file:
   - Use categories: Added, Changed, Fixed, Security, Removed
   - Be concise, user-facing language
 
+  - **SYSTEM-ARCHITECTURE.md**: Update any sections affected by the changes
+  - Route table, file structure tree, database schema, component library table, auth flow, security notes
+  - Only update sections that are actually affected — don't rewrite unrelated sections
+  - If a file was added, deleted, or renamed, reflect it in the file structure
+  - If a route was added or removed, update the route table
+
+
 ## 4. Documentation Style Rules
 
 ✅ **Concise** - Sacrifice grammar for brevity

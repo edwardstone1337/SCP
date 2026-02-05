@@ -3,6 +3,7 @@ import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { SkipLink } from "@/components/ui/skip-link";
+import { Navigation } from "@/components/navigation";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
       <body>
         <SkipLink />
+        <Navigation />
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

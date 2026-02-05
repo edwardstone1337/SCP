@@ -1,5 +1,4 @@
 import { ReactNode, CSSProperties } from 'react'
-import { cn } from '@/lib/utils/cn'
 
 type StackDirection = 'vertical' | 'horizontal'
 type StackGap = 'none' | 'tight' | 'normal' | 'loose' | 'section'

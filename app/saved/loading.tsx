@@ -1,4 +1,3 @@
-import { Navigation } from '@/components/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
@@ -9,7 +8,6 @@ import { getLoadingMessage } from '@/lib/utils/loading-messages'
 export default function SavedLoading() {
   return (
     <>
-      <Navigation />
       <Main>
         <Container size="md">
           <Stack

@@ -5,9 +5,9 @@ import { CSSProperties } from 'react'
 export function SkipLink() {
   const style: CSSProperties = {
     position: 'absolute',
-    top: '-100px',
-    left: '16px',
-    padding: '8px 16px',
+    top: '-9999px',
+    left: 'var(--spacing-4)',
+    padding: 'var(--spacing-2) var(--spacing-4)',
     backgroundColor: 'var(--color-accent)',
     color: 'var(--color-text-primary)',
     fontWeight: 700,
@@ -18,7 +18,7 @@ export function SkipLink() {
 
   const focusStyle = `
     .skip-link:focus {
-      top: 16px;
+      top: var(--spacing-4);
     }
   `
 

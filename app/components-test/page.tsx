@@ -418,7 +418,7 @@ export default function ComponentsTestPage() {
                 Breadcrumb
               </Heading>
               <Breadcrumb items={[
-                { label: 'Series', href: '/series' },
+                { label: 'Series', href: '/' },
                 { label: 'Series X', href: '/series/series-10' },
                 { label: '9600-9699', href: '/series/series-10/9600' },
                 { label: 'SCP-9600' },
@@ -461,7 +461,7 @@ export default function ComponentsTestPage() {
               </div>
               <div style={{ marginBottom: 'var(--spacing-4)' }}>
                 <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-2)' }}>As Link (href)</Text>
-                <Button variant="secondary" href="/series">Browse Series →</Button>
+                <Button variant="secondary" href="/">Browse Series →</Button>
               </div>
               <div>
                 <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-2)' }}>Loading State</Text>
@@ -491,15 +491,15 @@ export default function ComponentsTestPage() {
               <Stack gap="normal">
                 <div>
                   <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-1)' }}>Default</Text>
-                  <Link href="/series" variant="default">Browse all series</Link>
+                  <Link href="/" variant="default">Browse all series</Link>
                 </div>
                 <div>
                   <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-1)' }}>Back</Text>
-                  <Link href="/series" variant="back">← Back to series</Link>
+                  <Link href="/" variant="back">← Back to series</Link>
                 </div>
                 <div>
                   <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-1)' }}>Nav</Text>
-                  <Link href="/series" variant="nav">Series</Link>
+                  <Link href="/" variant="nav">Series</Link>
                 </div>
               </Stack>
             </div>
@@ -519,7 +519,7 @@ export default function ComponentsTestPage() {
                 </div>
                 <div>
                   <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-2)' }}>Interactive (hover)</Text>
-                  <Card variant="interactive" href="/series">
+                  <Card variant="interactive" href="/">
                     <Heading level={4}>Clickable Card</Heading>
                     <Text variant="secondary">This card scales on hover and works as a link.</Text>
                   </Card>
@@ -711,8 +711,8 @@ export default function ComponentsTestPage() {
               </Text>
               <Stack gap="loose">
                 <PageHeader title="Simple title" description="Optional description text." />
-                <PageHeader title="With back link" backHref="/series" description="Back link above title." />
-                <PageHeader title="With badge" backHref="/series" badge="Access Granted" description="Badge below title." />
+                <PageHeader title="With back link" backHref="/" description="Back link above title." />
+                <PageHeader title="With badge" backHref="/" badge="Access Granted" description="Badge below title." />
               </Stack>
             </div>
 

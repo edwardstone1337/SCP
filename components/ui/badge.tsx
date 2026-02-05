@@ -15,7 +15,7 @@ export function Badge({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '4px 8px',
+    padding: 'var(--spacing-1) var(--spacing-2)',
     borderRadius: 'var(--radius-badge)',
     fontSize: 'var(--font-size-xs)',
     fontWeight: 700,

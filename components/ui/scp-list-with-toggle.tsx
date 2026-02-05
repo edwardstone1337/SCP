@@ -83,6 +83,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
         {/* Hide read toggle - only for authenticated with read items */}
         {isAuthenticated && readCount > 0 && (
           <label
+            htmlFor="hide-read-checkbox"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -91,6 +92,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
             }}
           >
             <input
+              id="hide-read-checkbox"
               type="checkbox"
               checked={hideRead}
               onChange={(e) => setHideRead(e.target.checked)}

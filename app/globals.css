@@ -53,6 +53,7 @@
   /* Semantic: Surface colors */
   --color-surface: var(--color-grey-9);
   --color-surface-border: var(--color-grey-8);
+  --color-table-stripe: rgba(255, 255, 255, 0.02);
 
   /* Typography - Font Families */
   --font-family-sans: var(--font-roboto), system-ui, sans-serif;
@@ -64,6 +65,7 @@
   --font-size-xs: 0.75rem; /* 12px */
   --font-size-sm: 0.875rem; /* 14px */
   --font-size-base: 1rem; /* 16px */
+  --font-size-md: 1.125rem; /* 18px */
   --font-size-lg: 1.25rem; /* 20px */
   --font-size-xl: 1.5rem; /* 24px */
   --font-size-2xl: 1.875rem; /* 30px */
@@ -140,8 +142,12 @@
   --z-dropdown: 1000;
   --z-sticky: 1100;
   --z-overlay: 1200;
+  --z-nav: 1210;
   --z-modal: 1300;
   --z-toast: 1400;
+
+  /* Shadows - Semantic */
+  --shadow-elevated: 0 2px 8px rgba(0, 0, 0, 0.5);
 
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
@@ -152,15 +158,32 @@
 /* Mobile-responsive spacing */
 @media (max-width: 767px) {
   :root {
-    --spacing-page-padding: 1.5rem; /* 24px on mobile, 48px on desktop */
+    --spacing-page-padding: var(--spacing-3); /* 24px on mobile (1.5rem), 48px on desktop */
   }
 }
 
-/* Navigation: hide email on mobile */
-@media (max-width: 767px) {
-  .nav-email {
-    display: none;
-  }
+/* Navigation overlay (all viewports) */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background-color: var(--color-background);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: calc(44px + var(--spacing-2) * 2 + var(--spacing-6));
+  padding-left: var(--spacing-page-padding);
+  padding-right: var(--spacing-page-padding);
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.nav-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Buttons: responsive labels */
@@ -314,9 +337,10 @@ select:focus-visible {
   color: var(--color-text-primary) !important;
 }
 
-/* Restore link colors */
+/* Restore link colors (override API inline styles) */
 .scp-content a {
   color: var(--color-accent) !important;
+  text-decoration: underline;
 }
 
 .scp-content a:hover {
@@ -347,15 +371,6 @@ select:focus-visible {
 .scp-content h2 { font-size: var(--font-size-xl); }
 .scp-content h3 { font-size: var(--font-size-lg); }
 
-.scp-content a {
-  color: var(--color-accent);
-  text-decoration: underline;
-}
-
-.scp-content a:hover {
-  color: var(--color-accent-hover);
-}
-
 .scp-content ul,
 .scp-content ol {
   margin: var(--spacing-2) 0;
@@ -379,6 +394,155 @@ select:focus-visible {
   background-color: var(--color-grey-8);
   padding: var(--spacing-1);
   border-radius: var(--radius-sm);
+}
+
+/* Phase 1: Tables — borders, padding, horizontal scroll */
+.scp-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-4) 0;
+  font-size: var(--font-size-sm);
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scp-content th,
+.scp-content td {
+  border: 1px solid var(--color-grey-7);
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.scp-content th {
+  background-color: var(--color-grey-9);
+  font-weight: 700;
+}
+
+.scp-content tr:nth-child(even) {
+  background-color: var(--color-table-stripe);
+}
+
+/* Phase 1: Images — responsive containment */
+.scp-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-4) 0;
+}
+
+/* Phase 1: Pre/code blocks — background, overflow, font */
+.scp-content pre {
+  background-color: var(--color-grey-9);
+  border: 1px solid var(--color-grey-7);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: var(--spacing-4) 0;
+}
+
+.scp-content pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+}
+
+/* Phase 1: Horizontal rules */
+.scp-content hr {
+  border: none;
+  border-top: 1px solid var(--color-grey-7);
+  margin: var(--spacing-6) 0;
+}
+
+/* Phase 2: Heading hierarchy h4–h6 */
+.scp-content h4 {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  margin: var(--spacing-5) 0 var(--spacing-2);
+}
+
+.scp-content h5 {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: var(--spacing-4) 0 var(--spacing-2);
+}
+
+.scp-content h6 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: var(--spacing-4) 0 var(--spacing-2);
+}
+
+/* Phase 2: Superscript and subscript */
+.scp-content sup,
+.scp-content sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.scp-content sup {
+  top: -0.5em;
+}
+
+.scp-content sub {
+  bottom: -0.25em;
+}
+
+/* Phase 2: Content max-width for readability */
+.scp-content {
+  max-width: 72ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Phase 2: Footnote styling — inline refs */
+.scp-content sup.footnoteref a.footnoteref {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.75em;
+  padding: 0 2px; /* minimal hit area; no token for 2px */
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.scp-content sup.footnoteref a.footnoteref:hover,
+.scp-content sup.footnoteref a.footnoteref:focus-visible {
+  background-color: var(--color-red-1);
+  outline: none;
+}
+
+/* Phase 2: Footnote styling — bottom section */
+.scp-content div.footnote-footer {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-2) 0;
+  border-top: 1px solid var(--color-grey-8);
+  line-height: 1.5;
+}
+
+.scp-content div.footnote-footer:first-of-type {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-grey-7);
+}
+
+.scp-content div.footnote-footer a {
+  color: var(--color-accent);
+  font-weight: 700;
+  text-decoration: none;
+  margin-right: var(--spacing-1);
 }
 
 /* Loading spinner keyframes */

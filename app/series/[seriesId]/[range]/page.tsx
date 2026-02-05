@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import { notFound } from 'next/navigation'
-import { Navigation } from '@/components/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -28,7 +28,7 @@ async function getScpsInRange(
   const supabase = await createClient()
   
   // Get all SCPs in this range
-  const { data: scpsData } = await supabase
+  const { data: scpsData, error: scpsError } = await supabase
     .from('scps')
     .select('id, scp_id, scp_number, title, rating')
     .eq('series', seriesId)
@@ -36,6 +36,9 @@ async function getScpsInRange(
     .lt('scp_number', rangeStart + 100)
     .order('scp_number')
   
+  if (scpsError) {
+    logger.error('Failed to fetch range SCPs', { error: scpsError.message })
+  }
   if (!scpsData) return []
   
   if (!userId) {
@@ -103,14 +106,13 @@ export default async function RangeScpListPage({
   const rangeEnd = rangeStart + 99
   const rangeLabel = `${String(rangeStart).padStart(3, '0')}-${String(rangeEnd).padStart(3, '0')}`
   const breadcrumbItems = [
-    { label: 'Series', href: '/series' },
+    { label: 'Series', href: '/' },
     { label: `Series ${roman}` || seriesId, href: `/series/${seriesId}` },
     { label: rangeLabel }, // Current page, no href
   ]
 
   return (
     <>
-      <Navigation />
       <Main>
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />

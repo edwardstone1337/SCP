@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Stack } from '@/components/ui/stack'
 import { ScpListItem } from '@/components/ui/scp-list-item'
-import { Text, Label } from '@/components/ui/typography'
+import { Label } from '@/components/ui/typography'
 import { Select } from '@/components/ui/select'
 
 const sortOptions = [

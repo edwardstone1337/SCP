@@ -19,8 +19,3 @@ export const env = {
   siteUrl: getEnvVar('NEXT_PUBLIC_SITE_URL'),
   // Add other required vars here
 } as const
-
-// Optional: Validate on server startup
-if (typeof window === 'undefined') {
-  console.log('✓ Environment variables validated')
-}

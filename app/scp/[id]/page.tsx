@@ -1,4 +1,3 @@
-import { Navigation } from '@/components/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { ScpReader } from './scp-reader'
@@ -101,7 +100,6 @@ export default async function ScpPage({
 
   return (
     <>
-      <Navigation />
       <ScpReader scp={{ ...scpData, is_bookmarked: isBookmarked }} userId={user?.id} prev={prev} next={next} />
     </>
   )

@@ -45,11 +45,10 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 | Current text | Location | Recommendation | If Change: proposed |
 |--------------|----------|----------------|----------------------|
 | SECURE / CONTAIN / PROTECT | `app/page.tsx` (H1 home) | **Keep** (brand/themed) | — |
-| WARNING | `app/page.tsx` (H2) | **Keep** (themed) | — |
-| THE FOUNDATION DATABASE IS CLASSIFIED | `app/page.tsx` (H3) | **Keep** (themed) | — |
-| Access by unauthorized personnel is strictly prohibited... | `app/page.tsx` (body) | **Keep** (themed) | — |
-| Series | `app/series/page.tsx` (PageHeader title) | **Keep** | — |
-| Select a series to start reading | `app/series/page.tsx` (PageHeader description) | **Keep** | — |
+| Track your progress through the SCP Foundation database. | `app/page.tsx` (subtitle under header) | **Keep** | — |
+| WARNING / THE FOUNDATION DATABASE IS CLASSIFIED / Access by unauthorized... | (removed) | **Removed** | Was on home splash; removed in home/series consolidation. |
+| Series | Breadcrumb + nav (links to `/`) | **Keep** | — |
+| Select a series to start reading | (removed) | **Removed** | Was on `/series` PageHeader; `/series` now redirects to `/`, home has no PageHeader. |
 | Series {roman} | `app/series/[seriesId]/page.tsx` (PageHeader title, breadcrumb) | **Keep** | — |
 | {formatRange(rangeStart)} e.g. 100-199 | `app/series/[seriesId]/[range]/page.tsx` (PageHeader title) | **Keep** | — |
 | Saved Articles | `app/saved/page.tsx` (PageHeader title) | **Keep** | — |
@@ -70,7 +69,7 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 
 | Current text | Location | Recommendation | If Change: proposed |
 |--------------|----------|----------------|----------------------|
-| Continue | `app/page.tsx` (primary CTA) | **Keep** | — |
+| Continue | (removed) | **Removed** | Was home splash CTA; removed in home/series consolidation. |
 | Mark as Read | `components/ui/read-toggle-button.tsx` | **Keep** | — |
 | Mark as Unread | `components/ui/read-toggle-button.tsx` | **Keep** | — |
 | Save | `components/ui/bookmark-button.tsx` | **Keep** | — |

@@ -1,6 +1,5 @@
 import { ReactNode, CSSProperties } from 'react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils/cn'
 
 const PADDING_MAP = {
   sm: 'var(--spacing-2)',

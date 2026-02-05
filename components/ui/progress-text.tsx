@@ -1,5 +1,3 @@
-'use client'
-
 import { CSSProperties } from 'react'
 
 const SIZE_MAP = {
@@ -29,7 +27,7 @@ function formatPercentage(read: number, total: number): string {
 }
 
 function formatFraction(read: number, total: number): string {
-  return `${read} / ${total}`
+  return `${read} / ${total} read`
 }
 
 function formatBoth(read: number, total: number): string {

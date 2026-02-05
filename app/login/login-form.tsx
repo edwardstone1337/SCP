@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Message } from '@/components/ui/message'
 import { Button } from '@/components/ui/button'
+import { logger } from '@/lib/logger'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -52,7 +53,10 @@ export function LoginForm() {
         })
         setEmail('')
       }
-    } catch (error) {
+    } catch (err) {
+      logger.error('Login OTP request failed', {
+        error: err instanceof Error ? err.message : 'Unknown error',
+      })
       setMessage({
         type: 'error',
         text: 'An unexpected error occurred. Please try again.',
@@ -113,7 +117,7 @@ export function LoginForm() {
                 </form>
 
                 <Text size="sm" variant="muted" style={{ textAlign: 'center' }}>
-                  No password required. We'll send you a secure link to sign in.
+                  No password required. We&apos;ll send you a secure link to sign in.
                 </Text>
               </Stack>
             </Card>

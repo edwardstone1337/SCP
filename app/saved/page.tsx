@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 import { redirect } from 'next/navigation'
-import { Navigation } from '@/components/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -26,7 +26,7 @@ interface BookmarkRow {
 async function getBookmarkedScps(userId: string): Promise<SavedScpItem[]> {
   const supabase = await createClient()
 
-  const { data: bookmarks } = await supabase
+  const { data: bookmarks, error: bookmarksError } = await supabase
     .from('user_bookmarks')
     .select(
       `
@@ -45,6 +45,9 @@ async function getBookmarkedScps(userId: string): Promise<SavedScpItem[]> {
     .eq('user_id', userId)
     .order('bookmarked_at', { ascending: false })
 
+  if (bookmarksError) {
+    logger.error('Failed to fetch bookmarks', { error: bookmarksError.message })
+  }
   const rows = (bookmarks ?? []) as unknown as BookmarkRow[]
   const valid = rows.filter((r) => r.scps != null) as (BookmarkRow & { scps: NonNullable<BookmarkRow['scps']> })[]
   if (valid.length === 0) return []
@@ -83,7 +86,6 @@ export default async function SavedPage() {
 
   return (
     <>
-      <Navigation />
       <Main>
         <Container size="md">
           <Breadcrumb items={[{ label: 'Saved' }]} />

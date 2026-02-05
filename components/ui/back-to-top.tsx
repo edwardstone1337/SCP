@@ -51,7 +51,7 @@ export function BackToTop({ threshold = 400, bottomOffset = 200 }: BackToTopProp
         aria-label="Back to top"
         style={{
           backgroundColor: 'var(--color-surface)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+          boxShadow: 'var(--shadow-elevated)',
         }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>

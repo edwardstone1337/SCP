@@ -1,6 +1,5 @@
-import { ReactNode, CSSProperties } from 'react'
+import { ReactNode, CSSProperties, forwardRef } from 'react'
 import NextLink from 'next/link'
-import { cn } from '@/lib/utils/cn'
 
 interface LinkProps {
   href: string
@@ -8,15 +7,22 @@ interface LinkProps {
   children: ReactNode
   className?: string
   style?: CSSProperties
+  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | boolean
+  onClick?: () => void
 }
 
-export function Link({
-  href,
-  variant = 'default',
-  children,
-  className,
-  style: styleProp,
-}: LinkProps) {
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
+  {
+    href,
+    variant = 'default',
+    children,
+    className,
+    style: styleProp,
+    'aria-current': ariaCurrent,
+    onClick,
+  },
+  ref
+) {
   // Base styles
   const baseStyle: CSSProperties = {
     textDecoration: 'none',
@@ -53,12 +59,15 @@ export function Link({
 
   return (
     <NextLink
+      ref={ref}
       href={href}
       className={className}
       style={combinedStyle}
       data-variant={variant}
+      onClick={onClick}
+      {...(ariaCurrent !== undefined && { 'aria-current': ariaCurrent })}
     >
       {children}
     </NextLink>
   )
-}
+})

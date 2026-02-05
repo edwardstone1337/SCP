@@ -41,11 +41,11 @@ export function SeriesCard({
       className={className}
     >
       <div style={contentStyle}>
-        <ProgressRing size="md" value={percentage}>
+        <ProgressRing size="md" value={percentage} aria-label={`Series ${series} progress`}>
           <Heading level={3}>{roman}</Heading>
         </ProgressRing>
         <Stack gap="tight" style={{ marginTop: 'var(--spacing-2)', alignItems: 'center' }}>
-          <ProgressText read={read} total={total} />
+          <ProgressText read={read} total={total} variant="fraction" />
         </Stack>
       </div>
     </Card>

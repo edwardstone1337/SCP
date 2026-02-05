@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, CSSProperties } from 'react'
+import { ReactNode, CSSProperties, useState, useEffect, useRef } from 'react'
 
 const SIZE_MAP = {
   xs: 48,
@@ -33,6 +33,30 @@ export function ProgressRing({
   className,
   ariaLabel,
 }: ProgressRingProps) {
+  const ringRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    if (value === 0) {
+      setIsVisible(false)
+      return
+    }
+    if (!ringRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect() // Only animate once
+        }
+      },
+      { threshold: 0.3 } // Trigger when 30% visible
+    )
+
+    observer.observe(ringRef.current)
+    return () => observer.disconnect()
+  }, [value])
+
   const dimension = SIZE_MAP[size]
   const viewBoxSize = 100
   // Stroke in user units so it scales: 8px at dimension px → 8 * viewBoxSize / dimension
@@ -41,6 +65,10 @@ export function ProgressRing({
   const circumference = 2 * Math.PI * r
   const clamped = Math.min(100, Math.max(0, value))
   const strokeDashoffset = circumference * (1 - clamped / 100)
+  // If value > 0 but not yet visible, show as empty (full offset)
+  // Once visible, animate to actual offset
+  const animatedOffset =
+    value > 0 && !isVisible ? circumference : strokeDashoffset
   const label = ariaLabel ?? `Progress: ${clamped}%`
 
   const trackColor = 'var(--color-grey-7)'
@@ -65,6 +93,7 @@ export function ProgressRing({
 
   return (
     <div
+      ref={ringRef}
       className={className}
       style={wrapperStyle}
       role="progressbar"
@@ -98,8 +127,8 @@ export function ProgressRing({
           strokeWidth={strokeWidthUser}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          style={{ transition: 'stroke-dashoffset var(--transition-base)' }}
+          strokeDashoffset={animatedOffset}
+          style={{ transition: 'stroke-dashoffset 1000ms ease-out' }}
         />
       </svg>
       {children != null ? (

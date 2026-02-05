@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 
-export async function toggleReadStatus(scpUuid: string, currentStatus: boolean) {
+export async function toggleReadStatus(scpUuid: string, currentStatus: boolean, routeId?: string) {
   const supabase = await createClient()
 
   // Get current user
@@ -45,8 +45,11 @@ export async function toggleReadStatus(scpUuid: string, currentStatus: boolean) 
     return { success: false, error: error.message }
   }
 
-  // Revalidate series pages
-  revalidatePath('/series')
+  // Revalidate series pages and current SCP page
+  revalidatePath('/')
+  if (routeId) {
+    revalidatePath(`/scp/${routeId}`, 'page')
+  }
 
   if (scpData) {
     // Revalidate the specific series and range pages
@@ -80,6 +83,11 @@ export async function toggleBookmarkStatus(
       .eq('scp_id', scpId)
 
     if (error) {
+      logger.error('Bookmark toggle failed', {
+        error: error.message,
+        scpId,
+        action: 'delete',
+      })
       return { error: error.message }
     }
   } else {
@@ -92,6 +100,11 @@ export async function toggleBookmarkStatus(
       })
 
     if (error) {
+      logger.error('Bookmark toggle failed', {
+        error: error.message,
+        scpId,
+        action: 'insert',
+      })
       return { error: error.message }
     }
   }
@@ -99,4 +112,53 @@ export async function toggleBookmarkStatus(
   revalidatePath(`/scp/${routeId}`, 'page')
   revalidatePath('/saved', 'page')
   return { success: true }
+}
+
+export async function recordView(scpUuid: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return // Silently skip for guests
+
+  // Upsert: update viewed_at if already exists, insert if new
+  const { error: upsertError } = await supabase
+    .from('user_recently_viewed')
+    .upsert({
+      user_id: user.id,
+      scp_id: scpUuid,
+      viewed_at: new Date().toISOString(),
+    }, {
+      onConflict: 'user_id,scp_id',
+    })
+
+  if (upsertError) {
+    logger.error('Failed to record view', {
+      error: upsertError instanceof Error ? upsertError.message : String(upsertError),
+      userId: user.id,
+      scpId: scpUuid,
+      context: 'recordView'
+    })
+    return
+  }
+
+  // Cap at 5: delete oldest entries beyond the 5 most recent
+  const { data: recent } = await supabase
+    .from('user_recently_viewed')
+    .select('id')
+    .eq('user_id', user.id)
+    .order('viewed_at', { ascending: false })
+    .range(5, 100)
+
+  if (recent && recent.length > 0) {
+    const { error: deleteError } = await supabase
+      .from('user_recently_viewed')
+      .delete()
+      .in('id', recent.map(r => r.id))
+    if (deleteError) {
+      logger.error('Failed to trim recently viewed', {
+        error: deleteError.message,
+        userId: user.id,
+      })
+    }
+  }
 }

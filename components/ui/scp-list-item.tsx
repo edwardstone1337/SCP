@@ -85,6 +85,7 @@ export function ScpListItem({
           />
           <ReadToggleButton
             scpId={id}
+            routeId={scpId}
             isRead={isRead}
             userId={userId ?? null}
             size="sm"
