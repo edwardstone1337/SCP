@@ -22,7 +22,7 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   const containerStyle: CSSProperties = {
-    marginBottom: 'var(--spacing-8)',
+    marginBottom: 'var(--spacing-4)',
   }
 
   return (

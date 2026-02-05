@@ -1,4 +1,4 @@
-# SCP Continuum Tracker
+# SCP Reader
 
 Next.js 16 + Supabase + TypeScript + Tailwind. Phase 3: Authentication.
 

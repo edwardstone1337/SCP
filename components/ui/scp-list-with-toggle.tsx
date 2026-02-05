@@ -20,6 +20,7 @@ interface ScpItem {
   title: string
   rating: number
   is_read: boolean
+  is_bookmarked: boolean
 }
 
 interface ScpListWithToggleProps {
@@ -59,7 +60,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 'var(--spacing-2)',
+          marginBottom: 'var(--spacing-list-gap)',
           gap: 'var(--spacing-2)',
           flexWrap: 'wrap',
         }}
@@ -116,6 +117,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
             title={scp.title}
             rating={scp.rating}
             isRead={scp.is_read}
+            isBookmarked={scp.is_bookmarked}
             href={`/scp/${scp.scp_id}`}
             userId={userId ?? null}
           />
@@ -125,7 +127,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
       {/* Empty state when all filtered out */}
       {filteredScps.length === 0 && hideRead && (
         <Text variant="secondary" style={{ textAlign: 'center', padding: 'var(--spacing-4)' }}>
-          All articles in this range have been read! 🎉
+          All articles in this range have been read.
         </Text>
       )}
     </div>

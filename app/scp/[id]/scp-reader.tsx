@@ -1,6 +1,7 @@
 'use client'
 
 import { useScpContent } from '@/lib/hooks/use-scp-content'
+import { getLoadingMessage } from '@/lib/utils/loading-messages'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { getRange, seriesToRoman } from '@/lib/utils/series'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -9,8 +10,10 @@ import { Card } from '@/components/ui/card'
 import { Container } from '@/components/ui/container'
 import { Heading, Mono, Text } from '@/components/ui/typography'
 import { Main } from '@/components/ui/main'
+import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Stack } from '@/components/ui/stack'
+import { BackToTop } from '@/components/ui/back-to-top'
 
 interface AdjacentScp {
   scp_id: string
@@ -28,6 +31,7 @@ interface ScpReaderProps {
     url: string
     content_file: string | null
     is_read: boolean
+    is_bookmarked: boolean
   }
   userId?: string
   prev?: AdjacentScp | null
@@ -94,12 +98,21 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                   <Mono size="sm">{scp.scp_id}</Mono>
                 </Stack>
               </Stack>
-              <ReadToggleButton
-                scpId={scp.id}
-                isRead={scp.is_read}
-                userId={userId ?? null}
-                size="sm"
-              />
+              <Stack direction="horizontal" gap="tight">
+                <BookmarkButton
+                  scpId={scp.id}
+                  scpRouteId={scp.scp_id}
+                  isBookmarked={scp.is_bookmarked}
+                  userId={userId ?? null}
+                  size="sm"
+                />
+                <ReadToggleButton
+                  scpId={scp.id}
+                  isRead={scp.is_read}
+                  userId={userId ?? null}
+                  size="sm"
+                />
+              </Stack>
             </Stack>
           </Stack>
         </Container>
@@ -129,7 +142,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                 }}
               />
               <Text variant="secondary" size="sm" style={{ marginTop: 'var(--spacing-4)', display: 'block' }}>
-                Loading content...
+                {getLoadingMessage('reader')}
               </Text>
             </div>
           )}
@@ -160,20 +173,21 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
                 />
               </Card>
-              <div
-                style={{
-                  marginTop: 'var(--spacing-4)',
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
+              <Stack direction="horizontal" gap="tight" justify="center" style={{ marginTop: 'var(--spacing-4)' }}>
+                <BookmarkButton
+                  scpId={scp.id}
+                  scpRouteId={scp.scp_id}
+                  isBookmarked={scp.is_bookmarked}
+                  userId={userId ?? null}
+                  size="sm"
+                />
                 <ReadToggleButton
                   scpId={scp.id}
                   isRead={scp.is_read}
                   userId={userId ?? null}
                   size="sm"
                 />
-              </div>
+              </Stack>
               <Stack
                 direction="horizontal"
                 justify="between"
@@ -199,6 +213,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
           )}
         </Container>
       </div>
+      <BackToTop threshold={400} />
     </Main>
   )
 }

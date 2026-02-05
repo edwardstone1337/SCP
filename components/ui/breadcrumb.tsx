@@ -16,7 +16,11 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
   if (items.length === 0) return null
 
   return (
-    <nav aria-label="Breadcrumb" className={cn(className)}>
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(className)}
+      style={{ marginBottom: 'var(--spacing-2)' }}
+    >
       <ol
         style={{
           display: 'flex',

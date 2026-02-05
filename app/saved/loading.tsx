@@ -6,12 +6,12 @@ import { Spinner } from '@/components/ui/spinner'
 import { Text } from '@/components/ui/typography'
 import { getLoadingMessage } from '@/lib/utils/loading-messages'
 
-export default function SeriesLoading() {
+export default function SavedLoading() {
   return (
     <>
       <Navigation />
       <Main>
-        <Container size="lg">
+        <Container size="md">
           <Stack
             direction="vertical"
             gap="normal"
@@ -21,7 +21,7 @@ export default function SeriesLoading() {
           >
             <Spinner size="lg" />
             <Text variant="secondary" size="sm">
-              {getLoadingMessage('series')}
+              {getLoadingMessage('saved')}
             </Text>
           </Stack>
         </Container>

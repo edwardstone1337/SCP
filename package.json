@@ -1,5 +1,5 @@
 {
-  "name": "scp-continuum-tracker",
+  "name": "scp-reader",
   "version": "0.1.0",
   "private": true,
   "scripts": {

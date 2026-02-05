@@ -11,6 +11,7 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'cla
   href?: string
   children: ReactNode
   className?: string
+  style?: CSSProperties
 }
 
 export function Button({
@@ -21,6 +22,7 @@ export function Button({
   href,
   children,
   className,
+  style: callerStyle,
   disabled,
   type = 'button',
   ...props
@@ -119,7 +121,7 @@ export function Button({
       <Link
         href={href}
         className={combinedClassName}
-        style={combinedStyle}
+        style={{ ...combinedStyle, ...callerStyle }}
         data-variant={variant}
       >
         {children}
@@ -143,7 +145,7 @@ export function Button({
       type={type}
       disabled={isDisabled}
       className={combinedClassName}
-      style={combinedStyle}
+      style={{ ...combinedStyle, ...callerStyle }}
       data-variant={variant}
       {...props}
     >

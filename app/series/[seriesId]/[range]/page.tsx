@@ -17,6 +17,7 @@ interface ScpRow {
   title: string
   rating: number
   is_read: boolean
+  is_bookmarked: boolean
 }
 
 async function getScpsInRange(
@@ -38,26 +39,37 @@ async function getScpsInRange(
   if (!scpsData) return []
   
   if (!userId) {
-    // Guest: all unread
+    // Guest: all unread, no bookmarks
     return scpsData.map(scp => ({
       ...scp,
       is_read: false,
+      is_bookmarked: false,
     }))
   }
-  
-  // Get read status for these SCPs
+
   const scpIds = scpsData.map(s => s.id)
+
+  // Get read status for these SCPs
   const { data: progressData } = await supabase
     .from('user_progress')
     .select('scp_id, is_read')
     .eq('user_id', userId)
     .in('scp_id', scpIds)
-  
+
+  // Get bookmarks for these SCPs
+  const { data: bookmarkData } = await supabase
+    .from('user_bookmarks')
+    .select('scp_id')
+    .eq('user_id', userId)
+    .in('scp_id', scpIds)
+
   const readMap = new Map(progressData?.map(p => [p.scp_id, p.is_read]) || [])
-  
+  const bookmarkSet = new Set(bookmarkData?.map(b => b.scp_id) || [])
+
   return scpsData.map(scp => ({
     ...scp,
     is_read: readMap.get(scp.id) || false,
+    is_bookmarked: bookmarkSet.has(scp.id),
   }))
 }
 

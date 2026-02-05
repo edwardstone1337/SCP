@@ -15,7 +15,7 @@
 
 1. Go to: https://supabase.com/dashboard/account/tokens
 2. Click **Generate new token**
-3. Name it: **SCP Continuum Tracker CLI**
+3. Name it: **SCP Reader CLI**
 4. Copy the token (starts with `sbp_...`)
 
 ---

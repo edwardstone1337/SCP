@@ -7,7 +7,7 @@ interface SelectOption {
   label: string
 }
 
-interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'style'> {
+interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'style' | 'onChange'> {
   options: SelectOption[]
   value: string
   onChange: (value: string) => void

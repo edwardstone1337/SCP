@@ -1,4 +1,4 @@
-# SCP Continuum Tracker — Component Inventory
+# SCP Reader — Component Inventory
 
 Component library inventory derived from existing pages (Home, Series Grid, Range List, SCP List), design tokens in `app/globals.css`, and shared UI patterns. Use this to build components systematically.
 

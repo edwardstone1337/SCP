@@ -34,7 +34,9 @@ export function ReadToggleButton({
 
   const displayIsRead = isPending ? optimisticIsRead : isRead
 
-  const handleClick = async () => {
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (userId === null) {
       const returnUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname) : ''
       window.location.href = `/login?redirect=${returnUrl}`
@@ -47,13 +49,21 @@ export function ReadToggleButton({
 
     try {
       const result = await toggleReadStatus(scpId, isRead)
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to update read status')
+      if (result.error) {
+        setOptimisticIsRead(isRead)
+        const friendlyError = result.error === 'Not authenticated'
+          ? 'Sign in to track progress'
+          : result.error
+        setError(friendlyError)
+        return
       }
       onToggle?.()
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update read status')
+      setOptimisticIsRead(isRead)
+      const message = err instanceof Error ? err.message : 'Failed to update read status'
+      const friendlyError = message === 'Not authenticated' ? 'Sign in to track progress' : message
+      setError(friendlyError)
     } finally {
       setIsPending(false)
     }

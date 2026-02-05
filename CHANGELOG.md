@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Saved (bookmarks): `/saved` page (auth required, redirect to login); lists bookmarked SCPs with sort (Recently Saved, Oldest Saved, number, rating); `SavedList` + `ScpListItem` with Save/Read toggles
+- `user_bookmarks` table: user_id, scp_id (FK scps.id), bookmarked_at; RLS (select/insert/delete own); indexes on scp_id and (user_id, bookmarked_at DESC)
+- `BookmarkButton`: Save/Saved toggle, optimistic update, redirect to login if unauthenticated; used in SCP reader (header + below content) and list items
+- `toggleBookmarkStatus` server action; revalidates `/scp/[id]` and `/saved`
+- Nav: "Saved" link when authenticated
+- Custom 404 (`app/not-found.tsx`): SCP-themed copy (DOCUMENT NOT FOUND, redacted/reclassified), Return to Archive / Home
+- Loading messages: `lib/utils/loading-messages.ts` — context-based random messages (default, reader, series, saved, auth); `getLoadingMessage(context)` used in loading.tsx and login/reader
+- `BackToTop` on SCP reader: fixed bottom-right, shows after scroll threshold, hides near bottom; smooth scroll to top
+- Icon: `bookmark`, `bookmark-filled` for BookmarkButton
 - SCP article page: Previous/Next navigation (same series); nav in header and below content
 - `ScpListWithToggle` component: range list with "Hide read" checkbox (authenticated only, when any read); empty state when all filtered
 - Series range page uses `ScpListWithToggle` for list + hide-read filter
@@ -24,7 +33,11 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- SCP reader: Read toggle also shown below article; Prev/Next repeated below content
+- SCP page: fetches bookmark status for authenticated user; passes `is_bookmarked` to reader
+- Series range page: fetches bookmarks for range; passes `is_bookmarked` to `ScpListWithToggle` / `ScpListItem`
+- SCP reader: BookmarkButton in header and below content; Read toggle below article; Prev/Next repeated below content; `BackToTop` below content
+- `ScpListItem`: `isBookmarked` prop and `BookmarkButton`; uses DB UUID for bookmark/read actions
+- Loading states: series/range/scp/saved/login use `getLoadingMessage(context)` for spinner text
 - Home page: Phase 3 status, auth status (signed in / sign out), database connection status, link to `/test-data`; "Ready for Phase 4: The Tracker"
 - README: project title, env setup steps, Supabase migrations/seed/runbook section
 

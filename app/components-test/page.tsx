@@ -15,6 +15,7 @@ import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Grid } from '@/components/ui/grid'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
+import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Message } from '@/components/ui/message'
@@ -221,6 +222,8 @@ export default function ComponentsTestPage() {
                 <Icon name="eye" size="md" />
                 <Icon name="star" size="lg" />
                 <Icon name="arrow-back" size="md" />
+                <Icon name="bookmark" size="md" />
+                <Icon name="bookmark-filled" size="md" />
               </div>
             </div>
 
@@ -657,6 +660,38 @@ export default function ComponentsTestPage() {
               </Stack>
             </div>
 
+            {/* BookmarkButton */}
+            <div style={{ marginBottom: 'var(--spacing-6)' }}>
+              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+                BookmarkButton
+              </Heading>
+              <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
+                Save / Saved (requires auth; demo uses mock IDs)
+              </Text>
+              <Stack direction="horizontal" gap="loose" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <div>
+                  <Text variant="muted" size="xs" style={{ marginBottom: 'var(--spacing-1)', display: 'block' }}>Not bookmarked</Text>
+                  <BookmarkButton
+                    scpId="demo-id"
+                    scpRouteId="SCP-173"
+                    isBookmarked={false}
+                    userId="demo-user"
+                    size="sm"
+                  />
+                </div>
+                <div>
+                  <Text variant="muted" size="xs" style={{ marginBottom: 'var(--spacing-1)', display: 'block' }}>Bookmarked</Text>
+                  <BookmarkButton
+                    scpId="demo-id-2"
+                    scpRouteId="SCP-096"
+                    isBookmarked={true}
+                    userId="demo-user"
+                    size="sm"
+                  />
+                </div>
+              </Stack>
+            </div>
+
           </section>
 
           {/* ========== ORGANISMS ========== */}
@@ -714,7 +749,7 @@ export default function ComponentsTestPage() {
                 ScpListItem
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
-                read and unread states
+                read/unread and bookmarked states; Save and Mark as Read buttons
               </Text>
               <Stack gap="tight" style={{ maxWidth: 480 }}>
                 <ScpListItem
@@ -723,6 +758,7 @@ export default function ComponentsTestPage() {
                   title="The Sculpture"
                   rating={4}
                   isRead={true}
+                  isBookmarked={true}
                   href="/scp/173"
                   userId="demo-user-id"
                 />
@@ -732,8 +768,9 @@ export default function ComponentsTestPage() {
                   title={'The "Shy Guy"'}
                   rating={5}
                   isRead={false}
+                  isBookmarked={false}
                   href="/scp/096"
-                  userId={null}
+                  userId="demo-user-id"
                 />
               </Stack>
             </div>

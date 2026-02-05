@@ -4,6 +4,7 @@ import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Spinner } from '@/components/ui/spinner'
 import { Text } from '@/components/ui/typography'
+import { getLoadingMessage } from '@/lib/utils/loading-messages'
 
 export default function RangeScpListLoading() {
   return (
@@ -20,7 +21,7 @@ export default function RangeScpListLoading() {
           >
             <Spinner size="lg" />
             <Text variant="secondary" size="sm">
-              Loading...
+              {getLoadingMessage('series')}
             </Text>
           </Stack>
         </Container>

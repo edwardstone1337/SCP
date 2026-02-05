@@ -88,10 +88,7 @@ export default async function SeriesRangePage({
       <Main>
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />
-          <PageHeader
-            title={`Series ${roman}`}
-            badge="Access Granted"
-          />
+          <PageHeader title={`Series ${roman}`} />
           <Stack direction="vertical" gap="normal">
             {ranges.map(({ rangeStart, total, read }) => (
               <RangeListItem

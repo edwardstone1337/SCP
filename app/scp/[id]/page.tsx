@@ -80,6 +80,19 @@ export default async function ScpPage({
     notFound()
   }
 
+  // After getting user and SCP data, check if bookmarked
+  let isBookmarked = false
+  if (user) {
+    const { data: bookmark } = await supabase
+      .from('user_bookmarks')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('scp_id', scpData.id)
+      .maybeSingle()
+
+    isBookmarked = !!bookmark
+  }
+
   const { prev, next } = await getAdjacentScps(
     supabase,
     scpData.series,
@@ -89,7 +102,7 @@ export default async function ScpPage({
   return (
     <>
       <Navigation />
-      <ScpReader scp={scpData} userId={user?.id} prev={prev} next={next} />
+      <ScpReader scp={{ ...scpData, is_bookmarked: isBookmarked }} userId={user?.id} prev={prev} next={next} />
     </>
   )
 }

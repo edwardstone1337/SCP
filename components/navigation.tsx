@@ -36,7 +36,7 @@ export async function Navigation() {
             >
               <Stack direction="horizontal" align="center" gap="tight">
                 <Logo size="sm" />
-                <span>SCP Continuum</span>
+                <span>SCP Reader</span>
               </Stack>
             </Link>
 
@@ -45,10 +45,17 @@ export async function Navigation() {
                 <>
                   <Link
                     href="/series"
-                    variant="default"
+                    variant="nav"
                     style={{ minHeight: '44px', display: 'flex', alignItems: 'center' }}
                   >
                     Series
+                  </Link>
+                  <Link
+                    href="/saved"
+                    variant="nav"
+                    style={{ minHeight: '44px', display: 'flex', alignItems: 'center' }}
+                  >
+                    Saved
                   </Link>
                   <Text as="span" variant="secondary" size="sm">
                     {user.email}

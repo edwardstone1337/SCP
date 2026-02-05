@@ -58,3 +58,45 @@ export async function toggleReadStatus(scpUuid: string, currentStatus: boolean) 
 
   return { success: true, newStatus }
 }
+
+export async function toggleBookmarkStatus(
+  scpId: string,           // UUID for DB operations
+  isCurrentlyBookmarked: boolean,
+  routeId: string          // Text ID for revalidation (e.g., "SCP-173")
+) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  if (isCurrentlyBookmarked) {
+    // Remove bookmark
+    const { error } = await supabase
+      .from('user_bookmarks')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('scp_id', scpId)
+
+    if (error) {
+      return { error: error.message }
+    }
+  } else {
+    // Add bookmark
+    const { error } = await supabase
+      .from('user_bookmarks')
+      .insert({
+        user_id: user.id,
+        scp_id: scpId,
+      })
+
+    if (error) {
+      return { error: error.message }
+    }
+  }
+
+  revalidatePath(`/scp/${routeId}`, 'page')
+  revalidatePath('/saved', 'page')
+  return { success: true }
+}

@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card'
 import { Heading, Text } from '@/components/ui/typography'
 import { Icon } from '@/components/ui/icon'
-import { Link } from '@/components/ui/link'
+import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { CSSProperties } from 'react'
 
@@ -13,6 +13,7 @@ export interface ScpListItemProps {
   title: string
   rating: number
   isRead: boolean
+  isBookmarked: boolean
   href: string
   userId?: string | null  // For ReadToggleButton auth
   className?: string
@@ -24,6 +25,7 @@ export function ScpListItem({
   title,
   rating,
   isRead,
+  isBookmarked,
   href,
   userId,
   className,
@@ -58,24 +60,30 @@ export function ScpListItem({
 
   return (
     <Card
-      variant="bordered"
+      variant="interactive"
       accentBorder={isRead}
       padding="sm"
+      href={href}
       className={className}
     >
       <div style={rowStyle}>
         <div style={leftStyle}>
-          <Link href={href} variant="default" style={titleLinkStyle}>
-            <Heading level={4} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {title}
-            </Heading>
-          </Link>
+          <Heading level={4} style={titleLinkStyle}>
+            {title}
+          </Heading>
           <div style={metaStyle}>
             <Icon name="star" size="sm" className="text-[var(--color-text-secondary)]" />
             <Text variant="secondary" size="sm">{rating}</Text>
           </div>
         </div>
-        <div style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 'var(--spacing-1)', flexShrink: 0 }}>
+          <BookmarkButton
+            scpId={id}
+            scpRouteId={scpId}
+            isBookmarked={isBookmarked}
+            userId={userId ?? null}
+            size="sm"
+          />
           <ReadToggleButton
             scpId={id}
             isRead={isRead}

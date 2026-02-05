@@ -70,7 +70,7 @@ export function LoginForm() {
             {/* Header section */}
             <Stack direction="vertical" gap="normal" align="center">
               <Logo size="md" />
-              <Heading level={1}>SCP Continuum Tracker</Heading>
+              <Heading level={1}>SCP Reader</Heading>
               <Text variant="secondary">Sign in to track your reading progress</Text>
             </Stack>
 
