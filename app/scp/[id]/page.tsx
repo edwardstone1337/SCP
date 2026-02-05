@@ -3,6 +3,34 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { ScpReader } from './scp-reader'
 
+async function getAdjacentScps(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  series: string,
+  scpNumber: number
+) {
+  // Previous SCP (same series, lower number)
+  const { data: prev } = await supabase
+    .from('scps')
+    .select('scp_id, title')
+    .eq('series', series)
+    .lt('scp_number', scpNumber)
+    .order('scp_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // Next SCP (same series, higher number)
+  const { data: next } = await supabase
+    .from('scps')
+    .select('scp_id, title')
+    .eq('series', series)
+    .gt('scp_number', scpNumber)
+    .order('scp_number', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  return { prev, next }
+}
+
 async function getScpData(scpId: string, userId: string | undefined) {
   const supabase = await createClient()
 
@@ -52,10 +80,16 @@ export default async function ScpPage({
     notFound()
   }
 
+  const { prev, next } = await getAdjacentScps(
+    supabase,
+    scpData.series,
+    scpData.scp_number
+  )
+
   return (
     <>
       <Navigation />
-      <ScpReader scp={scpData} userId={user?.id} />
+      <ScpReader scp={scpData} userId={user?.id} prev={prev} next={next} />
     </>
   )
 }

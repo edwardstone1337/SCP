@@ -6,8 +6,7 @@ import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { PageHeader } from '@/components/ui/page-header'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { Stack } from '@/components/ui/stack'
-import { ScpListItem } from '@/components/ui/scp-list-item'
+import { ScpListWithToggle } from '@/components/ui/scp-list-with-toggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -104,18 +103,7 @@ export default async function RangeScpListPage({
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />
           <PageHeader title={formatRange(rangeStart)} />
-          <Stack direction="vertical" gap="tight">
-            {scps.map((scp) => (
-              <ScpListItem
-                key={scp.id}
-                scpId={scp.scp_id}
-                title={scp.title}
-                rating={scp.rating}
-                isRead={scp.is_read}
-                href={`/scp/${scp.scp_id}`}
-              />
-            ))}
-          </Stack>
+          <ScpListWithToggle scps={scps} isAuthenticated={!!user?.id} />
         </Container>
       </Main>
     </>

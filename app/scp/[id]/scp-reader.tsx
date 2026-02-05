@@ -4,12 +4,18 @@ import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { getRange, seriesToRoman } from '@/lib/utils/series'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Container } from '@/components/ui/container'
 import { Heading, Mono, Text } from '@/components/ui/typography'
 import { Main } from '@/components/ui/main'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Stack } from '@/components/ui/stack'
+
+interface AdjacentScp {
+  scp_id: string
+  title: string
+}
 
 interface ScpReaderProps {
   scp: {
@@ -24,9 +30,11 @@ interface ScpReaderProps {
     is_read: boolean
   }
   userId?: string
+  prev?: AdjacentScp | null
+  next?: AdjacentScp | null
 }
 
-export function ScpReader({ scp, userId }: ScpReaderProps) {
+export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
   const { data: content, isLoading, error: contentError } = useScpContent(
     scp.content_file,
     scp.scp_id
@@ -57,6 +65,22 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
         <Container size="lg">
           <Stack direction="vertical" gap="normal">
             <Breadcrumb items={breadcrumbItems} />
+            <Stack direction="horizontal" justify="between" align="center">
+              {prev ? (
+                <Button variant="secondary" size="sm" href={`/scp/${prev.scp_id}`}>
+                  ← Previous
+                </Button>
+              ) : (
+                <div />
+              )}
+              {next ? (
+                <Button variant="secondary" size="sm" href={`/scp/${next.scp_id}`}>
+                  Next →
+                </Button>
+              ) : (
+                <div />
+              )}
+            </Stack>
             <Stack direction="horizontal" justify="between" align="start" gap="loose">
               <Stack direction="vertical" gap="tight">
                 <Heading level={1}>{scp.title}</Heading>
@@ -129,12 +153,49 @@ export function ScpReader({ scp, userId }: ScpReaderProps) {
           )}
 
           {content && (
-            <Card padding="lg">
+            <>
+              <Card padding="lg">
+                <div
+                  className="scp-content"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
+                />
+              </Card>
               <div
-                className="scp-content"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
-              />
-            </Card>
+                style={{
+                  marginTop: 'var(--spacing-4)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <ReadToggleButton
+                  scpId={scp.id}
+                  isRead={scp.is_read}
+                  userId={userId ?? null}
+                  size="sm"
+                />
+              </div>
+              <Stack
+                direction="horizontal"
+                justify="between"
+                align="center"
+                style={{ marginTop: 'var(--spacing-4)' }}
+              >
+                {prev ? (
+                  <Button variant="secondary" size="sm" href={`/scp/${prev.scp_id}`}>
+                    ← Previous
+                  </Button>
+                ) : (
+                  <div />
+                )}
+                {next ? (
+                  <Button variant="secondary" size="sm" href={`/scp/${next.scp_id}`}>
+                    Next →
+                  </Button>
+                ) : (
+                  <div />
+                )}
+              </Stack>
+            </>
           )}
         </Container>
       </div>
