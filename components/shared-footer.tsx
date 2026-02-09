@@ -9,7 +9,7 @@ export function SharedFooter() {
       <Script
         src="https://footer.edwardstone.design/src/footer.js"
         type="module"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
     </>
   );

@@ -459,16 +459,14 @@ select:focus-visible {
   line-height: var(--line-height-lg);
 }
 
-/* Force all text in SCP content to use our theme colors (override API inline styles) */
-.scp-content,
-.scp-content * {
-  color: var(--color-text-primary) !important;
-}
-
 /* Restore link colors (override API inline styles) */
 .scp-content a {
   color: var(--color-accent) !important;
   text-decoration: underline;
+}
+
+.scp-content [style*="background"] {
+  color: #1a1a1a;
 }
 
 .scp-content a:hover {
