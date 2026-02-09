@@ -2,7 +2,7 @@
 
 Component library inventory derived from existing pages (Home, Range List, SCP List), design tokens in `app/globals.css`, and shared UI patterns. Use this to build components systematically.
 
-**Design tokens (reference):** Red scale (`--color-red-1`–`10`), Grey scale (`--color-grey-1`–`10`), semantic `--color-background`, `--color-text-primary`, `--color-text-secondary`, `--color-accent`, `--color-accent-hover`. Typography: Roboto / Roboto Mono, sizes `xs`–`5xl`.
+**Design tokens (reference):** Red scale (`--color-red-1`–`10`), Grey scale (`--color-grey-1`–`10`), semantic `--color-background`, `--color-text-primary`, `--color-text-secondary`, `--color-accent`, `--color-accent-hover`. Typography: Roboto / Roboto Mono, sizes `xs`–`5xl`. Motion tokens: `--transition-fast|base|slow`, `--animation-fade-in|fade-out|slide-up|slide-down`.
 
 ---
 
@@ -17,13 +17,13 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 - `variant` (string, optional) — `'primary' | 'secondary' | 'ghost' | 'danger' | 'success'`. Default: `'primary'`.
 - `size` (string, optional) — `'sm' | 'md' | 'lg'`. Default: `'md'`.
 - `disabled` (boolean, optional) — disables button.
-- `fullWidth` (boolean, optional) — full width (e.g. Login “Send Magic Link”).
+- `fullWidth` (boolean, optional) — full width (e.g. SignInPanel “Send Access Link”).
 - `type` (string, optional) — `'button' | 'submit' | 'reset'`. Default: `'button'`.
 - `children` (ReactNode, required) — label/content.
 - `onClick` (function, optional) — click handler.
 - `className` (string, optional) — extra classes.
 
-**Used in:** Login (Send Magic Link, Back to home), Navigation (Sign In, Sign Out), SCP Reader (Back, Mark as Read), 404 (Return to Archive, Home).
+**Used in:** SignInPanel (Send Access Link), Navigation (Sign In, Sign Out, Menu), SCP Reader (Save, Mark as Read), 404 (Return to Archive, Home).
 
 **Example usage:**
 
@@ -50,7 +50,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 - `children` (ReactNode, required).
 - `className` (string, optional).
 
-**Used in:** Home (series grid cards), Range List (Back, range links), SCP List (Back, SCP links), Navigation, Login (Back to home), breadcrumbs.
+**Used in:** Home (series grid cards), Range List (Back, range links), SCP List (Back, SCP links), Navigation, Recently Viewed links, breadcrumbs.
 
 **Example usage:**
 
@@ -235,13 +235,13 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 - `scpId` (string, required) — database UUID for bookmark operations.
 - `scpRouteId` (string, required) — text id for route/revalidation (e.g. `SCP-173`).
 - `isBookmarked` (boolean, required).
-- `userId` (string | null, required) — when null, click redirects to login with return URL.
+- `userId` (string | null, required) — when null, click opens sign-in modal.
 - `size` (string, optional) — `'sm' | 'md'`. Default: `'md'`.
 - `onToggle` (function, optional) — callback after successful toggle.
 
 **Used in:** SCP Reader (header + below content), ScpListItem.
 
-**Behavior:** Optimistic update; on error reverts and logs. Full-page redirect to `/login?redirect=...` when unauthenticated. Uses `stopPropagation` when nested in clickable cards.
+**Behavior:** Optimistic update; on error reverts and logs. Unauthenticated click opens `SignInPanel` in modal with `redirectTo` set to current location (`pathname + search + hash`). Uses `stopPropagation` when nested in clickable cards.
 
 **Dependencies:** Button, Icon (bookmark/bookmark-filled), `toggleBookmarkStatus` server action.
 
@@ -255,14 +255,14 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 
 - `scpId` (string, required) — database UUID.
 - `isRead` (boolean, required).
-- `userId` (string | null, required) — when null, click redirects to login.
+- `userId` (string | null, required) — when null, click opens sign-in modal.
 - `routeId` (string, optional) — text id (e.g. `SCP-173`) for revalidating current SCP page so reader badge updates.
 - `size` (string, optional) — `'sm' | 'md'`. Default: `'sm'`.
 - `onToggle` (function, optional).
 
 **Used in:** SCP Reader (header + below content), ScpListItem.
 
-**Behavior:** Optimistic toggle; Server Action `toggleReadStatus(scpUuid, currentStatus, routeId?)`; revalidates `/` and when `routeId` provided the reader page. Redirects to login when unauthenticated. `stopPropagation` when nested.
+**Behavior:** Optimistic toggle; Server Action `toggleReadStatus(scpUuid, currentStatus, routeId?)`; revalidates `/` and when `routeId` provided the reader page. Unauthenticated click opens `SignInPanel` in modal with `redirectTo` set to current location (`pathname + search + hash`). `stopPropagation` when nested.
 
 **Dependencies:** Button, Text, `toggleReadStatus` server action.
 
@@ -365,6 +365,43 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 
 ---
 
+### Modal
+
+**Variants:** size `sm` / `md` / `lg`; open and closing animation states.
+
+**Props:**
+
+- `isOpen` (boolean, required).
+- `onClose` (() => void, required) — backdrop click and Escape trigger this.
+- `children` (ReactNode, required).
+- `size` (`'sm' | 'md' | 'lg'`, optional) — default `'md'`.
+- `ariaLabel` (string, required).
+
+**Used in:** Rendered internally by `ModalProvider` for app-wide dialogs.
+
+**Usage pattern:** Consumers do **not** mount `Modal` directly. Use `useModal()` from the provider to open/close modal content.
+
+**Behavior:** Focus trap cycles Tab/Shift+Tab within dialog, focuses first focusable element on open, restores focus to opener on close, closes on Escape, locks body scroll while mounted, uses tokenized backdrop/panel styles and reusable animation tokens.
+
+**Token dependencies:** `--z-modal`, `--color-background`, `--color-surface`, `--color-surface-border`, `--radius-card`, `--spacing-card-padding`, `--spacing-page-padding`, `--shadow-elevated`, `--animation-fade-in`, `--animation-fade-out`, `--animation-slide-up`, `--animation-slide-down`.
+
+---
+
+### ModalProvider / useModal
+
+**Location:** `components/ui/modal-provider.tsx`.
+
+**Provider role:** Holds open/close state and modal content; mounts a single shared `Modal` instance at app root.
+
+**Hook API:**
+
+- `openModal(content: ReactNode, ariaLabel: string): void`
+- `closeModal(): void`
+
+**Wiring:** Provider is mounted in root layout so any client component can call `useModal()`.
+
+---
+
 ### PageHeader
 
 **Variants:** with back link, with badge, simple (title + description).
@@ -456,7 +493,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 
 **Used in:** Home (below series grid).
 
-**Behavior:** Guest: "Recently Viewed" heading + "Sign in to track your reading history." + Sign In button. Authenticated empty: "Articles you read will appear here." Authenticated with items: list of links (Card, interactive) to each SCP.
+**Behavior:** Guest: "Recently Viewed" heading + "Sign in to track your reading history." + Sign In link. With JS enabled, click opens sign-in modal (`SignInPanel`) and preserves current location (`pathname + search + hash`). Without JS, link falls back to `/login?redirect=...` with pathname/query preserved. Authenticated empty: "Articles you read will appear here." Authenticated with items: list of links (Card, interactive) to each SCP.
 
 **Dependencies:** Stack, Card, Link, Text, Mono, Button.
 
@@ -594,6 +631,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 **Behavior:**
 
 - Top-right controls appear on all viewports: `Sign In` (primary) when logged out, `Sign Out` (secondary) when logged in, and `Menu` (secondary) always.
+- Logged-out `Sign In` is an anchor (`/login?redirect=...`) with JS interception that opens `SignInPanel` in modal; no-JS users still navigate to `/login`.
 - Desktop uses a right-side drawer with backdrop and shadow depth; mobile uses full-screen overlay.
 - Menu contents: Series I–X links in a two-column grid (tighter spacing), Saved (when authenticated), account email.
 - Active state: current route highlighted with accent color and `aria-current="page"`; series sub-routes (e.g. `/series/series-3/200`) highlight the parent series link.
@@ -614,7 +652,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 
 ---
 
-## Form (Login / future)
+## Form (Auth / future)
 
 ### Input
 
@@ -632,7 +670,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 - `error` (string, optional).
 - `className` (string, optional).
 
-**Used in:** Login (email).
+**Used in:** SignInPanel (clearance email input).
 
 **Example usage:**
 
@@ -653,7 +691,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 - `type` (string, required) — `'success' | 'error'`.
 - `children` (ReactNode, required).
 
-**Used in:** Login (magic link sent / error).
+**Used in:** Components test page (success/error examples).
 
 **Example usage:**
 
@@ -662,6 +700,30 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 ```
 
 **Dependencies:** None.
+
+---
+
+### SignInPanel
+
+**Variants:** `context="page"` (standalone route layout) and `context="modal"` (inline panel for Modal body).
+
+**Props:**
+
+- `redirectTo` (string, optional) — post-auth destination passed through callback `next` param. Default: `'/'`.
+- `context` (`'modal' | 'page'`, optional) — default `'modal'`.
+
+**Used in:** Login page (`/login`) via `context="page"`; auth triggers in navigation, bookmark/read actions, and recently viewed via `context="modal"`.
+
+**Behavior:** Renders SCP-themed conversion copy with three value bullets, magic-link form, inline error state, submit loading state, trust line, and success confirmation state. Preserves callback construction: `SITE_URL/auth/callback?next=<redirectTo>`.
+
+**Copy reference:**
+
+- Heading: `Request Archive Access`
+- Subtext: `Verify your identity to unlock your personal archive terminal.`
+- CTA: `Send Access Link`
+- Success: `Access link dispatched. Check your inbox to verify your clearance.`
+
+**Token dependencies:** `--color-text-primary`, `--color-text-secondary`, `--color-red-7`, `--font-size-*`, `--line-height-*`, `--spacing-*`, `--radius-card`, `--color-surface`, `--color-surface-border`.
 
 ---
 

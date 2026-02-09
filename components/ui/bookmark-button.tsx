@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
+import { useModal } from '@/components/ui/modal-provider'
+import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { toggleBookmarkStatus } from '@/app/scp/[id]/actions'
 import { logger } from '@/lib/logger'
 
@@ -25,7 +27,7 @@ export function BookmarkButton({
   onToggle,
 }: BookmarkButtonProps) {
   const router = useRouter()
-  const pathname = usePathname()
+  const { openModal } = useModal()
   const [optimisticBookmarked, setOptimisticBookmarked] = useState(isBookmarked)
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,7 +44,14 @@ export function BookmarkButton({
     e.preventDefault()
     e.stopPropagation()
     if (!userId) {
-      window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`
+      const redirectTo =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+          : '/'
+      openModal(
+        <SignInPanel context="modal" redirectTo={redirectTo} />,
+        'Request Archive Access'
+      )
       return
     }
 

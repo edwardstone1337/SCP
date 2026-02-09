@@ -176,6 +176,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 4. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
 
 **Protected routes:** Only `/saved` is protected; unauthenticated users are redirected to `/login?redirect=/saved`.
+For protected client actions (nav Sign In, bookmark, mark-as-read, recently viewed sign-in), JS opens the sign-in modal and preserves current location as `pathname + search + hash`; non-JS users still fall back to `/login?redirect=...`.
 
 ---
 
@@ -218,7 +219,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 ### Z-Index
 
-- **Scale:** `--z-base`, `--z-dropdown`, `--z-sticky`, `--z-overlay`, `--z-nav`, `--z-modal`, `--z-toast`. Nav bar uses `--z-nav`; full-screen nav overlay uses `--z-overlay`.
+- **Scale:** `--z-base`, `--z-dropdown`, `--z-sticky`, `--z-overlay`, `--z-nav`, `--z-modal`, `--z-toast`, `--z-skip-link`. Nav bar uses `--z-nav`; full-screen nav overlay uses `--z-overlay`; skip link remains the highest layer for accessibility.
 
 ### Component Hierarchy
 
@@ -233,7 +234,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 |-----------|-------------|
 | `back-to-top` | Fixed button after scroll threshold; smooth scroll to top. |
 | `badge` | Badge variants: default, accent, progress. |
-| `bookmark-button` | Save/Saved toggle; optimistic update; on error revert + logger; full-page redirect to login if not authenticated. |
+| `bookmark-button` | Save/Saved toggle; optimistic update; on error revert + logger; opens sign-in modal when unauthenticated (preserves current location). |
 | `breadcrumb` | Breadcrumb trail (e.g. Series → Series I → 001–099 → SCP-173). |
 | `button` | Variants: primary, secondary, ghost, danger, success; sizes sm/md/lg; supports href; forwardRef. |
 | `card` | Container; variants default, interactive, bordered; optional accentBorder. |
@@ -252,14 +253,14 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `progress-ring` | Circular progress (percentage). |
 | `progress-text` | Percentage or "read / total" text. |
 | `range-list-item` | Range row with progress ring, link. |
-| `read-toggle-button` | Mark as Read/Unread; optional routeId for reader revalidation; optimistic update; login redirect when needed. |
+| `read-toggle-button` | Mark as Read/Unread; optional routeId for reader revalidation; optimistic update; opens sign-in modal when unauthenticated (preserves current location). |
 | `recently-viewed-section` | Recently Viewed block: last 5 SCPs for auth users; zero states for guests ("Sign in to track your reading history") and new users ("Articles you read will appear here"). |
 | `scp-list-item` | SCP row: title, rating, id, read/bookmark toggles, full-card link. |
 | `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem. |
 | `select` | Native select styled with design tokens. |
 | `series-card` | Series card with progress, link to series. |
 | `skeleton` | Tokenized dark-theme shimmer placeholder with reduced-motion support. |
-| `skip-link` | Accessibility skip-to-content link; off-screen until focus (top: -9999px); spacing tokens. |
+| `skip-link` | Accessibility skip-to-content link; off-screen until focus (top: -9999px); spacing tokens; highest layer via `--z-skip-link`. |
 | `spinner` | Loading spinner. |
 | `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose. |
 | `text` | Text with variant/size. |
@@ -416,8 +417,7 @@ app/
 │   ├── callback/route.ts    # Magic link code exchange
 │   └── error/client.tsx, page.tsx
 ├── login/
-│   ├── login-form.tsx       # Client form (OTP)
-│   └── page.tsx
+│   └── page.tsx             # Login route; renders SignInPanel (page context)
 ├── saved/
 │   ├── saved-list.tsx       # Client list + sort
 │   ├── page.tsx, loading.tsx

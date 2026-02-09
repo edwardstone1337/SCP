@@ -41,7 +41,7 @@ async function assertLoginPage() {
   }
 
   const html = await response.text()
-  if (!html.includes('Sign in with Magic Link')) {
+  if (!html.includes('Request Archive Access')) {
     throw new Error('/login does not contain expected sign-in content')
   }
 }
@@ -65,7 +65,7 @@ async function assertSavedRedirectsToLogin() {
     const html = await response.text()
     const resolvedPath = new URL(response.url).pathname
     const looksLikeLogin =
-      html.includes('Sign in with Magic Link') ||
+      html.includes('Request Archive Access') ||
       html.includes('/login?redirect=/saved') ||
       html.includes('/login?redirect=%2Fsaved')
     const leakedSavedContent = html.includes('Saved Articles')
@@ -100,7 +100,7 @@ async function assertCallbackRedirectsToLoginError() {
   if (response.status === 200) {
     const html = await response.text()
     const looksLikeLogin =
-      html.includes('Sign in with Magic Link') ||
+      html.includes('Request Archive Access') ||
       html.includes('/login?error=') ||
       html.includes('Could not verify magic link')
 

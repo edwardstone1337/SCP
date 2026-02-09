@@ -21,17 +21,19 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 
 | Current text | Location | Recommendation | If Change: proposed |
 |--------------|----------|----------------|----------------------|
-| SCP Reader | `app/login/login-form.tsx` (H1) | **Keep** | — |
-| Sign in to track your reading progress | `app/login/login-form.tsx` (subheading) | **Keep** | — |
-| Sign in with Magic Link | `app/login/login-form.tsx` (H2) | **Keep** | — |
-| Email address | `app/login/login-form.tsx` (Label) | **Keep** | — |
-| you@example.com | `app/login/login-form.tsx` (placeholder) | **Keep** | — |
-| Send Magic Link | `app/login/login-form.tsx` (button) | **Keep** | — |
-| No password required. We'll send you a secure link to sign in. | `app/login/login-form.tsx` (footer text) | **Keep** | — |
-| ← Back to home | `app/login/login-form.tsx` (button) | **Keep** | — |
-| Check your email for the magic link! | `app/login/login-form.tsx` (success message) | **Keep** | — |
-| (error.message from Supabase) | `app/login/login-form.tsx` (error from API) | **Keep** (system message) | — |
-| An unexpected error occurred. Please try again. | `app/login/login-form.tsx` (catch block) | **Keep** | — |
+| Request Archive Access | `components/ui/sign-in-panel.tsx` (heading) | **Keep** | — |
+| Verify your identity to unlock your personal archive terminal. | `components/ui/sign-in-panel.tsx` (subheading) | **Keep** | — |
+| Track your reading progress across all series | `components/ui/sign-in-panel.tsx` (value bullet) | **Keep** | — |
+| Bookmark SCPs for later review | `components/ui/sign-in-panel.tsx` (value bullet) | **Keep** | — |
+| Access your recently viewed files | `components/ui/sign-in-panel.tsx` (value bullet) | **Keep** | — |
+| Clearance Email | `components/ui/sign-in-panel.tsx` (label) | **Keep** | — |
+| you@example.com | `components/ui/sign-in-panel.tsx` (placeholder) | **Keep** | — |
+| Send Access Link | `components/ui/sign-in-panel.tsx` (CTA button) | **Keep** | — |
+| No password required. A one-time secure link will be sent to your inbox. | `components/ui/sign-in-panel.tsx` (trust line) | **Keep** | — |
+| Access link dispatched. Check your inbox to verify your clearance. | `components/ui/sign-in-panel.tsx` (success message) | **Keep** | — |
+| Enter a valid clearance email to continue. | `components/ui/sign-in-panel.tsx` (client validation) | **Keep** | — |
+| (error.message from Supabase) | `components/ui/sign-in-panel.tsx` (error from API) | **Keep** (system message) | — |
+| Unable to dispatch access link. Please try again. | `components/ui/sign-in-panel.tsx` (catch block) | **Keep** | — |
 | (getLoadingMessage('auth')) | `app/login/page.tsx` (Suspense fallback) | **Change** | See **Loading messages** section below. |
 | Authentication Error | `app/auth/error/client.tsx` (H2) | **Keep** | — |
 | An authentication error occurred | `app/auth/error/client.tsx` (default error text) | **Keep** | — |
@@ -101,9 +103,9 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 | Retry | `app/scp/[id]/scp-reader.tsx` (recovery button) | **Keep** | — |
 | Open Original Article | `app/scp/[id]/scp-reader.tsx` (fallback link) | **Keep** | — |
 | Content is not available for this entry. | `app/scp/[id]/scp-reader.tsx` (no content_file) | **Keep** | — |
-| (error from toggleReadStatus) e.g. "Not authenticated", Supabase errors | `components/ui/read-toggle-button.tsx` (displayed in alert) | **Keep** (system) | Consider user-friendly override for "Not authenticated": e.g. "Sign in to track progress." (currently user is redirected to login, so this may rarely show.) |
+| (error from toggleReadStatus) e.g. "Not authenticated", Supabase errors | `components/ui/read-toggle-button.tsx` (displayed in alert) | **Keep** (system) | Consider user-friendly override for "Not authenticated": e.g. "Sign in to track progress." (currently modal opens before action for guests, so this may rarely show.) |
 | Failed to update read status | `components/ui/read-toggle-button.tsx` (catch fallback) | **Keep** | — |
-| (result.error from toggleBookmarkStatus) | `components/ui/bookmark-button.tsx` | **Keep** (system) | Same as read: optional friendly override for "Not authenticated." |
+| (result.error from toggleBookmarkStatus) | `components/ui/bookmark-button.tsx` | **Keep** (system) | Same as read: optional friendly override for "Not authenticated." (modal opens before action for guests). |
 
 ---
 
@@ -151,6 +153,6 @@ All in `lib/utils/loading-messages.ts`. Principle: themed but still understandab
 - **Loading messages:** Themed but clearly loading; **Keep** unless you want to add a fallback like "Loading..." for stricter accessibility.
 - **Optional tweaks (only if you want):**
   - "All articles in this range have been read! 🎉" → drop the emoji for a more serious tone.
-  - Auth error fallback on Read/Bookmark: show "Sign in to track progress" / "Sign in to save" instead of raw "Not authenticated" when that's the cause (if those errors are ever shown in UI; currently redirect may prevent it).
+  - Auth error fallback on Read/Bookmark: show "Sign in to track progress" / "Sign in to save" instead of raw "Not authenticated" when that's the cause (if those errors are ever shown in UI; currently modal gating may prevent it).
 
 No changes are strictly required for clarity; the inventory is ready for a light copy pass or theming refinements.

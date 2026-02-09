@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { Suspense } from 'react'
-import { LoginForm } from './login-form'
+import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { Main } from '@/components/ui/main'
 import { Stack } from '@/components/ui/stack'
 import { Text } from '@/components/ui/typography'
@@ -10,7 +10,16 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getLoadingMessage } from '@/lib/utils/loading-messages'
 
-export default function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{ redirect?: string | string[] }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const resolvedSearchParams = await searchParams
+  const redirectParam = Array.isArray(resolvedSearchParams.redirect)
+    ? resolvedSearchParams.redirect[0]
+    : resolvedSearchParams.redirect
+
   return (
     <Suspense fallback={
       <Main>
@@ -30,7 +39,7 @@ export default function LoginPage() {
         </Stack>
       </Main>
     }>
-      <LoginForm />
+      <SignInPanel context="page" redirectTo={redirectParam || '/'} />
     </Suspense>
   )
 }

@@ -4,6 +4,8 @@ import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { SkipLink } from "@/components/ui/skip-link";
 import { Navigation } from "@/components/navigation";
+import { ModalProvider } from "@/components/ui/modal-provider";
+import { SharedFooter } from "@/components/shared-footer";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -33,9 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
       <body>
-        <SkipLink />
-        <Navigation />
-        <QueryProvider>{children}</QueryProvider>
+        <ModalProvider>
+          <SkipLink />
+          <Navigation />
+          <QueryProvider>{children}</QueryProvider>
+          <SharedFooter />
+        </ModalProvider>
       </body>
     </html>
   );

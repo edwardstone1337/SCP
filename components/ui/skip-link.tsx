@@ -12,7 +12,7 @@ export function SkipLink() {
     color: 'var(--color-text-primary)',
     fontWeight: 700,
     borderRadius: 'var(--radius-md)',
-    zIndex: 9999,
+    zIndex: 'var(--z-skip-link)',
     transition: 'top 0.2s',
   }
 

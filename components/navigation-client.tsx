@@ -1,13 +1,16 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import NextLink from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Text } from '@/components/ui/typography'
+import { useModal } from '@/components/ui/modal-provider'
+import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { signOut } from '@/app/actions/auth'
 import { seriesToRoman } from '@/lib/utils/series'
 
@@ -37,17 +40,44 @@ const paddingStyles: React.CSSProperties = {
   paddingRight: 'var(--spacing-page-padding)',
 }
 
+const signInLinkStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '44px',
+  fontWeight: 700,
+  fontFamily: 'var(--font-family-sans)',
+  transition: 'all var(--transition-base)',
+  cursor: 'pointer',
+  textDecoration: 'none',
+  borderWidth: 'var(--border-width-normal)',
+  borderStyle: 'solid',
+  backgroundColor: 'var(--color-accent)',
+  color: 'var(--color-text-primary)',
+  borderColor: 'var(--color-accent)',
+  fontSize: 'var(--font-size-base)',
+  paddingLeft: 'var(--spacing-3)',
+  paddingRight: 'var(--spacing-3)',
+  paddingTop: 'var(--spacing-1)',
+  paddingBottom: 'var(--spacing-1)',
+  borderRadius: 'var(--radius-button)',
+}
+
 interface NavigationClientProps {
   user: { email?: string } | null
 }
 
 export function NavigationClient({ user }: NavigationClientProps) {
+  const { openModal } = useModal()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const isSaved = pathname === '/saved'
+  const queryString = searchParams.toString()
+  const redirectPath = `${pathname}${queryString ? `?${queryString}` : ''}`
   const signInHref =
     pathname === '/login'
       ? '/login'
-      : `/login?redirect=${encodeURIComponent(pathname)}`
+      : `/login?redirect=${encodeURIComponent(redirectPath)}`
 
   const [isOpen, setIsOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
@@ -56,6 +86,24 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
   const closeOverlay = () => setIsOpen(false)
   const toggleOverlay = () => setIsOpen((open) => !open)
+  const openSignInModal = () => {
+    const redirectTo =
+      typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+        : redirectPath || '/'
+    openModal(
+      <SignInPanel context="modal" redirectTo={redirectTo} />,
+      'Request Archive Access'
+    )
+  }
+
+  const handleSignInClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return
+    }
+    event.preventDefault()
+    openSignInModal()
+  }
 
   const isActiveSeriesPage = (seriesId: string) => pathname.startsWith(`/series/${seriesId}`)
 
@@ -110,9 +158,14 @@ export function NavigationClient({ user }: NavigationClientProps) {
                     </Button>
                   </form>
                 ) : (
-                  <Button href={signInHref} variant="primary" size="md">
+                  <NextLink
+                    href={signInHref}
+                    onClick={handleSignInClick}
+                    style={signInLinkStyle}
+                    data-variant="primary"
+                  >
                     Sign In
-                  </Button>
+                  </NextLink>
                 )}
                 <Button
                   ref={menuButtonRef}

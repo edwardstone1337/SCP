@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Text } from '@/components/ui/typography'
+import { useModal } from '@/components/ui/modal-provider'
+import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { toggleReadStatus } from '@/app/scp/[id]/actions'
 import { logger } from '@/lib/logger'
 
@@ -26,6 +28,7 @@ export function ReadToggleButton({
   onToggle,
 }: ReadToggleButtonProps) {
   const router = useRouter()
+  const { openModal } = useModal()
   const [optimisticIsRead, setOptimisticIsRead] = useState(isRead)
   const [error, setError] = useState<string | null>(null)
   const [isPending, setIsPending] = useState(false)
@@ -42,8 +45,14 @@ export function ReadToggleButton({
     e.preventDefault()
     e.stopPropagation()
     if (userId === null) {
-      const returnUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname) : ''
-      window.location.href = `/login?redirect=${returnUrl}`
+      const redirectTo =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+          : '/'
+      openModal(
+        <SignInPanel context="modal" redirectTo={redirectTo} />,
+        'Request Archive Access'
+      )
       return
     }
 
