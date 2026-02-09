@@ -46,8 +46,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/series` | Redirects to `/` | — |
 | `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) | Public |
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
-| `/scp/[id]` | SCP reader (content via internal proxy route, prev/next, bookmark/read) | Public (toggles require login) |
-| `/api/scp-content/[contentFile]` | Internal SCP content proxy (timeout + cache) | Internal |
+| `/scp/[id]` | SCP reader (content via direct SCP-Data API fetch, prev/next, bookmark/read) | Public (toggles require login) |
 | `/saved` | Bookmarked SCPs with sort | **Protected** (redirects to login) |
 | `/login` | Magic-link login form | Public (redirects to `/` if already logged in) |
 | `/auth/callback` | OAuth/magic-link callback; exchanges code for session | Internal |
@@ -73,7 +72,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 ```
 
 - **Metadata (series, ranges, list):** Server Components read from Supabase (anon key, RLS). Guest users get `read=0`; authenticated get real progress/bookmarks.
-- **Article content:** Server passes `content_file` to client; `useScpContent` fetches `/api/scp-content/{contentFile}`. This proxy route forwards to `scp-data.tedivm.com`, applies timeout/error mapping, and returns cacheable responses; TanStack Query caches client-side (1h stale, 24h gc) with retry/backoff.
+- **Article content:** Server passes `content_file` to client; `useScpContent` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`. TanStack Query caches client-side (1h stale, 24h gc) with retry/backoff.
 - **Mutations:** Bookmark and read toggles call Server Actions; actions use Supabase server client (cookies), then `revalidatePath()` so the next request gets fresh data.
 
 ---
@@ -172,7 +171,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 1. **Login:** User visits `/login`, enters email. Client calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Supabase sends magic link to email.
 2. **Callback:** User clicks link → `/auth/callback?code=...&next=...`. Route handler creates server Supabase client, calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`). On failure, redirects to `/login?error=...`.
-3. **Session:** `proxy.ts` runs on each request; uses `@supabase/ssr` to read/set cookies and refresh session. Authenticated user on `/login` is redirected to `/`.
+3. **Session:** No middleware. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated. Authenticated users on `/login` are redirected in the callback flow (no middleware).
 4. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
 
 **Protected routes:** Only `/saved` is protected; unauthenticated users are redirected to `/login?redirect=/saved`.
@@ -266,7 +265,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `text` | Text with variant/size. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — server component; fetches user, renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, top-right auth action and Menu button on all viewports (`Sign In` primary when logged out, `Sign Out` secondary when logged in, `Menu` secondary always). Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay lists Series I–X (two-column grid), Saved (auth), and account email; active series/saved routes are highlighted with `aria-current="page"`.
+**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, top-right auth action and Menu button on all viewports (`Sign In` primary when logged out, `Sign Out` secondary when logged in, `Menu` secondary always). Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay lists Series I–X (two-column grid), Saved (auth), and account email; active series/saved routes are highlighted with `aria-current="page"`.
 
 ---
 
@@ -306,7 +305,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 ### Content Loading
 
 - **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. If `content_file` is null, reader shows "Content is not available."
-- **Body:** Client `useScpContent(contentFile, scpId)` fetches `/api/scp-content/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient network/upstream failures.
+- **Body:** Client `useScpContent(contentFile, scpId)` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient failures.
 - **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-only) then `dangerouslySetInnerHTML` in a div with class `scp-content` (prose styles in globals.css).
 - **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback).
 
@@ -364,12 +363,59 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 
 ---
 
-## Performance Considerations
+## Performance & Cost Architecture
 
-### Caching
+> ⚠️ **CRITICAL: Read this before changing data fetching or rendering strategy on any page.**
+>
+> This architecture was designed to keep Vercel costs near-zero regardless of traffic. Regressions can cause runaway bandwidth bills — the original server-rendered architecture generated 32 GB of origin transfer in 2 days from a single user.
+
+### Principles
+
+1. **Never proxy public API content through serverless functions.** SCP article content is fetched directly by the browser from `scp-data.tedivm.com`. Routing it through Vercel functions multiplies origin transfer by the number of visitors.
+
+2. **Never use the server Supabase client (`lib/supabase/server`) in page components.** It calls `cookies()` from `next/headers`, which forces dynamic rendering and bypasses ISR caching. Use `lib/supabase/static` for public data instead.
+
+3. **Never add `export const dynamic = 'force-dynamic'` to public pages.** This disables caching and causes every visit to invoke a serverless function.
+
+4. **User-specific data must be hydrated client-side.** Server components fetch public data only (via static client). Client wrapper components check auth and fetch user progress/bookmarks after mount.
+
+### How it works
+
+| Layer | What | Cost model |
+|-------|------|-----------|
+| Edge CDN | Serves cached HTML for all public pages | Included in plan — scales free with traffic |
+| ISR revalidation | Rebuilds a page when visited after cache expiry | One function invocation per page per revalidation period |
+| Client hydration | Browser fetches user-specific data from Supabase | Direct to Supabase — no Vercel cost |
+| SCP content | Browser fetches article HTML from SCP-Data API | Direct to upstream — no Vercel cost |
+
+### ISR configuration
+
+| Route | Revalidate | Client hydration component |
+|-------|-----------|--------------------------|
+| `/` | 300 (5 min) | `app/home-content.tsx` |
+| `/series/[seriesId]` | 86400 (24h) | `app/series/[seriesId]/series-content.tsx` |
+| `/series/[seriesId]/[range]` | 86400 (24h) | `app/series/[seriesId]/[range]/range-content.tsx` |
+| `/scp/[id]` | 86400 (24h) | `app/scp/[id]/scp-content.tsx` |
+
+### The pattern (for new pages)
+
+1. Page server component uses `createStaticClient()` from `lib/supabase/static`
+2. Fetches only public data, passes to a `'use client'` content component
+3. Content component checks auth on mount, fetches user data if logged in
+4. Set `export const revalidate = 86400` (or appropriate interval)
+5. Never import from `lib/supabase/server` in page components
+
+### Things that will break this and cost real money
+
+- Adding `export const dynamic = 'force-dynamic'` to any cached page
+- Importing `lib/supabase/server` (calls `cookies()`, forces dynamic)
+- Creating API routes that proxy external content
+- Calling `headers()` or `cookies()` in page server components
+
+### Caching (TanStack Query & revalidation)
 
 - **TanStack Query (QueryProvider):** Default `staleTime: 60_000`, `gcTime: 5 * 60_000`. Content hook overrides: `staleTime: 1h`, `gcTime: 24h`.
-- **Next.js:** Dynamic routes use `export const dynamic = 'force-dynamic'`. Revalidation via `revalidatePath()` after bookmark/read actions.
+- **Next.js:** Revalidation via `revalidatePath()` after bookmark/read actions. `/saved` uses `dynamic = 'force-dynamic'`.
 
 ### Parallel Data Loading
 
@@ -411,8 +457,6 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 app/
 ├── actions/
 │   └── auth.ts              # signOut server action
-├── api/
-│   └── scp-content/[contentFile]/route.ts  # Proxies SCP-Data with timeout + cache headers
 ├── auth/
 │   ├── callback/route.ts    # Magic link code exchange
 │   └── error/client.tsx, page.tsx
@@ -423,34 +467,37 @@ app/
 │   ├── page.tsx, loading.tsx
 ├── scp/[id]/
 │   ├── actions.ts           # toggleReadStatus, toggleBookmarkStatus, recordView
-│   ├── page.tsx             # Server: metadata + adjacent
+│   ├── page.tsx             # Server: metadata + adjacent (createStaticClient)
+│   ├── scp-content.tsx      # Wrapper; passes scp/prev/next to ScpReader
 │   ├── scp-reader.tsx       # Client: content + toggles
 │   └── loading.tsx
 ├── series/
 │   ├── page.tsx             # Redirect to /
-│   ├── [seriesId]/page.tsx  # Range list
-│   ├── [seriesId]/[range]/page.tsx  # SCP list
+│   ├── [seriesId]/page.tsx, series-content.tsx  # Range list (static client)
+│   ├── [seriesId]/[range]/page.tsx, range-content.tsx  # SCP list (static client)
 │   └── [seriesId]/loading.tsx, [seriesId]/[range]/loading.tsx
 ├── components-test/page.tsx
 ├── layout.tsx               # Fonts, QueryProvider, SkipLink, Navigation
 ├── globals.css               # @theme, tokens, .scp-content
-├── page.tsx                 # Home (themed header, Daily Featured, series grid, Recently Viewed)
+├── home-content.tsx         # Client: series grid, Daily Featured, Recently Viewed (auth-aware)
+├── page.tsx                 # Home server (createStaticClient; series + daily → HomeContent)
 ├── loading.tsx              # Root route loading state
 └── not-found.tsx            # 404
 
 components/
 ├── ui/                      # Design system (see Component Library table; includes daily-featured-section, recently-viewed-section, skeleton)
-├── navigation.tsx           # Server nav wrapper (getUser, renders NavigationClient)
+├── navigation.tsx           # Client nav (getUser, onAuthStateChange, renders NavigationClient)
 └── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 
 lib/
 ├── supabase/client.ts       # Browser client (anon)
 ├── supabase/server.ts       # Server client (cookies, env)
+├── supabase/static.ts       # createStaticClient (no cookies; static/ISR pages)
 ├── env.ts                   # Server env validation
 ├── hooks/
 │   ├── use-content-links.ts # In-article link interception (SCP→client nav, external→new tab, wiki→rewrite)
 │   ├── use-footnotes.ts     # Footnote tooltip handlers (refs ↔ footnote-N)
-│   └── use-scp-content.ts   # TanStack Query content fetch via internal proxy route
+│   └── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
 ├── providers/query-provider.tsx
 ├── utils/cn.ts, daily-scp.ts, loading-messages.ts, sanitize.ts, series.ts, site-url.ts
 └── logger.ts

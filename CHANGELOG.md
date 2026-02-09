@@ -3,6 +3,22 @@
 All notable changes to SCP Reader are documented here.
 
 ## [Unreleased]
+### Changed
+- SCP/series/home pages use static Supabase client (`createStaticClient`) for server data; auth-specific data (progress, recently viewed) fetched client-side where needed
+- Navigation: auth state resolved client-side via `getUser` + `onAuthStateChange`; layout wraps Navigation in `Suspense` for loading
+- SCP content: client fetches directly from SCP-Data API (`scp-data.tedivm.com`); internal proxy route removed
+
+### Performance
+- Removed SCP content proxy (`/api/scp-content/[contentFile]`); browser fetches directly from SCP-Data API, eliminating ~70% of Vercel origin transfer
+- Converted Navigation from server to client component; auth via `getUser()` + `onAuthStateChange()` in `useEffect`
+- Created `lib/supabase/static.ts` — cookie-free Supabase client for public data (avoids `cookies()` which forces dynamic rendering)
+- Homepage (`/`) converted to ISR with `revalidate = 300`; user data hydrated client-side via `app/home-content.tsx`
+- Series page (`/series/[seriesId]`), range page (`/series/[seriesId]/[range]`), and SCP reader (`/scp/[id]`) converted to ISR with `revalidate = 86400`; user data hydrated client-side via companion `*-content.tsx` components
+- All public pages now served from Vercel edge CDN; serverless functions only run on cache miss
+
+### Removed
+- Next.js middleware (session/redirect logic removed)
+- `/api/scp-content/[contentFile]` proxy route
 
 ## [0.6.0] - 2026-02-10
 ### Added

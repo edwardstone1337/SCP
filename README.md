@@ -40,9 +40,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## SCP Content Reliability
 
-- Reader content is fetched through internal proxy route: `/api/scp-content/[contentFile]`
-- Proxy adds timeout handling and cache headers before returning upstream SCP-Data JSON
-- Reader includes recovery actions when content load fails: **Retry** and **Open Original Article**
+SCP article content is fetched **directly from the SCP-Data API** by the browser via `useScpContent`. There is no server-side proxy.
+
+> ⚠️ **Do not re-introduce a server-side content proxy.** A previous `/api/scp-content/` route proxied articles through Vercel serverless functions, which generated 32 GB of origin transfer in 2 days from a single user. The upstream API is public and CORS-enabled — there is no reason to proxy it.
 
 ## Safe Change Workflow
 
