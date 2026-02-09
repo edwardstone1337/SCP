@@ -1,18 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { logger } from '@/lib/logger'
-import { seriesToRoman } from '@/lib/utils/series'
 import { getDailyIndex } from '@/lib/utils/daily-scp'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
-import { Heading } from '@/components/ui/typography'
-import { Text } from '@/components/ui/typography'
+import { Heading, Text } from '@/components/ui/typography'
 import { Stack } from '@/components/ui/stack'
-import { Grid } from '@/components/ui/grid'
-import { SeriesCard } from '@/components/ui/series-card'
-import { DailyFeaturedSection } from '@/components/ui/daily-featured-section'
-import { RecentlyViewedSection, type RecentlyViewedItem } from '@/components/ui/recently-viewed-section'
+import { HomeContent } from './home-content'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300 // ISR: regenerate every 5 minutes
 
 interface SeriesProgress {
   series: string
@@ -20,61 +15,17 @@ interface SeriesProgress {
   read: number
 }
 
-type RecentlyViewedRow = {
-  viewed_at: string
-  scps: {
-    scp_id: string
-    title: string
-  } | null
-}
-
-async function getRecentlyViewed(userId: string): Promise<RecentlyViewedItem[]> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('user_recently_viewed')
-    .select(`
-      viewed_at,
-      scps (
-        scp_id,
-        title
-      )
-    `)
-    .eq('user_id', userId)
-    .order('viewed_at', { ascending: false })
-    .limit(5)
-
-  if (error || !data) {
-    if (error) {
-      logger.error('Failed to fetch recently viewed', {
-        error: error.message,
-        userId,
-      })
-    }
-    return []
-  }
-
-  return (data as unknown as RecentlyViewedRow[])
-    .filter((row) => row.scps)
-    .map((row) => ({
-      scp_id: row.scps!.scp_id,
-      title: row.scps!.title,
-      viewed_at: row.viewed_at,
-    }))
-}
-
-async function getSeriesProgress(userId: string | undefined): Promise<SeriesProgress[]> {
-  const supabase = await createClient()
+async function getSeriesProgress(): Promise<SeriesProgress[]> {
+  const supabase = createStaticClient()
 
   const { data, error } = await supabase.rpc('get_series_progress', {
-    user_id_param: userId ?? null,
+    user_id_param: null,
   })
 
   if (error) {
     logger.error('Failed to fetch series progress', {
       error: error instanceof Error ? error.message : String(error),
-      userId,
-      context: 'getSeriesProgress'
+      context: 'getSeriesProgress (static)',
     })
     return []
   }
@@ -94,7 +45,7 @@ async function getDailyFeaturedScp(): Promise<{
   rating: number | null
   series: string
 } | null> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
 
   const { count } = await supabase
     .from('scps')
@@ -119,19 +70,15 @@ async function getDailyFeaturedScp(): Promise<{
 }
 
 export default async function Home() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const [recentlyViewed, seriesProgress, dailyScp] = await Promise.all([
-    user ? getRecentlyViewed(user.id) : Promise.resolve([]),
-    getSeriesProgress(user?.id),
+  const [seriesProgress, dailyScp] = await Promise.all([
+    getSeriesProgress(),
     getDailyFeaturedScp(),
   ])
 
   return (
     <Main>
       <Container size="lg">
-        {/* 1. Themed header — inspired by splash but compact */}
+        {/* Themed header */}
         <section style={{ marginBottom: 'var(--spacing-6)' }}>
           <Stack direction="horizontal" align="start" gap="normal">
             <Heading level={1} className="leading-tight tracking-tight">
@@ -152,36 +99,7 @@ export default async function Home() {
           </Text>
         </section>
 
-        {/* 2. Daily Featured */}
-        <DailyFeaturedSection scp={dailyScp} />
-
-        {/* 3. Series Grid */}
-        <section style={{ marginBottom: 'var(--spacing-6)' }}>
-          <Stack direction="vertical" gap="normal">
-            <Text size="sm" variant="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Series
-            </Text>
-            <Grid cols="auto">
-              {seriesProgress.map(({ series, total, read }) => {
-                const roman = seriesToRoman(series)
-                if (!roman) return null
-                return (
-                  <SeriesCard
-                    key={series}
-                    series={series}
-                    roman={roman}
-                    total={total}
-                    read={read}
-                    href={`/series/${series}`}
-                  />
-                )
-              })}
-            </Grid>
-          </Stack>
-        </section>
-
-        {/* 4. Recently Viewed */}
-        <RecentlyViewedSection items={recentlyViewed} isAuthenticated={!!user} />
+        <HomeContent seriesProgress={seriesProgress} dailyScp={dailyScp} />
       </Container>
     </Main>
   )
