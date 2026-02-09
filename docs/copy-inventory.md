@@ -8,12 +8,12 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 
 | Current text | Location | Recommendation | If Change: proposed |
 |--------------|----------|----------------|----------------------|
-| SCP Reader | `components/navigation.tsx` (logo span) | **Keep** | — |
-| Series | `components/navigation.tsx` (nav link) | **Keep** | — |
-| Saved | `components/navigation.tsx` (nav link) | **Keep** | — |
-| Sign Out | `components/navigation.tsx` (button) | **Keep** | — |
-| Sign In | `components/navigation.tsx` (button) | **Keep** | — |
-| Main navigation | `components/navigation.tsx` (aria-label) | **Keep** | — |
+| SCP Reader | `components/navigation-client.tsx` (logo span) | **Keep** | — |
+| Saved | `components/navigation-client.tsx` (drawer link) | **Keep** | — |
+| Sign Out | `components/navigation-client.tsx` (top-right button) | **Keep** | — |
+| Sign In | `components/navigation-client.tsx` (top-right button) | **Keep** | — |
+| Menu / Close | `components/navigation-client.tsx` (menu button label) | **Keep** | — |
+| Main navigation | `components/navigation-client.tsx` (aria-label) | **Keep** | — |
 
 ---
 
@@ -96,7 +96,10 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 
 | Current text | Location | Recommendation | If Change: proposed |
 |--------------|----------|----------------|----------------------|
-| Failed to load content. Please try again. | `app/scp/[id]/scp-reader.tsx` (content fetch error) | **Keep** | — |
+| Failed to load content right now. | `app/scp/[id]/scp-reader.tsx` (content fetch error) | **Keep** | — |
+| This can happen when the content mirror is temporarily unavailable. | `app/scp/[id]/scp-reader.tsx` (content fetch error help text) | **Keep** | — |
+| Retry | `app/scp/[id]/scp-reader.tsx` (recovery button) | **Keep** | — |
+| Open Original Article | `app/scp/[id]/scp-reader.tsx` (fallback link) | **Keep** | — |
 | Content is not available for this entry. | `app/scp/[id]/scp-reader.tsx` (no content_file) | **Keep** | — |
 | (error from toggleReadStatus) e.g. "Not authenticated", Supabase errors | `components/ui/read-toggle-button.tsx` (displayed in alert) | **Keep** (system) | Consider user-friendly override for "Not authenticated": e.g. "Sign in to track progress." (currently user is redirected to login, so this may rarely show.) |
 | Failed to update read status | `components/ui/read-toggle-button.tsx` (catch fallback) | **Keep** | — |

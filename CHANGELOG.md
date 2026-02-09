@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Loading UX + Content Resilience
+
+#### Added
+
+- `Skeleton` component (`components/ui/skeleton.tsx`) with tokenized dark shimmer in `app/globals.css`
+- Route-level skeleton loading layouts for home, series, range, saved, reader, login Suspense fallback, and auth error Suspense fallback
+- Internal content proxy route: `GET /api/scp-content/[contentFile]` with timeout handling, upstream error mapping, and cache headers
+- Reader error recovery actions: `Retry` query refetch and `Open Original Article` fallback link
+
+#### Changed
+
+- Skeleton shimmer palette moved to neutral dark tones (removed red accent tint)
+- Reader in-page loading state now uses skeleton content placeholders instead of inline spinner
+- `useScpContent` now fetches via internal proxy route and uses retry/backoff for transient failures
+- Loading copy placement standardized to one themed message per route-level loading screen
+
 ### Home/Series consolidation
 
 #### Added

@@ -589,14 +589,14 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 **Architecture:** Navigation lives in the root layout (`app/layout.tsx`) and appears on all pages. Split into a server wrapper and a client component:
 
 - **Server:** `components/navigation.tsx` — fetches user via `createClient().auth.getUser()`, renders `NavigationClient` with `user`.
-- **Client:** `components/navigation-client.tsx` — logo, "SCP Reader" link, Menu/Close button, full-screen overlay.
+- **Client:** `components/navigation-client.tsx` — logo, "SCP Reader" link, top-right auth action + Menu button, responsive overlay.
 
 **Behavior:**
 
-- Full-screen overlay at all viewport sizes (no separate desktop/mobile layouts). Overlay has class `.nav-overlay`, id `nav-menu`; scrollable when content exceeds viewport (`overflow-y: auto`).
-- Menu contents: Series I–X links in a two-column grid (tighter spacing), Saved (when authenticated), Sign In / Sign Out.
+- Top-right controls appear on all viewports: `Sign In` (primary) when logged out, `Sign Out` (secondary) when logged in, and `Menu` (secondary) always.
+- Desktop uses a right-side drawer with backdrop and shadow depth; mobile uses full-screen overlay.
+- Menu contents: Series I–X links in a two-column grid (tighter spacing), Saved (when authenticated), account email.
 - Active state: current route highlighted with accent color and `aria-current="page"`; series sub-routes (e.g. `/series/series-3/200`) highlight the parent series link.
-- Minimal nav on `/login`: logo + "SCP Reader" link only (no menu button or overlay).
 
 **Props:**
 
@@ -699,7 +699,7 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 - `size` (string, optional) — `'sm' | 'md' | 'lg'`.
 - `className` (string, optional).
 
-**Used in:** SCP Reader (loading content), Login (sending).
+**Used in:** Button loading states and any explicit indeterminate loading indicators.
 
 **Example usage:**
 
@@ -708,6 +708,31 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 ```
 
 **Dependencies:** None.
+
+---
+
+### Skeleton
+
+**Variants:** base shimmer block (size/shape via props).
+
+**Props:**
+
+- `width` (CSS size, optional) — default `100%`.
+- `height` (CSS size, optional) — default `1rem`.
+- `radius` (CSS radius, optional) — default `var(--radius-md)`.
+- `className` (string, optional).
+- `style` (CSSProperties, optional).
+
+**Used in:** Route loading states (`app/loading.tsx`, series/range/saved/scp/login/auth fallbacks) and reader content-loading placeholder.
+
+**Example usage:**
+
+```tsx
+<Skeleton width="70%" height="1.25rem" />
+<Skeleton width="96px" height="2.5rem" radius="var(--radius-button)" />
+```
+
+**Dependencies:** Global `.skeleton` shimmer styles in `app/globals.css`.
 
 ---
 
@@ -727,6 +752,6 @@ Components with explicit state documentation above: **Button**, **Badge**, **Ser
 6. **SeriesCard**, **RangeListItem**, **ScpListItem** — page-specific composites.
 7. **PageHeader**, **Logo**, **Main**, **Container**, **Stack**, **Grid** — layout.
 8. **Navigation** — refactor to use Button + Link.
-9. **Input**, **Message**, **Spinner** — forms and feedback.
+9. **Input**, **Message**, **Spinner**, **Skeleton** — forms and loading feedback.
 
 After building, refactor Home, Series, Range, SCP List, Login, and SCP Reader to use these components and align Login/Reader/Nav with the same design tokens (accent, grey scale) where appropriate.

@@ -54,6 +54,8 @@
   --color-surface: var(--color-grey-9);
   --color-surface-border: var(--color-grey-8);
   --color-table-stripe: rgba(255, 255, 255, 0.02);
+  --color-skeleton-base: #191919;
+  --color-skeleton-highlight: #303030;
 
   /* Typography - Font Families */
   --font-family-sans: var(--font-roboto), system-ui, sans-serif;
@@ -367,6 +369,43 @@ select:focus-visible {
 .input-design-tokens:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Skeleton shimmer (dark SCP aesthetic) */
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background-color: var(--color-skeleton-base);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 10%,
+    var(--color-skeleton-highlight) 35%,
+    #3a3a3a 50%,
+    var(--color-skeleton-highlight) 65%,
+    transparent 90%
+  );
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
 }
 
 /* SCP content area – prose-like typography using design tokens */

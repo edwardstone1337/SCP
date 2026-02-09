@@ -46,7 +46,8 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/series` | Redirects to `/` | — |
 | `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) | Public |
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
-| `/scp/[id]` | SCP reader (content from external API, prev/next, bookmark/read) | Public (toggles require login) |
+| `/scp/[id]` | SCP reader (content via internal proxy route, prev/next, bookmark/read) | Public (toggles require login) |
+| `/api/scp-content/[contentFile]` | Internal SCP content proxy (timeout + cache) | Internal |
 | `/saved` | Bookmarked SCPs with sort | **Protected** (redirects to login) |
 | `/login` | Magic-link login form | Public (redirects to `/` if already logged in) |
 | `/auth/callback` | OAuth/magic-link callback; exchanges code for session | Internal |
@@ -72,7 +73,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 ```
 
 - **Metadata (series, ranges, list):** Server Components read from Supabase (anon key, RLS). Guest users get `read=0`; authenticated get real progress/bookmarks.
-- **Article content:** Server passes `content_file` to client; `useScpContent` fetches from `https://scp-data.tedivm.com/data/scp/items/{contentFile}` and caches with TanStack Query (1h stale, 24h gc).
+- **Article content:** Server passes `content_file` to client; `useScpContent` fetches `/api/scp-content/{contentFile}`. This proxy route forwards to `scp-data.tedivm.com`, applies timeout/error mapping, and returns cacheable responses; TanStack Query caches client-side (1h stale, 24h gc) with retry/backoff.
 - **Mutations:** Bookmark and read toggles call Server Actions; actions use Supabase server client (cookies), then `revalidatePath()` so the next request gets fresh data.
 
 ---
@@ -171,7 +172,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 1. **Login:** User visits `/login`, enters email. Client calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Supabase sends magic link to email.
 2. **Callback:** User clicks link → `/auth/callback?code=...&next=...`. Route handler creates server Supabase client, calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`). On failure, redirects to `/login?error=...`.
-3. **Session:** Middleware runs on each request; uses `@supabase/ssr` to read/set cookies and refresh session. Authenticated user on `/login` is redirected to `/`.
+3. **Session:** `proxy.ts` runs on each request; uses `@supabase/ssr` to read/set cookies and refresh session. Authenticated user on `/login` is redirected to `/`.
 4. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
 
 **Protected routes:** Only `/saved` is protected; unauthenticated users are redirected to `/login?redirect=/saved`.
@@ -184,7 +185,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 - **`@theme static`** (Tailwind v4) in `app/globals.css`: all tokens are emitted as CSS variables, so they work in both Tailwind utilities and inline `style`.
 - **Primitive tokens:** Raw values (e.g. `--color-grey-9`, `--spacing-4`).
-- **Semantic tokens:** Purpose-driven (e.g. `--color-background`, `--color-surface`, `--spacing-page-padding`, `--shadow-elevated`). Grey-7 to Grey-8 is intentionally non-linear for surface/border contrast.
+- **Semantic tokens:** Purpose-driven (e.g. `--color-background`, `--color-surface`, `--spacing-page-padding`, `--shadow-elevated`, `--shadow-drawer`, skeleton color tokens). Grey-7 to Grey-8 is intentionally non-linear for surface/border contrast.
 
 ### Color Palette
 
@@ -213,7 +214,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 ### Shadows
 
-- **Semantic:** `--shadow-elevated` (e.g. BackToTop button, overlays).
+- **Semantic:** `--shadow-elevated` (e.g. BackToTop button), `--shadow-drawer` (desktop nav drawer depth).
 
 ### Z-Index
 
@@ -222,7 +223,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 ### Component Hierarchy
 
 - **Atoms:** Button, Link, Badge, Icon, Input, Label, Text, Heading, Mono.
-- **Molecules:** Card, Select, Message, Spinner, ProgressRing, ProgressText.
+- **Molecules:** Card, Select, Message, Spinner, Skeleton, ProgressRing, ProgressText.
 - **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop.
 - **Layout:** Main, Container, Stack, Grid, Navigation, SkipLink, Logo. Navigation: server wrapper (`navigation.tsx`) + client (`navigation-client.tsx`).
 
@@ -257,13 +258,14 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem. |
 | `select` | Native select styled with design tokens. |
 | `series-card` | Series card with progress, link to series. |
+| `skeleton` | Tokenized dark-theme shimmer placeholder with reduced-motion support. |
 | `skip-link` | Accessibility skip-to-content link; off-screen until focus (top: -9999px); spacing tokens. |
 | `spinner` | Loading spinner. |
 | `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose. |
 | `text` | Text with variant/size. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — server component; fetches user, renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, unified Menu/Close button on all devices, full-screen overlay (`.nav-overlay`, `id="nav-menu"`) with Series I–X in a two-column grid (tighter spacing), Saved + Sign In/Out when applicable, series-aware active state for sub-routes, minimal nav on `/login` (logo only). Overlay uses `overflow-y: auto` so content scrolls when it exceeds the viewport.
+**Layout (components/, not ui/):** `navigation.tsx` — server component; fetches user, renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, top-right auth action and Menu button on all viewports (`Sign In` primary when logged out, `Sign Out` secondary when logged in, `Menu` secondary always). Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay lists Series I–X (two-column grid), Saved (auth), and account email; active series/saved routes are highlighted with `aria-current="page"`.
 
 ---
 
@@ -303,8 +305,9 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 ### Content Loading
 
 - **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. If `content_file` is null, reader shows "Content is not available."
-- **Body:** Client `useScpContent(contentFile, scpId)` fetches `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc.
+- **Body:** Client `useScpContent(contentFile, scpId)` fetches `/api/scp-content/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient network/upstream failures.
 - **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-only) then `dangerouslySetInnerHTML` in a div with class `scp-content` (prose styles in globals.css).
+- **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback).
 
 ### Reader typography & layout
 
@@ -407,6 +410,8 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 app/
 ├── actions/
 │   └── auth.ts              # signOut server action
+├── api/
+│   └── scp-content/[contentFile]/route.ts  # Proxies SCP-Data with timeout + cache headers
 ├── auth/
 │   ├── callback/route.ts    # Magic link code exchange
 │   └── error/client.tsx, page.tsx
@@ -434,9 +439,9 @@ app/
 └── not-found.tsx            # 404
 
 components/
-├── ui/                      # Design system (see Component Library table; includes daily-featured-section, recently-viewed-section)
+├── ui/                      # Design system (see Component Library table; includes daily-featured-section, recently-viewed-section, skeleton)
 ├── navigation.tsx           # Server nav wrapper (getUser, renders NavigationClient)
-└── navigation-client.tsx    # Client nav (links, overlay, Sign In/Out)
+└── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 
 lib/
 ├── supabase/client.ts       # Browser client (anon)
@@ -445,7 +450,7 @@ lib/
 ├── hooks/
 │   ├── use-content-links.ts # In-article link interception (SCP→client nav, external→new tab, wiki→rewrite)
 │   ├── use-footnotes.ts     # Footnote tooltip handlers (refs ↔ footnote-N)
-│   └── use-scp-content.ts   # TanStack Query content fetch
+│   └── use-scp-content.ts   # TanStack Query content fetch via internal proxy route
 ├── providers/query-provider.tsx
 ├── utils/cn.ts, daily-scp.ts, loading-messages.ts, sanitize.ts, series.ts, site-url.ts
 └── logger.ts

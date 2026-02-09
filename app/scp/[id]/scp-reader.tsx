@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import { useContentLinks } from '@/lib/hooks/use-content-links'
 import { useFootnotes } from '@/lib/hooks/use-footnotes'
 import { useScpContent } from '@/lib/hooks/use-scp-content'
-import { getLoadingMessage } from '@/lib/utils/loading-messages'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { getRange, seriesToRoman } from '@/lib/utils/series'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -17,6 +16,7 @@ import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { Stack } from '@/components/ui/stack'
 import { BackToTop } from '@/components/ui/back-to-top'
+import { Skeleton } from '@/components/ui/skeleton'
 import { recordView } from './actions'
 
 interface AdjacentScp {
@@ -46,7 +46,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
   const hasRecordedView = useRef(false)
   const contentContainerRef = useRef<HTMLDivElement>(null)
 
-  const { data: content, isLoading, error: contentError } = useScpContent(
+  const { data: content, isLoading, isFetching, error: contentError, refetch } = useScpContent(
     scp.content_file,
     scp.scp_id
   )
@@ -142,29 +142,18 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
       <div style={{ marginTop: 'var(--spacing-4)' }}>
         <Container size="lg">
           {isLoading && (
-            <div
-              role="status"
-              aria-label="Loading content"
-              style={{
-                textAlign: 'center',
-                padding: 'var(--spacing-12) 0',
-              }}
-            >
-              <div
-                style={{
-                  display: 'inline-block',
-                  animation: 'spin 1s linear infinite',
-                  width: '2rem',
-                  height: '2rem',
-                  border: '2px solid var(--color-grey-8)',
-                  borderTopColor: 'var(--color-accent)',
-                  borderRadius: 'var(--radius-full)',
-                }}
-              />
-              <Text variant="secondary" size="sm" style={{ marginTop: 'var(--spacing-4)', display: 'block' }}>
-                {getLoadingMessage('reader')}
-              </Text>
-            </div>
+            <Card padding="lg" style={{ marginTop: 'var(--spacing-2)' }}>
+              <Stack gap="normal">
+                <Skeleton width="96%" height="1rem" />
+                <Skeleton width="92%" height="1rem" />
+                <Skeleton width="89%" height="1rem" />
+                <Skeleton width="94%" height="1rem" />
+                <Skeleton width="84%" height="1rem" />
+                <Skeleton width="90%" height="1rem" />
+                <Skeleton width="86%" height="1rem" />
+                <Skeleton width="78%" height="1rem" />
+              </Stack>
+            </Card>
           )}
 
           {!scp.content_file && (
@@ -175,12 +164,48 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
             </Card>
           )}
 
-          {contentError && (
+          {contentError && !content && (
             <div role="alert">
               <Card variant="bordered" accentBorder padding="md">
-                <Text style={{ color: 'var(--color-red-7)' }}>
-                  Failed to load content. Please try again.
-                </Text>
+                <Stack direction="vertical" gap="normal">
+                  <Text style={{ color: 'var(--color-red-7)' }}>
+                    Failed to load content right now.
+                  </Text>
+                  <Text variant="secondary" size="sm">
+                    This can happen when the content mirror is temporarily unavailable.
+                  </Text>
+                  <Stack direction="horizontal" gap="tight" style={{ flexWrap: 'wrap' }}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      loading={isFetching}
+                      onClick={() => void refetch()}
+                    >
+                      Retry
+                    </Button>
+                    <a
+                      href={scp.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '44px',
+                        padding: 'var(--spacing-1) var(--spacing-2)',
+                        borderRadius: 'var(--radius-button)',
+                        border: 'var(--border-width-normal) solid var(--color-surface-border)',
+                        color: 'var(--color-text-primary)',
+                        textDecoration: 'none',
+                        fontSize: 'var(--font-size-sm)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Open Original Article
+                    </a>
+                  </Stack>
+                </Stack>
               </Card>
             </div>
           )}

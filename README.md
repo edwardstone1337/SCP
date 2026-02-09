@@ -38,6 +38,12 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 - **Seed SCP data**: `npm run seed` (requires `.env.local`; fetches from scp-data.tedivm.com)
 - **Link runbook**: `docs/supabase-link-runbook.md`
 
+## SCP Content Reliability
+
+- Reader content is fetched through internal proxy route: `/api/scp-content/[contentFile]`
+- Proxy adds timeout handling and cache headers before returning upstream SCP-Data JSON
+- Reader includes recovery actions when content load fails: **Retry** and **Open Original Article**
+
 ## Safe Change Workflow
 
 - **Playbook**: `docs/SAFE-OPERATIONS.md`
