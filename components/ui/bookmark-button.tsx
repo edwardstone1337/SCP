@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/icon'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { toggleBookmarkStatus } from '@/app/scp/[id]/actions'
+import { trackSignInModalOpen } from '@/lib/analytics'
 import { logger } from '@/lib/logger'
 
 interface BookmarkButtonProps {
@@ -48,8 +49,9 @@ export function BookmarkButton({
         typeof window !== 'undefined'
           ? `${window.location.pathname}${window.location.search}${window.location.hash}`
           : '/'
+      trackSignInModalOpen('bookmark')
       openModal(
-        <SignInPanel context="modal" redirectTo={redirectTo} />,
+        <SignInPanel context="modal" redirectTo={redirectTo} triggerSource="bookmark" />,
         'Request Archive Access'
       )
       return

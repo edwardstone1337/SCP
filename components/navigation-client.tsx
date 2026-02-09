@@ -12,6 +12,7 @@ import { Text } from '@/components/ui/typography'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { signOut } from '@/app/actions/auth'
+import { trackSignInModalOpen } from '@/lib/analytics'
 import { seriesToRoman } from '@/lib/utils/series'
 
 const SERIES_LIST = Array.from({ length: 10 }, (_, i) => {
@@ -91,8 +92,9 @@ export function NavigationClient({ user }: NavigationClientProps) {
       typeof window !== 'undefined'
         ? `${window.location.pathname}${window.location.search}${window.location.hash}`
         : redirectPath || '/'
+    trackSignInModalOpen('nav')
     openModal(
-      <SignInPanel context="modal" redirectTo={redirectTo} />,
+      <SignInPanel context="modal" redirectTo={redirectTo} triggerSource="nav" />,
       'Request Archive Access'
     )
   }

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
+import { trackSignInModalOpen } from '@/lib/analytics'
 
 export interface RecentlyViewedItem {
   scp_id: string    // e.g. "SCP-173"
@@ -61,8 +62,9 @@ export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewed
       typeof window !== 'undefined'
         ? `${window.location.pathname}${window.location.search}${window.location.hash}`
         : redirectPathWithQuery
+    trackSignInModalOpen('recently_viewed')
     openModal(
-      <SignInPanel context="modal" redirectTo={redirectTo} />,
+      <SignInPanel context="modal" redirectTo={redirectTo} triggerSource="recently_viewed" />,
       'Request Archive Access'
     )
   }

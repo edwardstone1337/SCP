@@ -6,6 +6,7 @@ import { useFootnotes } from '@/lib/hooks/use-footnotes'
 import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { getRange, seriesToRoman } from '@/lib/utils/series'
+import { trackOutboundWikiClick } from '@/lib/analytics'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -124,6 +125,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                       href={content?.url ?? scp.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackOutboundWikiClick(scp.scp_id)}
                       data-variant="default"
                       style={{
                         color: 'var(--color-text-secondary)',

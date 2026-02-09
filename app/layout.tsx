@@ -7,6 +7,8 @@ import { Navigation } from "@/components/navigation";
 import { ModalProvider } from "@/components/ui/modal-provider";
 import { SiteFooter } from "@/components/ui/site-footer";
 import { SharedFooter } from "@/components/shared-footer";
+import { Analytics } from "@/components/ui/analytics";
+import { AuthCompleteTracker } from "@/components/ui/auth-complete-tracker";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -36,6 +38,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
       <body>
+        <Analytics />
+        <AuthCompleteTracker />
         <ModalProvider>
           <SkipLink />
           <Navigation />

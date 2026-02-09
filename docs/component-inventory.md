@@ -674,6 +674,46 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 
 ---
 
+### Analytics
+
+**Location:** `components/ui/analytics.tsx`.
+
+**Purpose:** Loads Google Analytics 4 (`gtag.js`) for production traffic measurement without blocking render.
+
+**Props:** None.
+
+**Configuration:**
+
+- `NEXT_PUBLIC_GA_ID` (required in production) — GA4 measurement ID (for example `G-1TXXCCK1WN`).
+- `NODE_ENV` gating — component returns `null` unless `NODE_ENV === 'production'`.
+- Script strategy — both scripts use `strategy=\"afterInteractive\"` so page rendering is not blocked.
+
+**Wiring:** Mounted once in root layout (`app/layout.tsx`) inside `<body>`, before `<ModalProvider>`.
+
+**Data behavior:** Loads baseline GA4 pageview tracking; custom events are emitted via `lib/analytics.ts`. No Supabase user identifiers are sent.
+
+---
+
+### Analytics Utility (`lib/analytics.ts`)
+
+**Location:** `lib/analytics.ts`.
+
+**Purpose:** Single source of truth for typed GA4 custom event names and parameter payloads.
+
+**Public API:**
+
+- `trackSignInModalOpen(trigger)`
+- `trackSignInSubmit()`
+- `trackSignInModalClose(trigger)`
+- `trackAuthComplete()`
+- `trackOutboundWikiClick(scpId)`
+
+**Type declarations:** Declares `window.gtag` globally for TypeScript in the same utility file.
+
+**Schema source:** Event names/params must stay in sync with `TRACKING.md` custom events table.
+
+---
+
 ### SiteFooter
 
 **Location:** `components/ui/site-footer.tsx`.

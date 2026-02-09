@@ -7,6 +7,7 @@ import { Text } from '@/components/ui/typography'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { toggleReadStatus } from '@/app/scp/[id]/actions'
+import { trackSignInModalOpen } from '@/lib/analytics'
 import { logger } from '@/lib/logger'
 
 export interface ReadToggleButtonProps {
@@ -49,8 +50,9 @@ export function ReadToggleButton({
         typeof window !== 'undefined'
           ? `${window.location.pathname}${window.location.search}${window.location.hash}`
           : '/'
+      trackSignInModalOpen('read_toggle')
       openModal(
-        <SignInPanel context="modal" redirectTo={redirectTo} />,
+        <SignInPanel context="modal" redirectTo={redirectTo} triggerSource="read_toggle" />,
         'Request Archive Access'
       )
       return

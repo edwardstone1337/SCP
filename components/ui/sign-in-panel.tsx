@@ -1,9 +1,10 @@
 'use client'
 
-import { CSSProperties, FormEvent, useEffect, useState } from 'react'
+import { CSSProperties, FormEvent, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getSiteUrl } from '@/lib/utils/site-url'
+import { trackSignInModalClose, trackSignInSubmit, type SignInTrigger } from '@/lib/analytics'
 import { logger } from '@/lib/logger'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
@@ -18,17 +19,20 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export interface SignInPanelProps {
   redirectTo?: string
   context?: 'modal' | 'page'
+  triggerSource?: SignInTrigger
 }
 
 export function SignInPanel({
   redirectTo = '/',
   context = 'modal',
+  triggerSource,
 }: SignInPanelProps) {
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorText, setErrorText] = useState<string | null>(null)
+  const submitSucceededRef = useRef(false)
 
   useEffect(() => {
     const urlError = context === 'page' ? searchParams.get('error') : null
@@ -36,6 +40,14 @@ export function SignInPanel({
       setErrorText(urlError)
     }
   }, [context, searchParams])
+
+  useEffect(() => {
+    return () => {
+      if (context === 'modal' && triggerSource && !submitSucceededRef.current) {
+        trackSignInModalClose(triggerSource)
+      }
+    }
+  }, [context, triggerSource])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -63,6 +75,8 @@ export function SignInPanel({
         return
       }
 
+      trackSignInSubmit()
+      submitSucceededRef.current = true
       setIsSuccess(true)
       setEmail('')
     } catch (err) {
