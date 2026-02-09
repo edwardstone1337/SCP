@@ -43,8 +43,11 @@ interface NavigationClientProps {
 
 export function NavigationClient({ user }: NavigationClientProps) {
   const pathname = usePathname()
-  const isLoginPage = pathname === '/login'
   const isSaved = pathname === '/saved'
+  const signInHref =
+    pathname === '/login'
+      ? '/login'
+      : `/login?redirect=${encodeURIComponent(pathname)}`
 
   const [isOpen, setIsOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
@@ -84,25 +87,6 @@ export function NavigationClient({ user }: NavigationClientProps) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [isOpen])
 
-  if (isLoginPage) {
-    return (
-      <nav aria-label="Main navigation" style={navStyles}>
-        <Container size="lg">
-          <div style={paddingStyles}>
-            <Stack direction="horizontal" align="center" justify="between" gap="normal">
-              <Link href="/" variant="nav" style={linkTouchStyle}>
-                <Stack direction="horizontal" align="center" gap="tight">
-                  <Logo size="sm" />
-                  <span>SCP Reader</span>
-                </Stack>
-              </Link>
-            </Stack>
-          </div>
-        </Container>
-      </nav>
-    )
-  }
-
   return (
     <>
       <nav aria-label="Main navigation" style={navStyles}>
@@ -117,18 +101,31 @@ export function NavigationClient({ user }: NavigationClientProps) {
                 </Stack>
               </Link>
 
-              {/* Right: Menu button (all viewports) */}
-              <Button
-                ref={menuButtonRef}
-                type="button"
-                variant="ghost"
-                size="md"
-                aria-expanded={isOpen}
-                aria-controls="nav-menu"
-                onClick={toggleOverlay}
-              >
-                {isOpen ? 'Close' : 'Menu'}
-              </Button>
+              {/* Right: Auth + Menu (all viewports) */}
+              <Stack direction="horizontal" align="center" gap="tight">
+                {user ? (
+                  <form action={signOut}>
+                    <Button type="submit" variant="secondary" size="md">
+                      Sign Out
+                    </Button>
+                  </form>
+                ) : (
+                  <Button href={signInHref} variant="primary" size="md">
+                    Sign In
+                  </Button>
+                )}
+                <Button
+                  ref={menuButtonRef}
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  aria-expanded={isOpen}
+                  aria-controls="nav-menu"
+                  onClick={toggleOverlay}
+                >
+                  {isOpen ? 'Close' : 'Menu'}
+                </Button>
+              </Stack>
             </Stack>
           </div>
         </Container>
@@ -142,12 +139,12 @@ export function NavigationClient({ user }: NavigationClientProps) {
         aria-hidden={!isOpen}
         className={`nav-overlay ${isOpen ? 'open' : ''}`}
       >
-        <nav aria-label="Series navigation">
+        <nav aria-label="Series navigation" className="nav-drawer">
           <Stack
             direction="vertical"
             align="start"
             gap="normal"
-            style={{ gap: 'var(--spacing-2)' }}
+            style={{ gap: 'var(--spacing-2)', width: '100%' }}
           >
             <Text
               size="sm"
@@ -194,35 +191,25 @@ export function NavigationClient({ user }: NavigationClientProps) {
             />
 
             {user && (
-              <Link
-                href="/saved"
-                variant="nav"
-                style={{
-                  ...linkTouchStyle,
-                  ...(isSaved && { color: 'var(--color-accent)' }),
-                }}
-                aria-current={isSaved ? 'page' : undefined}
-                onClick={closeOverlay}
-              >
-                Saved
-              </Link>
-            )}
-
-            {user ? (
               <>
-                <Text size="sm" variant="secondary">
-                  {user.email}
-                </Text>
-                <form action={signOut}>
-                  <Button type="submit" variant="ghost" size="md">
-                    Sign Out
-                  </Button>
-                </form>
+                <Link
+                  href="/saved"
+                  variant="nav"
+                  style={{
+                    ...linkTouchStyle,
+                    ...(isSaved && { color: 'var(--color-accent)' }),
+                  }}
+                  aria-current={isSaved ? 'page' : undefined}
+                  onClick={closeOverlay}
+                >
+                  Saved
+                </Link>
+                {user.email && (
+                  <Text size="sm" variant="secondary">
+                    {user.email}
+                  </Text>
+                )}
               </>
-            ) : (
-              <Button href="/login" variant="ghost" size="md" onClick={closeOverlay}>
-                Sign In
-              </Button>
             )}
           </Stack>
         </nav>

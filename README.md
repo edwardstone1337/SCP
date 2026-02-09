@@ -41,7 +41,8 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 ## Safe Change Workflow
 
 - **Playbook**: `docs/SAFE-OPERATIONS.md`
-- **Verification command**: `npm run verify`
+- **Verification command**: `npm run verify` (lint + build + auth smoke test)
+- **Auth smoke only**: `npm run smoke:auth`
 
 ## Deploy on Vercel
 

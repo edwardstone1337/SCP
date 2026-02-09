@@ -18,6 +18,10 @@ Goal: ship safely with minimal break risk for a one-person team.
 2. Make the smallest possible change.
 3. Run verification:
 `npm run verify`
+This now runs:
+- lint
+- production build
+- auth smoke test (`/login`, `/saved` redirect, `/auth/callback` redirect)
 4. Run manual smoke checks:
 - `/`
 - `/scp/SCP-173` (or any known valid SCP)
