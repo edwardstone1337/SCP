@@ -37,10 +37,7 @@ export function ProgressRing({
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    if (value === 0) {
-      setIsVisible(false)
-      return
-    }
+    if (value === 0) return
     if (!ringRef.current) return
 
     const observer = new IntersectionObserver(

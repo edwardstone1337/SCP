@@ -38,6 +38,11 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 - **Seed SCP data**: `npm run seed` (requires `.env.local`; fetches from scp-data.tedivm.com)
 - **Link runbook**: `docs/supabase-link-runbook.md`
 
+## Safe Change Workflow
+
+- **Playbook**: `docs/SAFE-OPERATIONS.md`
+- **Verification command**: `npm run verify`
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
