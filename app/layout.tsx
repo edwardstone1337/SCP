@@ -5,6 +5,7 @@ import { QueryProvider } from "@/lib/providers/query-provider";
 import { SkipLink } from "@/components/ui/skip-link";
 import { Navigation } from "@/components/navigation";
 import { ModalProvider } from "@/components/ui/modal-provider";
+import { SiteFooter } from "@/components/ui/site-footer";
 import { SharedFooter } from "@/components/shared-footer";
 
 const roboto = Roboto({
@@ -39,6 +40,7 @@ export default function RootLayout({
           <SkipLink />
           <Navigation />
           <QueryProvider>{children}</QueryProvider>
+          <SiteFooter />
           <SharedFooter />
         </ModalProvider>
       </body>

@@ -518,6 +518,28 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 
 ---
 
+### ScpReader (Page Module)
+
+**Location:** `app/scp/[id]/scp-reader.tsx` (client page component).
+
+**Data contract (content hook):**
+
+- `useScpContent(contentFile, scpId)` returns selected content shaped as:
+  - `raw_content` (string)
+  - `raw_source` (string)
+  - `creator?` (string)
+  - `url?` (string)
+- Source typing lives in `lib/hooks/use-scp-content.ts`.
+
+**Header metadata behavior:** Reader header metadata row includes rating, SCP id, and inline attribution:
+
+- With creator: `Written by {creator} · View original on SCP Wiki`
+- Without creator: `View original on SCP Wiki`
+
+**Dependencies:** Main, Container, Breadcrumb, Heading/Text/Mono, BookmarkButton, ReadToggleButton, `useScpContent`.
+
+---
+
 ## Layout
 
 ### Main
@@ -649,6 +671,26 @@ Component library inventory derived from existing pages (Home, Range List, SCP L
 ```
 
 **Dependencies:** Link, Button, Typography. Server wrapper uses `createClient`; client uses `signOut` server action.
+
+---
+
+### SiteFooter
+
+**Location:** `components/ui/site-footer.tsx`.
+
+**Purpose:** Quiet legal/attribution footer for SCP Reader, rendered above the externally injected Edward Stone shared footer.
+
+**Props:** None.
+
+**Accessibility:** Renders semantic `<footer>` with `role="contentinfo"` and `aria-label="Site licensing and attribution"` to distinguish it from the external footer landmark.
+
+**Content:** Compact legal copy (fan-project disclaimer, CC BY-SA attribution, data source) plus internal link to `/about`.
+
+**Layout behavior:** Mounted in root layout after page content (`<QueryProvider>{children}</QueryProvider>`) and before `<SharedFooter />` so every route gets the same ordering.
+
+**Token dependencies:** `--color-text-muted`, `--color-text-secondary`, `--color-surface-border`, `--spacing-page-padding`, `--spacing-section-gap`, `--font-size-xs`, `--line-height-sm`, `--border-width-normal`, `--border-width-thick`.
+
+**Dependencies:** Container, Stack, Link.
 
 ---
 

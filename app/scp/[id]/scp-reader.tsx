@@ -105,7 +105,7 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
             <div className="reader-header-row">
               <Stack direction="vertical" gap="tight">
                 <Heading level={1}>{scp.title}</Heading>
-                <Stack direction="horizontal" gap="tight" align="center">
+                <Stack direction="horizontal" gap="tight" align="center" style={{ flexWrap: 'wrap' }}>
                   <Text variant="secondary" size="sm">
                     ★ {scp.rating}
                   </Text>
@@ -113,6 +113,27 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                     •
                   </Text>
                   <Mono size="sm">{scp.scp_id}</Mono>
+                  <Text size="sm" style={{ color: 'var(--color-text-muted)' }}>
+                    {content?.creator ? (
+                      <>
+                        Written by <span style={{ color: 'var(--color-text-secondary)' }}>{content.creator}</span>{' '}
+                        ·{' '}
+                      </>
+                    ) : null}
+                    <a
+                      href={content?.url ?? scp.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-variant="default"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        textDecoration: 'underline',
+                        textUnderlineOffset: 'var(--border-width-thick)',
+                      }}
+                    >
+                      View original on SCP Wiki
+                    </a>
+                  </Text>
                 </Stack>
               </Stack>
               <div className="reader-header-actions">

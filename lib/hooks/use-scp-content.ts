@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query'
 interface ScpContent {
   raw_content: string
   raw_source: string
+  creator?: string
+  url?: string
 }
 
 interface ContentResponse {
@@ -52,6 +54,16 @@ export function useScpContent(contentFile: string | null, scpId: string) {
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
     staleTime: 60 * 60 * 1000, // 1 hour (content rarely changes)
     gcTime: 24 * 60 * 60 * 1000, // 24 hours
-    select: (data) => data[scpId] || null,
+    select: (data) => {
+      const entry = data[scpId]
+      if (!entry) return null
+
+      return {
+        raw_content: entry.raw_content,
+        raw_source: entry.raw_source,
+        creator: entry.creator,
+        url: entry.url,
+      }
+    },
   })
 }

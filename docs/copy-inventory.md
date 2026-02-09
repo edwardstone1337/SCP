@@ -121,6 +121,7 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 | Oldest First / Newest First / Top Rated / Lowest Rated | `components/ui/scp-list-with-toggle.tsx`, `app/saved/saved-list.tsx` (sort options) | **Keep** | — |
 | Recently Saved / Oldest Saved | `app/saved/saved-list.tsx` (sort options) | **Keep** | — |
 | ★ {rating} | `app/scp/[id]/scp-reader.tsx` (rating display) | **Keep** | — |
+| Written by {creator} · View original on SCP Wiki (or, when creator missing: View original on SCP Wiki) | `app/scp/[id]/scp-reader.tsx` (header metadata attribution line) | **Keep** | — |
 | {percentage}% (e.g. 42%) | `components/ui/range-list-item.tsx`, `components/ui/progress-text.tsx` | **Keep** (numeric) | — |
 | ProgressText: "X%", "X / Y", or "X% (X / Y)" | `components/ui/progress-text.tsx` | **Keep** (no "read" label in component; context is Series/Range) | — |
 | Skip to main content | `components/ui/skip-link.tsx` | **Keep** | — |
@@ -143,6 +144,30 @@ All in `lib/utils/loading-messages.ts`. Principle: themed but still understandab
 | auth | Verifying credentials...; Authenticating clearance level...; Processing access request... | **Keep** | — |
 
 **Recommendation:** **Keep** all. They are clearly loading states with a light SCP theme. If you ever get feedback that users are confused, add one plain option per context (e.g. "Loading...") or simplify the set.
+
+---
+
+## 9. Footer + About Attribution
+
+| Current text | Location | Recommendation | If Change: proposed |
+|--------------|----------|----------------|----------------------|
+| SCP Reader is an independent fan project - not affiliated with the SCP Foundation. | `components/ui/site-footer.tsx` | **Keep** | — |
+| SCP content is licensed under CC BY-SA 3.0 and originates from scpwiki.com and its authors. This project is also released under CC BY-SA 3.0. | `components/ui/site-footer.tsx` | **Keep** | — |
+| Data provided by the SCP Data API. | `components/ui/site-footer.tsx` | **Keep** | — |
+| About & Attribution | `components/ui/site-footer.tsx` (footer link to `/about`) | **Keep** | — |
+| About SCP Reader | `app/about/page.tsx` (page heading) | **Keep** | — |
+| What is this? | `app/about/page.tsx` (section heading) | **Keep** | — |
+| SCP Reader is an independent fan-built reading companion for the SCP Foundation collaborative fiction archive. It helps readers track their progress across the full catalogue of SCP entries - bookmark articles, mark them as read, and pick up where they left off. | `app/about/page.tsx` | **Keep** | — |
+| This project is not affiliated with, endorsed by, or officially connected to the SCP Foundation wiki or its staff. | `app/about/page.tsx` | **Keep** | — |
+| Content License | `app/about/page.tsx` (section heading) | **Keep** | — |
+| All SCP Foundation content - including article text, titles, and associated concepts - is licensed under Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0) and originates from scpwiki.com and its authors. | `app/about/page.tsx` | **Keep** | — |
+| SCP Reader, as a derivative work, is also released under CC BY-SA 3.0. You are free to share and adapt this work under the same license terms. | `app/about/page.tsx` | **Keep** | — |
+| Data Source | `app/about/page.tsx` (section heading) | **Keep** | — |
+| Article data is provided by the SCP Data API (maintained by tedivm), a daily-updated static dataset of the SCP Wiki. The API itself is not affiliated with the SCP Wiki. | `app/about/page.tsx` | **Keep** | — |
+| Author Attribution | `app/about/page.tsx` (section heading) | **Keep** | — |
+| Individual SCP articles are written by contributors to the SCP Wiki. Where available, the original author is credited on each article page. For full revision history, visit the original entry on scpwiki.com. | `app/about/page.tsx` | **Keep** | — |
+| Contact | `app/about/page.tsx` (section heading) | **Keep** | — |
+| SCP Reader is built by Edward Stone. For questions, concerns, or attribution requests, reach out via edwardstone.design. | `app/about/page.tsx` | **Keep** | — |
 
 ---
 
