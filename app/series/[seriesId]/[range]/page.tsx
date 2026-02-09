@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { logger } from '@/lib/logger'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import { notFound } from 'next/navigation'
@@ -6,9 +6,9 @@ import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { PageHeader } from '@/components/ui/page-header'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { ScpListWithToggle } from '@/components/ui/scp-list-with-toggle'
+import { RangeContent } from './range-content'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 86400
 
 interface ScpRow {
   id: string
@@ -22,12 +22,10 @@ interface ScpRow {
 
 async function getScpsInRange(
   seriesId: string,
-  rangeStart: number,
-  userId: string | undefined
+  rangeStart: number
 ): Promise<ScpRow[]> {
-  const supabase = await createClient()
-  
-  // Get all SCPs in this range
+  const supabase = createStaticClient()
+
   const { data: scpsData, error: scpsError } = await supabase
     .from('scps')
     .select('id, scp_id, scp_number, title, rating')
@@ -35,44 +33,17 @@ async function getScpsInRange(
     .gte('scp_number', rangeStart)
     .lt('scp_number', rangeStart + 100)
     .order('scp_number')
-  
+
   if (scpsError) {
     logger.error('Failed to fetch range SCPs', { error: scpsError.message })
   }
   if (!scpsData) return []
-  
-  if (!userId) {
-    // Guest: all unread, no bookmarks
-    return scpsData.map(scp => ({
-      ...scp,
-      is_read: false,
-      is_bookmarked: false,
-    }))
-  }
 
-  const scpIds = scpsData.map(s => s.id)
-
-  // Get read status for these SCPs
-  const { data: progressData } = await supabase
-    .from('user_progress')
-    .select('scp_id, is_read')
-    .eq('user_id', userId)
-    .in('scp_id', scpIds)
-
-  // Get bookmarks for these SCPs
-  const { data: bookmarkData } = await supabase
-    .from('user_bookmarks')
-    .select('scp_id')
-    .eq('user_id', userId)
-    .in('scp_id', scpIds)
-
-  const readMap = new Map(progressData?.map(p => [p.scp_id, p.is_read]) || [])
-  const bookmarkSet = new Set(bookmarkData?.map(b => b.scp_id) || [])
-
-  return scpsData.map(scp => ({
+  return scpsData.map((scp) => ({
     ...scp,
-    is_read: readMap.get(scp.id) || false,
-    is_bookmarked: bookmarkSet.has(scp.id),
+    rating: scp.rating ?? 0,
+    is_read: false,
+    is_bookmarked: false,
   }))
 }
 
@@ -82,23 +53,19 @@ export default async function RangeScpListPage({
   params: Promise<{ seriesId: string; range: string }>
 }) {
   const { seriesId, range } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  // Validate series
+
   const roman = seriesToRoman(seriesId)
   if (!roman) {
     notFound()
   }
-  
-  // Parse range
+
   const rangeStart = parseInt(range, 10)
   if (isNaN(rangeStart) || rangeStart < 0) {
     notFound()
   }
-  
-  const scps = await getScpsInRange(seriesId, rangeStart, user?.id)
-  
+
+  const scps = await getScpsInRange(seriesId, rangeStart)
+
   if (scps.length === 0) {
     notFound()
   }
@@ -108,7 +75,7 @@ export default async function RangeScpListPage({
   const breadcrumbItems = [
     { label: 'Series', href: '/' },
     { label: `Series ${roman}` || seriesId, href: `/series/${seriesId}` },
-    { label: rangeLabel }, // Current page, no href
+    { label: rangeLabel },
   ]
 
   return (
@@ -117,7 +84,7 @@ export default async function RangeScpListPage({
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />
           <PageHeader title={formatRange(rangeStart)} />
-          <ScpListWithToggle scps={scps} isAuthenticated={!!user?.id} userId={user?.id} />
+          <RangeContent scps={scps} />
         </Container>
       </Main>
     </>

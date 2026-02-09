@@ -1,13 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { notFound } from 'next/navigation'
-import { ScpReader } from './scp-reader'
+import { ScpContent } from './scp-content'
 
 async function getAdjacentScps(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createStaticClient>,
   series: string,
   scpNumber: number
 ) {
-  // Previous SCP (same series, lower number)
   const { data: prev } = await supabase
     .from('scps')
     .select('scp_id, title')
@@ -17,7 +16,6 @@ async function getAdjacentScps(
     .limit(1)
     .maybeSingle()
 
-  // Next SCP (same series, higher number)
   const { data: next } = await supabase
     .from('scps')
     .select('scp_id, title')
@@ -30,10 +28,9 @@ async function getAdjacentScps(
   return { prev, next }
 }
 
-async function getScpData(scpId: string, userId: string | undefined) {
-  const supabase = await createClient()
+async function getScpData(scpId: string) {
+  const supabase = createStaticClient()
 
-  // Get SCP metadata
   const { data: scp } = await supabase
     .from('scps')
     .select('id, scp_id, scp_number, title, rating, series, url, content_file')
@@ -42,26 +39,15 @@ async function getScpData(scpId: string, userId: string | undefined) {
 
   if (!scp) return null
 
-  // Get read status only if user is authenticated
-  if (!userId) {
-    return {
-      ...scp,
-      is_read: false,
-    }
-  }
-
-  const { data: progress } = await supabase
-    .from('user_progress')
-    .select('is_read')
-    .eq('user_id', userId)
-    .eq('scp_id', scp.id)
-    .single()
-
   return {
     ...scp,
-    is_read: progress?.is_read || false,
+    rating: scp.rating ?? 0,
+    is_read: false,
+    is_bookmarked: false,
   }
 }
+
+export const revalidate = 86400
 
 export default async function ScpPage({
   params,
@@ -69,29 +55,14 @@ export default async function ScpPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
-  // Allow guests
-  const scpData = await getScpData(id, user?.id)
+  const scpData = await getScpData(id)
 
   if (!scpData) {
     notFound()
   }
 
-  // After getting user and SCP data, check if bookmarked
-  let isBookmarked = false
-  if (user) {
-    const { data: bookmark } = await supabase
-      .from('user_bookmarks')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('scp_id', scpData.id)
-      .maybeSingle()
-
-    isBookmarked = !!bookmark
-  }
-
+  const supabase = createStaticClient()
   const { prev, next } = await getAdjacentScps(
     supabase,
     scpData.series,
@@ -99,8 +70,6 @@ export default async function ScpPage({
   )
 
   return (
-    <>
-      <ScpReader scp={{ ...scpData, is_bookmarked: isBookmarked }} userId={user?.id} prev={prev} next={next} />
-    </>
+    <ScpContent scp={scpData} prev={prev} next={next} />
   )
 }

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { logger } from '@/lib/logger'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
 import { notFound } from 'next/navigation'
@@ -6,10 +6,9 @@ import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { PageHeader } from '@/components/ui/page-header'
-import { Stack } from '@/components/ui/stack'
-import { RangeListItem } from '@/components/ui/range-list-item'
+import { SeriesContent } from './series-content'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 86400
 
 interface RangeProgress {
   rangeStart: number
@@ -23,36 +22,29 @@ interface GetRangeProgressRow {
   read_count: number
 }
 
-async function getRangeProgress(
-  seriesId: string,
-  userId: string | undefined
-): Promise<RangeProgress[]> {
-  const supabase = await createClient()
+async function getRangeProgress(seriesId: string): Promise<RangeProgress[]> {
+  const supabase = createStaticClient()
 
-  // Use RPC for both auth and guest. RPC aggregates at DB level (GROUP BY)
-  // so we get all ranges regardless of table size. Passing null for guest users
-  // yields read_count=0 for all (LEFT JOIN never matches).
   const { data, error } = await supabase.rpc('get_range_progress', {
     series_id_param: seriesId,
-    user_id_param: userId ?? null
+    user_id_param: null,
   })
-  
+
   if (error) {
     logger.error('Failed to fetch range progress', {
       error: error instanceof Error ? error.message : String(error),
       seriesId,
-      userId,
-      context: 'getRangeProgress'
+      context: 'getRangeProgress (static)',
     })
     return []
   }
-  
+
   if (!data) return []
-  
+
   return data.map((row: GetRangeProgressRow) => ({
     rangeStart: row.range_start,
     total: Number(row.total),
-    read: Number(row.read_count)
+    read: Number(row.read_count),
   }))
 }
 
@@ -62,16 +54,14 @@ export default async function SeriesRangePage({
   params: Promise<{ seriesId: string }>
 }) {
   const { seriesId } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
+
   const roman = seriesToRoman(seriesId)
   if (!roman) {
     notFound()
   }
-  
-  const ranges = await getRangeProgress(seriesId, user?.id)
-  
+
+  const ranges = await getRangeProgress(seriesId)
+
   if (ranges.length === 0) {
     notFound()
   }
@@ -87,17 +77,7 @@ export default async function SeriesRangePage({
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />
           <PageHeader title={`Series ${roman}`} />
-          <Stack direction="vertical" gap="normal">
-            {ranges.map(({ rangeStart, total, read }) => (
-              <RangeListItem
-                key={rangeStart}
-                rangeLabel={formatRange(rangeStart)}
-                total={total}
-                read={read}
-                href={`/series/${seriesId}/${rangeStart}`}
-              />
-            ))}
-          </Stack>
+          <SeriesContent ranges={ranges} seriesId={seriesId} />
         </Container>
       </Main>
     </>
