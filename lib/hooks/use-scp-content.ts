@@ -18,7 +18,7 @@ interface QueryError extends Error {
 }
 
 async function fetchScpContent(contentFile: string): Promise<ContentResponse> {
-  const url = `/api/scp-content/${encodeURIComponent(contentFile)}`
+  const url = `https://scp-data.tedivm.com/data/scp/items/${encodeURIComponent(contentFile)}`
 
   const response = await fetch(url)
   if (!response.ok) {
