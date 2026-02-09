@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
@@ -42,7 +43,9 @@ export default function RootLayout({
         <AuthCompleteTracker />
         <ModalProvider>
           <SkipLink />
-          <Navigation />
+          <Suspense>
+            <Navigation />
+          </Suspense>
           <QueryProvider>{children}</QueryProvider>
           <SiteFooter />
           <SharedFooter />
