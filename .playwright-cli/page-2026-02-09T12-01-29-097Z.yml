@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - navigation "Main navigation" [ref=e3]:
+    - generic [ref=e6]:
+      - link "SCP Foundation SCP Reader" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]:
+          - img "SCP Foundation" [ref=e9]
+          - generic [ref=e10]: SCP Reader
+      - generic [ref=e11]:
+        - link "Sign In" [ref=e12] [cursor=pointer]:
+          - /url: /login?redirect=%2Fscp%2FSCP-002
+        - button "Menu" [ref=e13] [cursor=pointer]
+  - dialog:
+    - navigation:
+      - generic:
+        - paragraph: Series
+        - generic:
+          - link:
+            - /url: /series/series-1
+            - text: Series I
+          - link:
+            - /url: /series/series-2
+            - text: Series II
+          - link:
+            - /url: /series/series-3
+            - text: Series III
+          - link:
+            - /url: /series/series-4
+            - text: Series IV
+          - link:
+            - /url: /series/series-5
+            - text: Series V
+          - link:
+            - /url: /series/series-6
+            - text: Series VI
+          - link:
+            - /url: /series/series-7
+            - text: Series VII
+          - link:
+            - /url: /series/series-8
+            - text: Series VIII
+          - link:
+            - /url: /series/series-9
+            - text: Series IX
+          - link:
+            - /url: /series/series-10
+            - text: Series X
+  - main [ref=e14]:
+    - generic [ref=e17]:
+      - navigation "Breadcrumb" [ref=e18]:
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - link "Series" [ref=e21] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e22]:
+            - generic [ref=e23]: ›
+            - link "Series I" [ref=e24] [cursor=pointer]:
+              - /url: /series/series-1
+          - listitem [ref=e25]:
+            - generic [ref=e26]: ›
+            - link "000-099" [ref=e27] [cursor=pointer]:
+              - /url: /series/series-1/0
+          - listitem [ref=e28]:
+            - generic [ref=e29]: ›
+            - paragraph [ref=e30]: SCP-002
+      - link "Next →" [ref=e32] [cursor=pointer]:
+        - /url: /scp/SCP-003
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - heading "SCP-002" [level=1] [ref=e35]
+          - generic [ref=e36]:
+            - paragraph [ref=e37]: ★ 2388
+            - paragraph [ref=e38]: •
+            - generic [ref=e39]: SCP-002
+        - generic [ref=e41]:
+          - button "Add bookmark" [ref=e43] [cursor=pointer]:
+            - generic [ref=e44]:
+              - img [ref=e46]
+              - generic [ref=e48]: Save
+          - button "Mark as Read" [ref=e50] [cursor=pointer]
+  - contentinfo [ref=e65]:
+    - generic [ref=e66]:
+      - link "Edward Stone" [ref=e67] [cursor=pointer]:
+        - /url: https://edwardstone.design
+        - img [ref=e69]
+        - text: Edward Stone
+      - navigation "More from Edward Stone" [ref=e75]:
+        - list [ref=e76]:
+          - listitem [ref=e77]:
+            - link "Flip 7" [ref=e78] [cursor=pointer]:
+              - /url: https://flip7scorecard.com
+          - listitem [ref=e79]: SCP Reader
+          - listitem [ref=e80]:
+            - link "Fair Share" [ref=e81] [cursor=pointer]:
+              - /url: https://fairsharecalculator.com
+          - listitem [ref=e82]:
+            - link "Lost Cities" [ref=e83] [cursor=pointer]:
+              - /url: https://lostcitiesscorecalculator.com
+          - listitem [ref=e84]:
+            - link "Kaomoji" [ref=e85] [cursor=pointer]:
+              - /url: https://kaomoji.click
+      - paragraph [ref=e86]: © 2026 Edward Stone
+  - button "Open Next.js Dev Tools" [ref=e92] [cursor=pointer]:
+    - img [ref=e93]
+  - alert [ref=e96]

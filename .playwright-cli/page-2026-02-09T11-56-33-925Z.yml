@@ -1,0 +1,76 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - navigation "Main navigation" [ref=e3]:
+    - generic [ref=e6]:
+      - link "SCP Foundation SCP Reader" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]:
+          - img "SCP Foundation" [ref=e9]
+          - generic [ref=e10]: SCP Reader
+      - generic [ref=e11]:
+        - link "Sign In" [ref=e12] [cursor=pointer]:
+          - /url: /login?redirect=%2F
+        - button "Menu" [ref=e13] [cursor=pointer]
+  - dialog:
+    - navigation:
+      - generic:
+        - paragraph: Series
+        - generic:
+          - link:
+            - /url: /series/series-1
+            - text: Series I
+          - link:
+            - /url: /series/series-2
+            - text: Series II
+          - link:
+            - /url: /series/series-3
+            - text: Series III
+          - link:
+            - /url: /series/series-4
+            - text: Series IV
+          - link:
+            - /url: /series/series-5
+            - text: Series V
+          - link:
+            - /url: /series/series-6
+            - text: Series VI
+          - link:
+            - /url: /series/series-7
+            - text: Series VII
+          - link:
+            - /url: /series/series-8
+            - text: Series VIII
+          - link:
+            - /url: /series/series-9
+            - text: Series IX
+          - link:
+            - /url: /series/series-10
+            - text: Series X
+  - main [ref=e14]:
+    - paragraph [ref=e71]: Retrieving containment database...
+  - contentinfo [ref=e74]:
+    - generic [ref=e75]:
+      - link "Edward Stone" [ref=e76] [cursor=pointer]:
+        - /url: https://edwardstone.design
+        - img [ref=e78]
+        - text: Edward Stone
+      - navigation "More from Edward Stone" [ref=e84]:
+        - list [ref=e85]:
+          - listitem [ref=e86]:
+            - link "Flip 7" [ref=e87] [cursor=pointer]:
+              - /url: https://flip7scorecard.com
+          - listitem [ref=e88]: SCP Reader
+          - listitem [ref=e89]:
+            - link "Fair Share" [ref=e90] [cursor=pointer]:
+              - /url: https://fairsharecalculator.com
+          - listitem [ref=e91]:
+            - link "Lost Cities" [ref=e92] [cursor=pointer]:
+              - /url: https://lostcitiesscorecalculator.com
+          - listitem [ref=e93]:
+            - link "Kaomoji" [ref=e94] [cursor=pointer]:
+              - /url: https://kaomoji.click
+      - paragraph [ref=e95]: © 2026 Edward Stone
+  - button "Open Next.js Dev Tools" [ref=e101] [cursor=pointer]:
+    - img [ref=e102]
+  - alert [ref=e105]
