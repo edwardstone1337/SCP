@@ -9,9 +9,10 @@ interface HeadingProps {
   children: ReactNode
   className?: string
   style?: CSSProperties
+  id?: string
 }
 
-export function Heading({ level, as, accent, children, className, style }: HeadingProps) {
+export function Heading({ level, as, accent, children, className, style, id }: HeadingProps) {
   const Component = as || (`h${level}` as 'h1' | 'h2' | 'h3' | 'h4')
 
   const styles = {
@@ -23,6 +24,7 @@ export function Heading({ level, as, accent, children, className, style }: Headi
 
   return (
     <Component
+      id={id}
       className={cn(
         styles[level],
         accent && 'text-[var(--color-accent)]',

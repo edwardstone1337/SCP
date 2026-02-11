@@ -1,0 +1,3 @@
+# Ignore scanner output files
+*.json
+*.log

@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/ui/site-footer";
 import { SharedFooter } from "@/components/shared-footer";
 import { Analytics } from "@/components/ui/analytics";
 import { AuthCompleteTracker } from "@/components/ui/auth-complete-tracker";
+import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -25,10 +26,10 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s — SCP Reader',
-    default: 'SCP Reader — Track Your SCP Foundation Reading Progress',
+    template: `%s — ${SITE_NAME}`,
+    default: `${SITE_NAME} — Track Your SCP Foundation Reading Progress`,
   },
-  description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+  description: SITE_DESCRIPTION,
   icons: {
     icon: "/scp-logo.svg",
   },

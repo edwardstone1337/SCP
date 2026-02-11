@@ -107,6 +107,7 @@ export function useFootnotes(
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const activeRefId = useRef<string | null>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
+  const activeRefElementRef = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
     if (!contentLoaded || !containerRef.current) return
@@ -124,12 +125,16 @@ export function useFootnotes(
     function dismiss(): void {
       document.removeEventListener('click', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
+      if (activeRefElementRef.current) {
+        activeRefElementRef.current.removeEventListener('focusout', handleFocusOut)
+      }
       if (tooltipEl && tooltipEl.parentNode) {
         tooltipEl.style.opacity = '0'
         tooltipEl.style.visibility = 'hidden'
         tooltipEl.parentNode.removeChild(tooltipEl)
       }
       activeRefId.current = null
+      activeRefElementRef.current = null
       refLinks.forEach((a) => a.removeAttribute('aria-describedby'))
     }
 
@@ -148,6 +153,22 @@ export function useFootnotes(
       }
     }
 
+    function handleFocusOut(e: FocusEvent): void {
+      // Use requestAnimationFrame to ensure relatedTarget is set
+      requestAnimationFrame(() => {
+        const newFocus = e.relatedTarget as Node | null
+        // Dismiss only if focus has left both the tooltip and the active reference
+        if (!tooltipEl || !activeRefElementRef.current) return
+
+        const focusInTooltip = tooltipEl.contains(newFocus)
+        const focusInRef = activeRefElementRef.current === newFocus || activeRefElementRef.current.contains(newFocus)
+
+        if (!focusInTooltip && !focusInRef) {
+          dismiss()
+        }
+      })
+    }
+
     function openTooltip(refEl: HTMLAnchorElement, num: number): void {
       const footnoteEl = container.querySelector<HTMLElement>(`#footnote-${num}`)
       if (!footnoteEl) {
@@ -162,11 +183,13 @@ export function useFootnotes(
 
       showTooltip(tooltipEl!, refEl, num, bodyText, placeAbove)
       activeRefId.current = refEl.id
+      activeRefElementRef.current = refEl
       refEl.setAttribute('aria-describedby', TOOLTIP_ID)
 
       setTimeout(() => {
         document.addEventListener('click', handleClickOutside)
         document.addEventListener('keydown', handleEscape)
+        refEl.addEventListener('focusout', handleFocusOut)
       }, 0)
     }
 

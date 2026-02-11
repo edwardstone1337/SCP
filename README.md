@@ -47,6 +47,7 @@ SCP article content is fetched **directly from the SCP-Data API** by the browser
 ## Safe Change Workflow
 
 - **Playbook**: `docs/SAFE-OPERATIONS.md`
+- **Customer-facing features**: `docs/FEATURES.md`
 - **Verification command**: `npm run verify` (lint + build + auth smoke test)
 - **Auth smoke only**: `npm run smoke:auth`
 

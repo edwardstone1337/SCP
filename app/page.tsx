@@ -105,7 +105,7 @@ async function getTopRatedScps(): Promise<TopRatedScp[]> {
     .select('scp_id, title, rating')
     .not('rating', 'is', null)
     .order('rating', { ascending: false })
-    .limit(3)
+    .limit(4)
 
   if (error) {
     logger.error('Failed to fetch top rated SCPs', {

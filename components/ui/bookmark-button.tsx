@@ -98,6 +98,9 @@ export function BookmarkButton({
           {error}
         </div>
       )}
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {!isPending && displayIsBookmarked ? 'Bookmark added' : !isPending && !displayIsBookmarked ? 'Bookmark removed' : ''}
+      </span>
       <Button
         variant={displayIsBookmarked ? 'primary' : 'secondary'}
         size={size}

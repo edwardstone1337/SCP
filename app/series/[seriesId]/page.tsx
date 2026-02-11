@@ -9,6 +9,8 @@ import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { PageHeader } from '@/components/ui/page-header'
 import { SeriesContent } from './series-content'
+import { generateCollectionPageJsonLd, generateBreadcrumbJsonLd } from '@/lib/utils/json-ld'
+import { SITE_NAME } from '@/lib/constants'
 
 export const revalidate = 86400
 
@@ -139,8 +141,33 @@ export default async function SeriesRangePage({
     { label: `Series ${roman}` },
   ]
 
+  // Generate JSON-LD structured data
+  const siteUrl = getSiteUrl()
+  const seriesTitle = getSeriesTitle(seriesId)
+  const seriesDescription = getSeriesDescription(seriesId)
+  const canonicalUrl = `${siteUrl}/series/${seriesId}`
+
+  const collectionPageSchema = generateCollectionPageJsonLd({
+    name: seriesTitle,
+    description: seriesDescription,
+    url: canonicalUrl,
+  })
+
+  const breadcrumbSchema = generateBreadcrumbJsonLd([
+    { name: SITE_NAME, url: siteUrl },
+    { name: seriesTitle, url: canonicalUrl },
+  ])
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Main>
         <Container size="md">
           <Breadcrumb items={breadcrumbItems} />

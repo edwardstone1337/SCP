@@ -10,6 +10,10 @@
  * - app/scp/[id]/scp-reader.tsx (Client Component) ✓
  *
  * DO NOT USE in Server Components until server-side sanitization is implemented.
+ *
+ * WORKFLOW: After modifying applyInlineStyleLegibilityFixes or sanitizeHtml logic,
+ * verify dark theme legibility across the top 100 SCPs:
+ *   npx tsx scripts/dark-theme-scanner.ts
  */
 import DOMPurify from 'dompurify'
 
@@ -249,7 +253,7 @@ function parseHslFunction(value: string): ParsedColor | null {
   }
 }
 
-function parseColor(value: string): ParsedColor | null {
+export function parseColor(value: string): ParsedColor | null {
   const normalized = normalizeCssColor(value)
   if (normalized === '') return null
 
@@ -273,7 +277,7 @@ function parseColor(value: string): ParsedColor | null {
   return null
 }
 
-function getRelativeLuminance(colorValue: string): number | null {
+export function getRelativeLuminance(colorValue: string): number | null {
   const parsed = parseColor(colorValue)
   if (!parsed || parsed.a <= 0) {
     return null
@@ -284,14 +288,6 @@ function getRelativeLuminance(colorValue: string): number | null {
     return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4
   })
   return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
-}
-
-function isUrlOnlyBackgroundImage(backgroundImageValue: string): boolean {
-  const value = backgroundImageValue.trim().toLowerCase()
-  if (value === '' || value === 'none') {
-    return false
-  }
-  return /^(?:url\([^)]*\)\s*)(?:,\s*url\([^)]*\)\s*)*$/i.test(value)
 }
 
 function getExplicitBackgroundColor(backgroundValue: string, backgroundColorValue: string): string | null {
@@ -343,12 +339,23 @@ function applyInlineStyleLegibilityFixes(html: string): string {
     const hasExplicitBackgroundColor = getExplicitBackgroundColor(backgroundValue, backgroundColorValue) !== null
     const hasMeaningfulBackgroundImage =
       hasInlineBackgroundImage &&
-      !isNonVisualBackground(backgroundImageValue) &&
-      !isUrlOnlyBackgroundImage(backgroundImageValue)
+      !isNonVisualBackground(backgroundImageValue)
     const hasMeaningfulBackground = hasExplicitBackgroundColor || hasMeaningfulBackgroundImage
 
     if (hasMeaningfulBackground && !hasInlineColor) {
-      style.setProperty('color', '#1a1a1a')
+      // For background images/gradients, remove the image and apply dark theme colors
+      const hasBackgroundImage = hasMeaningfulBackgroundImage ||
+                                 backgroundValue.includes('url(') ||
+                                 backgroundValue.includes('gradient')
+      if (hasBackgroundImage) {
+        style.setProperty('background', 'none', 'important')
+        style.setProperty('background-color', 'var(--grey-2, #1e1e1e)', 'important')
+        style.setProperty('color', 'var(--grey-9, #e0e0e0)', 'important')
+      } else {
+        // For solid background colors, set dark text
+        style.setProperty('color', '#1a1a1a')
+      }
+
       return
     }
 
@@ -395,13 +402,17 @@ function applyInlineStyleLegibilityFixes(html: string): string {
   return template.innerHTML
 }
 
-function registerSanitizeHooks() {
-  if (sanitizeHooksRegistered || typeof window === 'undefined') {
+function registerSanitizeHooks(purifyInstance?: any) {
+  const purify = purifyInstance || DOMPurify
+
+  if (sanitizeHooksRegistered || (typeof window === 'undefined' && !purifyInstance)) {
     return
   }
 
-  DOMPurify.addHook('afterSanitizeElements', (node) => {
-    if (!(node instanceof Element)) {
+  purify.addHook('afterSanitizeElements', (node: any) => {
+    // In Node.js, Element comes from the JSDOM window
+    const ElementClass = (typeof window !== 'undefined' && window.Element) || Element
+    if (!(node instanceof ElementClass)) {
       return
     }
 
@@ -413,7 +424,10 @@ function registerSanitizeHooks() {
     if (node.tagName === 'A') {
       const href = node.getAttribute('href')
       if (href && /^\s*javascript\s*:/i.test(href)) {
-        node.remove()
+        // Neutralize javascript: hrefs instead of removing the element,
+        // as Wikidot footnote refs use href="javascript:;" and useFootnotes
+        // depends on these anchor elements being present in the DOM.
+        node.setAttribute('href', '#')
       }
     }
   })
@@ -424,16 +438,21 @@ function registerSanitizeHooks() {
 /**
  * Sanitize HTML content from external sources to prevent XSS
  * Uses DOMPurify with a safe configuration
+ *
+ * @param html - The HTML string to sanitize
+ * @param customDOMPurify - Optional DOMPurify instance (for Node.js environments)
  */
-export function sanitizeHtml(html: string): string {
-  if (typeof window === 'undefined') {
+export function sanitizeHtml(html: string, customDOMPurify?: any): string {
+  // If no custom DOMPurify provided and we're server-side, return as-is
+  if (typeof window === 'undefined' && !customDOMPurify) {
     // Server-side: return as-is (will be sanitized on client)
     return html
   }
 
-  registerSanitizeHooks()
+  const purify = customDOMPurify || DOMPurify
+  registerSanitizeHooks(customDOMPurify)
 
-  const sanitized = DOMPurify.sanitize(html, {
+  const sanitized = purify.sanitize(html, {
     // Allow common HTML tags used in SCP articles
     ALLOWED_TAGS: [
       'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',

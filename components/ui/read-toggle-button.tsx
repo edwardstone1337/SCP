@@ -105,6 +105,9 @@ export function ReadToggleButton({
           </Text>
         </div>
       )}
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {!isPending && displayIsRead ? 'Marked as read' : !isPending && !displayIsRead ? 'Marked as unread' : ''}
+      </span>
       <Button
         variant={displayIsRead ? 'secondary' : 'primary'}
         size={size}

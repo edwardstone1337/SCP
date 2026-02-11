@@ -21,6 +21,23 @@ const SERIES_LIST = Array.from({ length: 10 }, (_, i) => {
   return { id, roman }
 })
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
+
+function getFocusableElements(container: HTMLElement | null): HTMLElement[] {
+  if (!container) return []
+
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true'
+  )
+}
+
 const navStyles: React.CSSProperties = {
   position: 'relative',
   zIndex: 'var(--z-nav)',
@@ -84,6 +101,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const firstOverlayLinkRef = useRef<HTMLAnchorElement>(null)
   const prevOpenRef = useRef(false)
+  const navDrawerRef = useRef<HTMLDivElement>(null)
 
   const closeOverlay = () => setIsOpen(false)
   const toggleOverlay = () => setIsOpen((open) => !open)
@@ -130,11 +148,43 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
   useEffect(() => {
     if (!isOpen) return
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeOverlay()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        closeOverlay()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusable = getFocusableElements(navDrawerRef.current)
+      if (focusable.length === 0) {
+        event.preventDefault()
+        navDrawerRef.current?.focus()
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (active === first || active === navDrawerRef.current) {
+          event.preventDefault()
+          last.focus()
+        }
+        return
+      }
+
+      if (active === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen])
 
   return (
@@ -174,6 +224,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
                   type="button"
                   variant="secondary"
                   size="md"
+                  aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
                   aria-expanded={isOpen}
                   aria-controls="nav-menu"
                   onClick={toggleOverlay}
@@ -189,25 +240,35 @@ export function NavigationClient({ user }: NavigationClientProps) {
       {/* Full-screen navigation overlay */}
       <div
         id="nav-menu"
-        role="dialog"
         aria-label="Navigation menu"
         aria-hidden={!isOpen}
         className={`nav-overlay ${isOpen ? 'open' : ''}`}
       >
-        <nav aria-label="Series navigation" className="nav-drawer">
+        <nav ref={navDrawerRef} aria-label="Series navigation" className="nav-drawer">
           <Stack
             direction="vertical"
             align="start"
             gap="normal"
             style={{ gap: 'var(--spacing-2)', width: '100%' }}
           >
-            <Text
-              size="sm"
-              variant="secondary"
-              style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-            >
-              Series
-            </Text>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <Text
+                size="sm"
+                variant="secondary"
+                style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+              >
+                Series
+              </Text>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={closeOverlay}
+                aria-label="Close navigation menu"
+              >
+                ✕
+              </Button>
+            </div>
 
             <div
               style={{

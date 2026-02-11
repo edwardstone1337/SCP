@@ -126,6 +126,8 @@ export function TopRatedContent({ scps: initialScps }: TopRatedContentProps) {
         isAuthenticated={isAuthenticated}
         userId={userId ?? undefined}
         getItemHref={(scp) => `/scp/${scp.scp_id}?context=top-rated&rank=${(scp as ScpItem).rank}`}
+        hideSortDropdown={true}
+        defaultSort="rating-desc"
       />
 
       {/* Bottom CTA */}

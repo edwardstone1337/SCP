@@ -12,6 +12,9 @@ interface CardProps {
   href?: string
   className?: string
   style?: CSSProperties
+  role?: string
+  'aria-live'?: 'polite' | 'assertive' | 'off'
+  'aria-busy'?: 'true' | 'false' | boolean
 }
 
 export function Card({
@@ -22,6 +25,9 @@ export function Card({
   href,
   className,
   style,
+  role,
+  'aria-live': ariaLive,
+  'aria-busy': ariaBusy,
 }: CardProps) {
   const cardClassName = ['ui-card', `ui-card-padding-${padding}`, className].filter(Boolean).join(' ')
 
@@ -74,6 +80,9 @@ export function Card({
       style={combinedStyle}
       data-variant={variant}
       data-card-padding={padding}
+      role={role}
+      aria-live={ariaLive}
+      aria-busy={ariaBusy !== undefined ? (ariaBusy === 'true' || ariaBusy === true) : undefined}
     >
       {children}
     </div>

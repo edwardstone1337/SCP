@@ -21,11 +21,23 @@ For each changed file:
   - Use categories: Added, Changed, Fixed, Security, Removed
   - Be concise, user-facing language
 
-  - **SYSTEM-ARCHITECTURE.md**: Update any sections affected by the changes
+- **SYSTEM-ARCHITECTURE.md**: Update any sections affected by the changes
   - Route table, file structure tree, database schema, component library table, auth flow, security notes
   - Only update sections that are actually affected — don't rewrite unrelated sections
   - If a file was added, deleted, or renamed, reflect it in the file structure
   - If a route was added or removed, update the route table
+
+- **FEATURES.md**: Update customer-facing capabilities when user-visible behavior changes
+  - Focus on value/features users can see and use
+  - Do not include implementation-only details (internal refactors, provider internals)
+  - Track Added / Changed / Removed behavior at feature level
+  - If no user-facing feature changed, explicitly state "No customer-facing feature changes" in your final response
+
+## 3.1 Documentation Completion Checklist (Required)
+- [ ] Checked code diff and verified behavior from source code
+- [ ] Updated `CHANGELOG.md` (or confirmed not needed)
+- [ ] Updated `docs/SYSTEM-ARCHITECTURE.md` where affected
+- [ ] Updated `docs/FEATURES.md` for customer-facing changes (or explicitly confirmed none)
 
 
 ## 4. Documentation Style Rules

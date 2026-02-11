@@ -1,8 +1,11 @@
 import { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
 import { getSiteUrl } from '@/lib/utils/site-url'
+import { seriesToRoman } from '@/lib/utils/series'
 import { notFound } from 'next/navigation'
 import { ScpContent } from './scp-content'
+import { generateCreativeWorkJsonLd, generateBreadcrumbJsonLd } from '@/lib/utils/json-ld'
+import { SITE_NAME } from '@/lib/constants'
 
 async function getAdjacentScps(
   supabase: ReturnType<typeof createStaticClient>,
@@ -150,7 +153,42 @@ export default async function ScpPage({
     scpData.scp_number
   )
 
+  // Generate JSON-LD structured data
+  const siteUrl = getSiteUrl()
+  const canonicalUrl = `${siteUrl}/scp/${id}`
+  const seriesRoman = seriesToRoman(scpData.series)
+  const seriesTitle = seriesRoman ? `Series ${seriesRoman}` : scpData.series
+  const seriesUrl = `${siteUrl}/series/${scpData.series}`
+
+  const creativeWorkSchema = generateCreativeWorkJsonLd({
+    scp_id: scpData.scp_id,
+    title: scpData.title,
+    description: `Read ${scpData.scp_id} on SCP Reader. Track your reading progress through the SCP Foundation database.`,
+    url: canonicalUrl,
+    isBasedOn: scpData.url,
+    isPartOf: {
+      name: seriesTitle,
+      url: seriesUrl,
+    },
+  })
+
+  const breadcrumbSchema = generateBreadcrumbJsonLd([
+    { name: SITE_NAME, url: siteUrl },
+    { name: seriesTitle, url: seriesUrl },
+    { name: `${scpData.scp_id} — ${scpData.title}`, url: canonicalUrl },
+  ])
+
   return (
-    <ScpContent scp={scpData} prev={prev} next={next} />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(creativeWorkSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <ScpContent scp={scpData} prev={prev} next={next} />
+    </>
   )
 }

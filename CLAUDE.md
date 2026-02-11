@@ -1,6 +1,7 @@
 See @CHANGELOG.md for release history
 See @docs/SAFE-OPERATIONS.md for full safe operations guide
 See @docs/SYSTEM-ARCHITECTURE.md for detailed architecture
+See @docs/FEATURES.md for customer-facing features
 
 # CLAUDE.md
 
@@ -17,6 +18,9 @@ npm run lint         # Run ESLint
 npm run verify       # Run lint + build + auth smoke test (use before merge)
 npm run smoke:auth   # Auth smoke test only
 npm run seed         # Seed SCP data from scp-data.tedivm.com (requires .env.local)
+
+# QA Tools
+npx tsx scripts/dark-theme-scanner.ts  # Scan top 100 SCPs for dark theme issues (run after modifying lib/utils/sanitize.ts)
 ```
 
 ## Architecture
@@ -87,6 +91,8 @@ See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `
 3. Run: `npm run verify` (lint + build + auth smoke test)
 4. Manual smoke checks: `/`, `/scp/SCP-173`, `/login`, `/saved` (logged out and logged in)
 5. Merge only if all checks pass
+
+**Docs workflow**: For any user-visible behavior change, update `CHANGELOG.md`, `docs/SYSTEM-ARCHITECTURE.md`, and `docs/FEATURES.md`.
 
 **Known lint baseline**: If `npm run lint` shows ONLY the `progress-ring.tsx` warning (`react-hooks/set-state-in-effect`), that's the known baseline — treat as passing. Do not introduce new lint failures.
 

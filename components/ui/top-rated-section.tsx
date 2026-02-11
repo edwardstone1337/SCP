@@ -19,40 +19,110 @@ export function TopRatedSection({ scps }: TopRatedSectionProps) {
   if (scps.length === 0) return null
 
   return (
-    <section style={{ marginBottom: 'var(--spacing-6)' }}>
-      <Stack direction="vertical" gap="normal">
-        <Text
-          size="sm"
-          variant="secondary"
-          style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-        >
-          Top Rated
-        </Text>
-        <Grid cols="auto">
-          {scps.map((scp, index) => (
-            <Link
-              key={scp.scp_id}
-              href={`/scp/${scp.scp_id}?context=top-rated&rank=${index + 1}`}
-              variant="default"
+    <>
+      <style>{`
+        /* Grid column overrides - mobile to desktop */
+        .top-rated-grid-wrapper .grid {
+          grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+          .top-rated-grid-wrapper .grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .top-rated-grid-wrapper .grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
+        }
+
+        /* Hide 4th card at md breakpoint (3-column layout) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .top-rated-grid-wrapper .grid > *:nth-child(4) {
+            display: none;
+          }
+        }
+
+        /* Card content layout - vertical by default (md+) */
+        .top-rated-card-content {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-1);
+        }
+
+        /* Horizontal layout on mobile */
+        @media (max-width: 767px) {
+          .top-rated-card-content {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--spacing-3);
+          }
+
+          .top-rated-card-content-left {
+            min-width: 0;
+            flex: 1;
+          }
+
+          .top-rated-card-content-right {
+            flex-shrink: 0;
+          }
+        }
+      `}</style>
+
+      <section style={{ marginBottom: 'var(--spacing-6)' }}>
+        <Stack direction="vertical" gap="normal">
+          {/* Heading row with inline button */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 'var(--spacing-2)',
+            }}
+          >
+            <Text
+              size="sm"
+              variant="secondary"
+              style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
             >
-              <Card variant="interactive" padding="md">
-                <Stack direction="vertical" gap="tight">
-                  <Mono size="sm">{scp.scp_id}</Mono>
-                  <Heading level={3}>{scp.title}</Heading>
-                  <Text size="sm" variant="secondary">
-                    Rating: {scp.rating}
-                  </Text>
-                </Stack>
-              </Card>
-            </Link>
-          ))}
-        </Grid>
-        <div style={{ marginTop: 'var(--spacing-2)', display: 'flex', justifyContent: 'center' }}>
-          <Button variant="secondary" href="/top-rated">
-            View Top 100
-          </Button>
-        </div>
-      </Stack>
-    </section>
+              Top Rated
+            </Text>
+            <Button variant="secondary" href="/top-rated" style={{ fontSize: 'var(--font-size-sm)' }}>
+              View Top 100
+            </Button>
+          </div>
+
+          {/* Responsive grid */}
+          <div className="top-rated-grid-wrapper">
+            <Grid cols="auto">
+              {scps.map((scp, index) => (
+                <Link
+                  key={scp.scp_id}
+                  href={`/scp/${scp.scp_id}?context=top-rated&rank=${index + 1}`}
+                  variant="default"
+                >
+                  <Card variant="interactive" padding="md">
+                    <div className="top-rated-card-content">
+                      <div className="top-rated-card-content-left">
+                        <Mono size="sm">{scp.scp_id}</Mono>
+                        <Heading level={3}>{scp.title}</Heading>
+                      </div>
+                      <div className="top-rated-card-content-right">
+                        <Text size="sm" variant="secondary">
+                          Rating: {scp.rating}
+                        </Text>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </Grid>
+          </div>
+        </Stack>
+      </section>
+    </>
   )
 }

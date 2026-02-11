@@ -47,7 +47,7 @@ interface ScpReaderProps {
 
 export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderProps) {
   const hasRecordedView = useRef(false)
-  const contentContainerRef = useRef<HTMLDivElement>(null)
+  const contentContainerRef = useRef<HTMLElement>(null)
 
   const { data: content, isLoading, isFetching, error: contentError, refetch } = useScpContent(
     scp.content_file,
@@ -114,7 +114,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
             </Stack>
             <div className="reader-header-row">
               <Stack direction="vertical" gap="tight">
-                <Heading level={1}>{scp.title}</Heading>
+                <Heading level={1} id="scp-title">{scp.title}</Heading>
                 <Stack direction="horizontal" gap="tight" align="center" style={{ flexWrap: 'wrap' }}>
                   <Text variant="secondary" size="sm">
                     ★ {scp.rating}
@@ -173,6 +173,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
       {/* Content */}
       <div style={{ marginTop: 'var(--spacing-4)' }}>
         <Container size="lg">
+          <h2 className="sr-only">Article Content</h2>
           {/* Context Banner */}
           {contextInfo && (
             <div style={{ marginBottom: 'var(--spacing-2)' }}>
@@ -188,7 +189,8 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
           )}
 
           {isLoading && (
-            <Card padding="lg" style={{ marginTop: 'var(--spacing-2)' }}>
+            <Card padding="lg" style={{ marginTop: 'var(--spacing-2)' }} role="status" aria-live="polite" aria-busy="true">
+              <span className="sr-only">Loading SCP content...</span>
               <Stack gap="normal">
                 <Skeleton width="96%" height="1rem" />
                 <Skeleton width="92%" height="1rem" />
@@ -259,9 +261,10 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
           {content && (
             <>
               <Card padding="lg">
-                <div
+                <article
                   ref={contentContainerRef}
                   className="scp-content"
+                  aria-labelledby="scp-title"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
                 />
               </Card>

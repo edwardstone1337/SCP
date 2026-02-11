@@ -34,7 +34,7 @@
   --color-grey-5: #d9d9d9;
   --color-grey-6: #bfbfbf;
   --color-grey-7: #8c8c8c;
-  --color-grey-8: #303030;  /* was #595959 */
+  --color-grey-8: #595959;
   --color-grey-9: #141414;  /* was #262626 */
   --color-grey-10: #000000;
 
@@ -47,7 +47,7 @@
   --color-text-primary: var(--color-grey-1);
   --color-text-secondary: #dbdbdb;
   --color-text-muted: var(--color-grey-7);
-  --color-accent: #e41c2c;
+  --color-accent: #ef4444;
   --color-accent-hover: var(--color-red-7);
 
   /* Semantic: Surface colors */
@@ -332,7 +332,7 @@ a[data-variant="secondary"]:hover {
 
 button[data-variant="ghost"]:not(:disabled):hover,
 a[data-variant="ghost"]:hover {
-  background-color: var(--color-grey-8);  /* was grey-9, now visible contrast */
+  background-color: #404040;
   color: var(--color-text-primary);
 }
 
@@ -664,7 +664,9 @@ select:focus-visible {
 
 .scp-content sup.footnoteref a.footnoteref:hover,
 .scp-content sup.footnoteref a.footnoteref:focus-visible {
-  background-color: var(--color-red-1);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 2px;
   outline: none;
 }
 
@@ -704,6 +706,19 @@ select:focus-visible {
     padding-left: var(--spacing-2);
     padding-right: var(--spacing-2);
   }
+}
+
+/* Screen reader only - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* Loading spinner keyframes */

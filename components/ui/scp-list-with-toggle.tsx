@@ -28,6 +28,8 @@ interface ScpListWithToggleProps {
   isAuthenticated: boolean  // Hide toggle for guests (all items are unread anyway)
   userId?: string | null    // For ReadToggleButton auth
   getItemHref?: (scp: ScpItem, index: number) => string  // Optional custom href generator
+  defaultSort?: string      // Override initial sort value (default: 'number-asc')
+  hideSortDropdown?: boolean  // Hide sort dropdown when true
 }
 
 function sortScps(scps: ScpItem[], sortBy: string): ScpItem[] {
@@ -45,9 +47,9 @@ function sortScps(scps: ScpItem[], sortBy: string): ScpItem[] {
   }
 }
 
-export function ScpListWithToggle({ scps, isAuthenticated, userId, getItemHref }: ScpListWithToggleProps) {
+export function ScpListWithToggle({ scps, isAuthenticated, userId, getItemHref, defaultSort, hideSortDropdown }: ScpListWithToggleProps) {
   const [hideRead, setHideRead] = useState(false)
-  const [sortBy, setSortBy] = useState('number-asc')
+  const [sortBy, setSortBy] = useState(defaultSort ?? 'number-asc')
 
   const sortedScps = sortScps(scps, sortBy)
   const filteredScps = hideRead ? sortedScps.filter(scp => !scp.is_read) : sortedScps
@@ -66,20 +68,22 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId, getItemHref }
           flexWrap: 'wrap',
         }}
       >
-        {/* Sort dropdown - always visible */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
-          <Label htmlFor="sort-select" style={{ whiteSpace: 'nowrap', marginBottom: 0 }}>
-            Sort by
-          </Label>
-          <Select
-            id="sort-select"
-            options={sortOptions}
-            value={sortBy}
-            onChange={setSortBy}
-            aria-label="Sort articles"
-            style={{ width: 'auto', minWidth: '150px' }}
-          />
-        </div>
+        {/* Sort dropdown - hidden when hideSortDropdown is true */}
+        {!hideSortDropdown && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
+            <Label htmlFor="sort-select" style={{ whiteSpace: 'nowrap', marginBottom: 0 }}>
+              Sort by
+            </Label>
+            <Select
+              id="sort-select"
+              options={sortOptions}
+              value={sortBy}
+              onChange={setSortBy}
+              aria-label="Sort articles"
+              style={{ width: 'auto', minWidth: '150px' }}
+            />
+          </div>
+        )}
 
         {/* Hide read toggle - only for authenticated with read items */}
         {isAuthenticated && readCount > 0 && (

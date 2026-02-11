@@ -45,9 +45,9 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/` | Home: themed header (SECURE CONTAIN PROTECT), Daily Featured, series grid, Recently Viewed | Public (progress when logged in) |
 | `/top-rated` | Top 100 highest-rated SCP list, with ranked links into reader context | Public (toggles require login) |
 | `/series` | Redirects to `/` | — |
-| `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) | Public |
+| `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) + CollectionPage/Breadcrumb JSON-LD | Public |
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
-| `/scp/[id]` | SCP reader (content via direct SCP-Data API fetch, prev/next, bookmark/read) | Public (toggles require login) |
+| `/scp/[id]` | SCP reader (content via direct SCP-Data API fetch, prev/next, bookmark/read) + CreativeWork/Breadcrumb JSON-LD | Public (toggles require login) |
 | `/saved` | Bookmarked SCPs with sort | **Protected** (redirects to login) |
 | `/login` | Magic-link login form | Public (redirects to `/` if already logged in) |
 | `/auth/callback` | OAuth/magic-link callback; exchanges code for session | Internal |
@@ -73,7 +73,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 ```
 
 - **Metadata (series, ranges, list):** Server Components read from Supabase (anon key, RLS). Guest users get `read=0`; authenticated get real progress/bookmarks.
-- **Top-rated landing data:** Home fetches top 3 rated SCP rows server-side; `/top-rated` fetches top 100 rows server-side, then hydrates user read/bookmark state client-side after auth check.
+- **Top-rated landing data:** Home fetches top 4 rated SCP rows server-side; `/top-rated` fetches top 100 rows server-side, then hydrates user read/bookmark state client-side after auth check.
 - **Article content:** Server passes `content_file` to client; `useScpContent` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`. TanStack Query caches client-side (1h stale, 24h gc) with retry/backoff.
 - **Mutations:** Bookmark and read toggles call Server Actions; actions use Supabase server client (cookies), then `revalidatePath()` so the next request gets fresh data.
 
@@ -197,10 +197,10 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `--color-text-primary` | Primary text (grey-1) |
 | `--color-text-secondary` | Secondary text (#dbdbdb) |
 | `--color-text-muted` | Muted (grey-7) |
-| `--color-accent` | Primary actions, links (#e41c2c) |
+| `--color-accent` | Primary actions, links (#ef4444) |
 | `--color-accent-hover` | Hover (red-7) |
 | `--color-surface` | Cards, inputs (grey-9) |
-| `--color-surface-border` | Borders (grey-8) |
+| `--color-surface-border` | Borders (grey-8, #595959) |
 | Red scale | Danger, success states; green-5/7 for success |
 
 ### Typography
@@ -238,11 +238,11 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `bookmark-button` | Save/Saved toggle; optimistic update; on error revert + logger; opens sign-in modal when unauthenticated (preserves current location). |
 | `breadcrumb` | Breadcrumb trail (e.g. Series → Series I → 001–099 → SCP-173). |
 | `button` | Variants: primary, secondary, ghost, danger, success; sizes sm/md/lg; supports href; forwardRef. |
-| `card` | Container; variants default, interactive, bordered; optional accentBorder. |
+| `card` | Container; variants default, interactive, bordered; optional accentBorder; forwards `role` and `aria-live`/`aria-busy` props. |
 | `container` | Max-width + padding; sizes xs … 2xl, full. |
 | `daily-featured-section` | Hero-style "Today's Featured SCP" block on home page; deterministic by UTC date (getDailyIndex); shows scp_id, title, rating, series; link wraps card. |
 | `grid` | Responsive grid (e.g. cols="auto" → 2→3→4). |
-| `heading` | Heading level 1–4, optional accent. |
+| `heading` | Heading level 1–4, optional accent; supports `id` prop forwarding. |
 | `icon` | Inline SVG icons (check, eye, star, bookmark, bookmark-filled, arrow-up, etc.). |
 | `input` | Styled input with design tokens. |
 | `label` | Form label. |
@@ -257,18 +257,18 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `read-toggle-button` | Mark as Read/Unread; optional routeId for reader revalidation; optimistic update; opens sign-in modal when unauthenticated (preserves current location). |
 | `recently-viewed-section` | Recently Viewed block: last 5 SCPs for auth users; zero states for guests ("Sign in to track your reading history") and new users ("Articles you read will appear here"). |
 | `scp-list-item` | SCP row: title, rating, id, read/bookmark toggles, full-card link. |
-| `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem. |
+| `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem; supports `defaultSort` and optional hidden sort control. |
 | `select` | Native select styled with design tokens. |
 | `series-card` | Series card with progress, link to series. |
-| `top-rated-section` | Home page Top Rated block (top 3 by rating) with ranked reader links and CTA to `/top-rated`. |
+| `top-rated-section` | Home page Top Rated block (top 4 by rating) with ranked reader links and CTA to `/top-rated`; responsive 1/3/4-card layout by breakpoint. |
 | `skeleton` | Tokenized dark-theme shimmer placeholder with reduced-motion support. |
-| `skip-link` | Accessibility skip-to-content link; off-screen until focus (top: -9999px); spacing tokens; highest layer via `--z-skip-link`. |
+| `skip-link` | Accessibility skip-to-content link using visually-hidden clipping pattern until focus/focus-visible; spacing tokens; highest layer via `--z-skip-link`. |
 | `spinner` | Loading spinner. |
 | `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose. |
 | `text` | Text with variant/size. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, top-right auth action and Menu button on all viewports (`Sign In` primary when logged out, `Sign Out` secondary when logged in, `Menu` secondary always). Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay lists Series I–X (two-column grid), Saved (auth), and account email; active series/saved routes are highlighted with `aria-current="page"`.
+**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, top-right auth action and Menu button on all viewports (`Sign In` primary when logged out, `Sign Out` secondary when logged in, `Menu` secondary always). Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes a close button, Escape-to-close, and Tab focus trapping while open. It lists Series I–X (two-column grid), Saved (auth), and account email; active series/saved routes are highlighted with `aria-current="page"`.
 
 ---
 
@@ -303,7 +303,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 ### Sorting
 
 - **Range list (`ScpListWithToggle`):** Client-side. Options: Oldest First, Newest First, Top Rated, Lowest Rated. Optional "Hide read" filter.
-- **Top 100 list (`/top-rated`):** Uses `ScpListWithToggle` with same sort/filter controls; item links include `?context=top-rated&rank=N` to preserve ranked navigation context in reader.
+- **Top 100 list (`/top-rated`):** Uses `ScpListWithToggle` with fixed default sort (`rating-desc`) and hidden sort dropdown; keeps "Hide read" filter when applicable. Item links include `?context=top-rated&rank=N` to preserve ranked navigation context in reader.
 - **Saved list (`SavedList`):** Client-side. Options: Recently Saved, Oldest Saved, Oldest/Newest First, Top/Lowest Rated. Same `Select` component.
 
 ### Top Rated navigation context
@@ -312,11 +312,17 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 - **Reader behavior:** `ScpContent` enables `useTopRatedList()` only in top-rated context, loads ordered top-100 `scp_id` values, and overrides prev/next targets by rank instead of SCP number adjacency.
 - **Reader UI:** Context banner shows `Top Rated · #N of 100` plus a link back to `/top-rated`.
 
+### Structured data (JSON-LD)
+
+- **SCP page (`/scp/[id]`):** Injects `CreativeWork` and `BreadcrumbList` JSON-LD via `lib/utils/json-ld.ts`.
+- **Series page (`/series/[seriesId]`):** Injects `CollectionPage` and `BreadcrumbList` JSON-LD via `lib/utils/json-ld.ts`.
+- **Name handling:** `CreativeWork` name uses `SCP-XXX — Title` only when title differs from `scp_id`.
+
 ### Content Loading
 
 - **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. If `content_file` is null, reader shows "Content is not available."
 - **Body:** Client `useScpContent(contentFile, scpId)` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient failures.
-- **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-only) then `dangerouslySetInnerHTML` in a div with class `scp-content` (prose styles in globals.css).
+- **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-side by default; optional custom instance for Node/JSDOM tooling) then `dangerouslySetInnerHTML` in an `article` with class `scp-content` and `aria-labelledby` for semantic association to the page title.
 - **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback).
 
 ### Reader typography & layout
@@ -337,7 +343,7 @@ All `.scp-content` styles live in `app/globals.css` and use design tokens from `
 - **Hook:** `lib/hooks/use-footnotes.ts` runs after content renders. It attaches click and keyboard handlers to inline refs, resolves the target footnote by id, and shows a tooltip with the footnote text (leading "N. " stripped).
 - **Tooltip:** `position: fixed`, viewport-clamped with padding; `role="tooltip"`, `aria-describedby` for accessibility; appears above or below the ref depending on space. Styled with design tokens (grey-9 background, grey-7 border, `--shadow-elevated`).
 - **Bottom section:** Footnote blocks remain in the DOM as the reference section; `.footnote-footer` styled with smaller font, secondary color, border-top.
-- **Inline refs:** Styled in globals.css as interactive (accent color, no underline; hover/focus highlight with `--color-red-1` background).
+- **Inline refs:** Styled in globals.css as interactive (accent color, no underline; hover/focus uses accent underline styling).
 
 ### Content links
 
@@ -504,6 +510,7 @@ components/
 └── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 
 lib/
+├── constants.ts             # Site/authorship constants (name, description, license)
 ├── supabase/client.ts       # Browser client (anon)
 ├── supabase/server.ts       # Server client (cookies, env)
 ├── supabase/static.ts       # createStaticClient (no cookies; static/ISR pages)
@@ -514,10 +521,13 @@ lib/
 │   ├── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
 │   └── use-top-rated-list.ts # Top 100 ranked `scp_id` list for reader contextual prev/next
 ├── providers/query-provider.tsx
-├── utils/cn.ts, daily-scp.ts, loading-messages.ts, sanitize.ts, series.ts, site-url.ts
+├── utils/cn.ts, daily-scp.ts, json-ld.ts, loading-messages.ts, sanitize.ts, series.ts, site-url.ts
 └── logger.ts
 
 scripts/
+├── dark-theme-scanner.ts    # QA: scan top 100 SCPs for dark-theme legibility issues
+├── README-dark-theme-scanner.md # Scanner usage and interpretation guide
+├── output/                  # Scanner JSON reports (generated artifacts)
 └── seed-scps.ts             # SCP-Data API → scps table (service role)
 
 supabase/
