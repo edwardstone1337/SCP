@@ -3,10 +3,16 @@
 All notable changes to SCP Reader are documented here.
 
 ## [Unreleased]
+### Added
+- New `/top-rated` page listing top 100 highest-rated SCPs, with read/bookmark toggles and sign-in CTA for progress tracking
+- Home page "Top Rated" section showing the top 3 entries with quick links into ranked reading flow
+
 ### Changed
 - SCP/series/home pages use static Supabase client (`createStaticClient`) for server data; auth-specific data (progress, recently viewed) fetched client-side where needed
 - Navigation: auth state resolved client-side via `getUser` + `onAuthStateChange`; layout wraps Navigation in `Suspense` for loading
 - SCP content: client fetches directly from SCP-Data API (`scp-data.tedivm.com`); internal proxy route removed
+- SCP reader now preserves ranked navigation context (`context=top-rated&rank=n`) so Previous/Next follows Top 100 order when opened from top-rated links
+- Sitemap now includes `/top-rated`
 
 ### Performance
 - Removed SCP content proxy (`/api/scp-content/[contentFile]`); browser fetches directly from SCP-Data API, eliminating ~70% of Vercel origin transfer

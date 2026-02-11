@@ -43,6 +43,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | Route | Purpose | Auth |
 |-------|---------|------|
 | `/` | Home: themed header (SECURE CONTAIN PROTECT), Daily Featured, series grid, Recently Viewed | Public (progress when logged in) |
+| `/top-rated` | Top 100 highest-rated SCP list, with ranked links into reader context | Public (toggles require login) |
 | `/series` | Redirects to `/` | — |
 | `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) | Public |
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
@@ -72,6 +73,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 ```
 
 - **Metadata (series, ranges, list):** Server Components read from Supabase (anon key, RLS). Guest users get `read=0`; authenticated get real progress/bookmarks.
+- **Top-rated landing data:** Home fetches top 3 rated SCP rows server-side; `/top-rated` fetches top 100 rows server-side, then hydrates user read/bookmark state client-side after auth check.
 - **Article content:** Server passes `content_file` to client; `useScpContent` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`. TanStack Query caches client-side (1h stale, 24h gc) with retry/backoff.
 - **Mutations:** Bookmark and read toggles call Server Actions; actions use Supabase server client (cookies), then `revalidatePath()` so the next request gets fresh data.
 
@@ -224,7 +226,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 - **Atoms:** Button, Link, Badge, Icon, Input, Label, Text, Heading, Mono.
 - **Molecules:** Card, Select, Message, Spinner, Skeleton, ProgressRing, ProgressText.
-- **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop.
+- **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, TopRatedSection, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop.
 - **Layout:** Main, Container, Stack, Grid, Navigation, SkipLink, Logo. Navigation: server wrapper (`navigation.tsx`) + client (`navigation-client.tsx`).
 
 ### Component Library (components/ui/)
@@ -258,6 +260,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem. |
 | `select` | Native select styled with design tokens. |
 | `series-card` | Series card with progress, link to series. |
+| `top-rated-section` | Home page Top Rated block (top 3 by rating) with ranked reader links and CTA to `/top-rated`. |
 | `skeleton` | Tokenized dark-theme shimmer placeholder with reduced-motion support. |
 | `skip-link` | Accessibility skip-to-content link; off-screen until focus (top: -9999px); spacing tokens; highest layer via `--z-skip-link`. |
 | `spinner` | Loading spinner. |
@@ -300,7 +303,14 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 ### Sorting
 
 - **Range list (`ScpListWithToggle`):** Client-side. Options: Oldest First, Newest First, Top Rated, Lowest Rated. Optional "Hide read" filter.
+- **Top 100 list (`/top-rated`):** Uses `ScpListWithToggle` with same sort/filter controls; item links include `?context=top-rated&rank=N` to preserve ranked navigation context in reader.
 - **Saved list (`SavedList`):** Client-side. Options: Recently Saved, Oldest Saved, Oldest/Newest First, Top/Lowest Rated. Same `Select` component.
+
+### Top Rated navigation context
+
+- **Entry points:** Home Top Rated cards and `/top-rated` list links append `context=top-rated&rank=<1..100>` to reader URLs.
+- **Reader behavior:** `ScpContent` enables `useTopRatedList()` only in top-rated context, loads ordered top-100 `scp_id` values, and overrides prev/next targets by rank instead of SCP number adjacency.
+- **Reader UI:** Context banner shows `Top Rated · #N of 100` plus a link back to `/top-rated`.
 
 ### Content Loading
 
@@ -393,6 +403,7 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 | Route | Revalidate | Client hydration component |
 |-------|-----------|--------------------------|
 | `/` | 300 (5 min) | `app/home-content.tsx` |
+| `/top-rated` | 2592000 (30 days) | `app/top-rated/top-rated-content.tsx` |
 | `/series/[seriesId]` | 86400 (24h) | `app/series/[seriesId]/series-content.tsx` |
 | `/series/[seriesId]/[range]` | 86400 (24h) | `app/series/[seriesId]/[range]/range-content.tsx` |
 | `/scp/[id]` | 86400 (24h) | `app/scp/[id]/scp-content.tsx` |
@@ -471,6 +482,9 @@ app/
 │   ├── scp-content.tsx      # Wrapper; passes scp/prev/next to ScpReader
 │   ├── scp-reader.tsx       # Client: content + toggles
 │   └── loading.tsx
+├── top-rated/
+│   ├── page.tsx             # Top 100 rated route (static client + ISR)
+│   └── top-rated-content.tsx # Client auth hydration + ranked list context links
 ├── series/
 │   ├── page.tsx             # Redirect to /
 │   ├── [seriesId]/page.tsx, series-content.tsx  # Range list (static client)
@@ -485,7 +499,7 @@ app/
 └── not-found.tsx            # 404
 
 components/
-├── ui/                      # Design system (see Component Library table; includes daily-featured-section, recently-viewed-section, skeleton)
+├── ui/                      # Design system (see Component Library table; includes daily-featured-section, top-rated-section, recently-viewed-section, skeleton)
 ├── navigation.tsx           # Client nav (getUser, onAuthStateChange, renders NavigationClient)
 └── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 
@@ -497,7 +511,8 @@ lib/
 ├── hooks/
 │   ├── use-content-links.ts # In-article link interception (SCP→client nav, external→new tab, wiki→rewrite)
 │   ├── use-footnotes.ts     # Footnote tooltip handlers (refs ↔ footnote-N)
-│   └── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
+│   ├── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
+│   └── use-top-rated-list.ts # Top 100 ranked `scp_id` list for reader contextual prev/next
 ├── providers/query-provider.tsx
 ├── utils/cn.ts, daily-scp.ts, loading-messages.ts, sanitize.ts, series.ts, site-url.ts
 └── logger.ts

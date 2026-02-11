@@ -1,7 +1,7 @@
 // All GA4 custom events for SCP Reader.
 // Event schema is documented in TRACKING.md — update both when adding events.
 
-export type SignInTrigger = 'nav' | 'bookmark' | 'read_toggle' | 'recently_viewed'
+export type SignInTrigger = 'nav' | 'bookmark' | 'read_toggle' | 'recently_viewed' | 'top_rated'
 
 declare global {
   interface Window {
