@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { notFound } from 'next/navigation'
 import { ScpContent } from './scp-content'
 
@@ -86,7 +87,7 @@ export async function generateMetadata({
 
   if (!scpData) {
     return {
-      title: 'SCP Not Found — SCP Reader',
+      title: 'SCP Not Found',
       description: 'Track your reading progress through the SCP Foundation database.',
     }
   }
@@ -105,9 +106,27 @@ export async function generateMetadata({
     }
   }
 
+  const canonicalUrl = `${getSiteUrl()}/scp/${id}`
+  const title = scpData.scp_id
+
   return {
-    title: `${scpData.scp_id} — SCP Reader`,
+    title,
     description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      siteName: 'SCP Reader',
+      type: 'article',
+      title,
+      description,
+      url: canonicalUrl,
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
   }
 }
 

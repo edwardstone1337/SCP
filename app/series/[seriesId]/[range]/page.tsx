@@ -1,6 +1,8 @@
+import { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
 import { logger } from '@/lib/logger'
 import { seriesToRoman, formatRange } from '@/lib/utils/series'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { notFound } from 'next/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
@@ -45,6 +47,43 @@ async function getScpsInRange(
     is_read: false,
     is_bookmarked: false,
   }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ seriesId: string; range: string }>
+}): Promise<Metadata> {
+  const { seriesId, range } = await params
+  const rangeStart = parseInt(range, 10)
+  const rangeEnd = rangeStart + 99
+
+  const roman = seriesToRoman(seriesId)
+  const seriesLabel = roman ? `Series ${roman}` : seriesId
+
+  const title = `SCP-${String(rangeStart).padStart(3, '0')} to SCP-${String(rangeEnd).padStart(3, '0')} | ${seriesLabel}`
+  const description = `Read SCP-${String(rangeStart).padStart(3, '0')} through SCP-${String(rangeEnd).padStart(3, '0')} in ${seriesLabel}. Track your progress on SCP Reader.`
+  const canonicalUrl = `${getSiteUrl()}/series/${seriesId}/${range}`
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      siteName: 'SCP Reader',
+      type: 'website',
+      title,
+      description,
+      url: canonicalUrl,
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
+  }
 }
 
 export default async function RangeScpListPage({

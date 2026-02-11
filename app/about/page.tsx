@@ -1,9 +1,31 @@
 import type { CSSProperties } from 'react'
+import type { Metadata } from 'next'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Card } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
 import { Heading, Text } from '@/components/ui/typography'
+
+export const metadata: Metadata = {
+  title: 'About',
+  description: 'Learn about SCP Reader, an independent reading companion for the SCP Foundation collaborative fiction archive. Track your progress, bookmark favorites, and explore the SCP database.',
+  alternates: {
+    canonical: `${getSiteUrl()}/about`,
+  },
+  openGraph: {
+    siteName: 'SCP Reader',
+    type: 'website',
+    title: 'About',
+    description: 'Learn about SCP Reader, an independent reading companion for the SCP Foundation collaborative fiction archive. Track your progress, bookmark favorites, and explore the SCP database.',
+    url: `${getSiteUrl()}/about`,
+  },
+  twitter: {
+    card: 'summary',
+    title: 'About',
+    description: 'Learn about SCP Reader, an independent reading companion for the SCP Foundation collaborative fiction archive. Track your progress, bookmark favorites, and explore the SCP database.',
+  },
+}
 
 const sectionHeadingStyle: CSSProperties = {
   fontSize: 'var(--font-size-lg)',

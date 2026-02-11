@@ -24,11 +24,15 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SCP Reader",
-  description: "Track your SCP Foundation reading progress",
+  title: {
+    template: '%s — SCP Reader',
+    default: 'SCP Reader — Track Your SCP Foundation Reading Progress',
+  },
+  description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
   icons: {
     icon: "/scp-logo.svg",
   },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://scp-reader.co'),
 };
 
 export default function RootLayout({

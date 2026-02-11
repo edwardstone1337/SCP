@@ -1,6 +1,8 @@
+import { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
 import { logger } from '@/lib/logger'
 import { getDailyIndex } from '@/lib/utils/daily-scp'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Heading, Text } from '@/components/ui/typography'
@@ -8,6 +10,26 @@ import { Stack } from '@/components/ui/stack'
 import { HomeContent } from './home-content'
 
 export const revalidate = 300 // ISR: regenerate every 5 minutes
+
+export const metadata: Metadata = {
+  title: 'SCP Reader — Track Your SCP Foundation Reading Progress',
+  description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+  alternates: {
+    canonical: getSiteUrl(),
+  },
+  openGraph: {
+    siteName: 'SCP Reader',
+    type: 'website',
+    title: 'SCP Reader — Track Your SCP Foundation Reading Progress',
+    description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+    url: getSiteUrl(),
+  },
+  twitter: {
+    card: 'summary',
+    title: 'SCP Reader — Track Your SCP Foundation Reading Progress',
+    description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+  },
+}
 
 interface SeriesProgress {
   series: string
