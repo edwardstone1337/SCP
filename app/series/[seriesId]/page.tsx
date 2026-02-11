@@ -1,6 +1,6 @@
 import { createStaticClient } from '@/lib/supabase/static'
 import { logger } from '@/lib/logger'
-import { seriesToRoman, formatRange } from '@/lib/utils/series'
+import { seriesToRoman } from '@/lib/utils/series'
 import { notFound } from 'next/navigation'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
