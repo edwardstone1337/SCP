@@ -1,13 +1,7 @@
 import { ReactNode, CSSProperties } from 'react'
 import Link from 'next/link'
 
-const PADDING_MAP = {
-  sm: 'var(--spacing-2)',
-  md: 'var(--spacing-3)',
-  lg: 'var(--spacing-4)',
-} as const
-
-type PaddingKey = keyof typeof PADDING_MAP
+type PaddingKey = 'sm' | 'md' | 'lg'
 
 interface CardProps {
   children: ReactNode
@@ -29,9 +23,10 @@ export function Card({
   className,
   style,
 }: CardProps) {
+  const cardClassName = ['ui-card', `ui-card-padding-${padding}`, className].filter(Boolean).join(' ')
+
   // Base styles
   const baseStyle: CSSProperties = {
-    padding: PADDING_MAP[padding],
     backgroundColor: 'var(--color-surface)',
     borderRadius: 'var(--radius-card)',
     borderWidth: 'var(--border-width-normal)',
@@ -62,9 +57,10 @@ export function Card({
     return (
       <Link
         href={href}
-        className={className}
+        className={cardClassName}
         style={combinedStyle}
         data-variant={variant}
+        data-card-padding={padding}
       >
         {children}
       </Link>
@@ -74,9 +70,10 @@ export function Card({
   // Otherwise render as div
   return (
     <div
-      className={className}
+      className={cardClassName}
       style={combinedStyle}
       data-variant={variant}
+      data-card-padding={padding}
     >
       {children}
     </div>
