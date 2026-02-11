@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Container } from '@/components/ui/container'
 import { Heading, Mono, Text } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
 import { Main } from '@/components/ui/main'
 import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
@@ -41,9 +42,10 @@ interface ScpReaderProps {
   userId?: string
   prev?: AdjacentScp | null
   next?: AdjacentScp | null
+  contextInfo?: { context: string; rank: number } | null
 }
 
-export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
+export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderProps) {
   const hasRecordedView = useRef(false)
   const contentContainerRef = useRef<HTMLDivElement>(null)
 
@@ -61,6 +63,13 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
       recordView(scp.id)
     }
   }, [scp.id])
+
+  // Helper to generate href with context params
+  const getNavHref = (scpId: string, offset: number) => {
+    if (!contextInfo) return `/scp/${scpId}`
+    const newRank = contextInfo.rank + offset
+    return `/scp/${scpId}?context=${contextInfo.context}&rank=${newRank}`
+  }
 
   const roman = seriesToRoman(scp.series)
   const rangeStart = getRange(scp.scp_number)
@@ -89,14 +98,14 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
             <Breadcrumb items={breadcrumbItems} />
             <Stack direction="horizontal" justify="between" align="center">
               {prev ? (
-                <Button variant="secondary" size="sm" href={`/scp/${prev.scp_id}`}>
+                <Button variant="secondary" size="sm" href={getNavHref(prev.scp_id, -1)}>
                   ← Previous
                 </Button>
               ) : (
                 <div />
               )}
               {next ? (
-                <Button variant="secondary" size="sm" href={`/scp/${next.scp_id}`}>
+                <Button variant="secondary" size="sm" href={getNavHref(next.scp_id, 1)}>
                   Next →
                 </Button>
               ) : (
@@ -164,6 +173,20 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
       {/* Content */}
       <div style={{ marginTop: 'var(--spacing-4)' }}>
         <Container size="lg">
+          {/* Context Banner */}
+          {contextInfo && (
+            <div style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Stack direction="horizontal" justify="between" align="center">
+                <Text size="sm" variant="secondary">
+                  Top Rated · #{contextInfo.rank} of 100
+                </Text>
+                <Link href="/top-rated" variant="default">
+                  <Text size="sm">View Full List</Text>
+                </Link>
+              </Stack>
+            </div>
+          )}
+
           {isLoading && (
             <Card padding="lg" style={{ marginTop: 'var(--spacing-2)' }}>
               <Stack gap="normal">
@@ -265,14 +288,14 @@ export function ScpReader({ scp, userId, prev, next }: ScpReaderProps) {
                 style={{ marginTop: 'var(--spacing-4)' }}
               >
                 {prev ? (
-                  <Button variant="secondary" size="sm" href={`/scp/${prev.scp_id}`}>
+                  <Button variant="secondary" size="sm" href={getNavHref(prev.scp_id, -1)}>
                     ← Previous
                   </Button>
                 ) : (
                   <div />
                 )}
                 {next ? (
-                  <Button variant="secondary" size="sm" href={`/scp/${next.scp_id}`}>
+                  <Button variant="secondary" size="sm" href={getNavHref(next.scp_id, 1)}>
                     Next →
                   </Button>
                 ) : (

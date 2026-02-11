@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useTopRatedList } from '@/lib/hooks/use-top-rated-list'
 import { ScpReader } from './scp-reader'
 
 interface AdjacentScp {
@@ -31,6 +33,44 @@ interface ScpContentProps {
 export function ScpContent({ scp: initialScp, prev, next }: ScpContentProps) {
   const [scp, setScp] = useState(initialScp)
   const [userId, setUserId] = useState<string | undefined>(undefined)
+  const searchParams = useSearchParams()
+
+  // Read context params
+  const context = searchParams.get('context')
+  const rankStr = searchParams.get('rank')
+  const rank = rankStr ? parseInt(rankStr, 10) : null
+
+  // Fetch top-rated list only when context is top-rated
+  const { data: topRatedList } = useTopRatedList(context === 'top-rated' && rank !== null)
+
+  // Compute contextual prev/next when in top-rated context
+  let contextualPrev = prev
+  let contextualNext = next
+  let contextInfo: { context: string; rank: number } | null = null
+
+  if (context === 'top-rated' && rank !== null && topRatedList && topRatedList.length > 0) {
+    contextInfo = { context: 'top-rated', rank }
+
+    // Prev: rank > 1 → list[rank - 2]
+    if (rank > 1 && topRatedList[rank - 2]) {
+      contextualPrev = {
+        scp_id: topRatedList[rank - 2],
+        title: '', // Title not needed for navigation
+      }
+    } else {
+      contextualPrev = null
+    }
+
+    // Next: rank < list.length → list[rank]
+    if (rank < topRatedList.length && topRatedList[rank]) {
+      contextualNext = {
+        scp_id: topRatedList[rank],
+        title: '', // Title not needed for navigation
+      }
+    } else {
+      contextualNext = null
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -60,5 +100,13 @@ export function ScpContent({ scp: initialScp, prev, next }: ScpContentProps) {
     })
   }, [initialScp.id])
 
-  return <ScpReader scp={scp} userId={userId} prev={prev} next={next} />
+  return (
+    <ScpReader
+      scp={scp}
+      userId={userId}
+      prev={contextualPrev}
+      next={contextualNext}
+      contextInfo={contextInfo}
+    />
+  )
 }

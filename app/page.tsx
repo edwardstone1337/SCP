@@ -37,6 +37,12 @@ interface SeriesProgress {
   read: number
 }
 
+interface TopRatedScp {
+  scp_id: string
+  title: string
+  rating: number
+}
+
 async function getSeriesProgress(): Promise<SeriesProgress[]> {
   const supabase = createStaticClient()
 
@@ -91,10 +97,34 @@ async function getDailyFeaturedScp(): Promise<{
   return data
 }
 
+async function getTopRatedScps(): Promise<TopRatedScp[]> {
+  const supabase = createStaticClient()
+
+  const { data, error } = await supabase
+    .from('scps')
+    .select('scp_id, title, rating')
+    .not('rating', 'is', null)
+    .order('rating', { ascending: false })
+    .limit(3)
+
+  if (error) {
+    logger.error('Failed to fetch top rated SCPs', {
+      error: error instanceof Error ? error.message : String(error),
+      context: 'getTopRatedScps (static)',
+    })
+    return []
+  }
+
+  if (!data) return []
+
+  return data as TopRatedScp[]
+}
+
 export default async function Home() {
-  const [seriesProgress, dailyScp] = await Promise.all([
+  const [seriesProgress, dailyScp, topRated] = await Promise.all([
     getSeriesProgress(),
     getDailyFeaturedScp(),
+    getTopRatedScps(),
   ])
 
   return (
@@ -121,7 +151,7 @@ export default async function Home() {
           </Text>
         </section>
 
-        <HomeContent seriesProgress={seriesProgress} dailyScp={dailyScp} />
+        <HomeContent seriesProgress={seriesProgress} dailyScp={dailyScp} topRated={topRated} />
       </Container>
     </Main>
   )

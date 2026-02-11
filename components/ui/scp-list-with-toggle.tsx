@@ -27,6 +27,7 @@ interface ScpListWithToggleProps {
   scps: ScpItem[]
   isAuthenticated: boolean  // Hide toggle for guests (all items are unread anyway)
   userId?: string | null    // For ReadToggleButton auth
+  getItemHref?: (scp: ScpItem, index: number) => string  // Optional custom href generator
 }
 
 function sortScps(scps: ScpItem[], sortBy: string): ScpItem[] {
@@ -44,7 +45,7 @@ function sortScps(scps: ScpItem[], sortBy: string): ScpItem[] {
   }
 }
 
-export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWithToggleProps) {
+export function ScpListWithToggle({ scps, isAuthenticated, userId, getItemHref }: ScpListWithToggleProps) {
   const [hideRead, setHideRead] = useState(false)
   const [sortBy, setSortBy] = useState('number-asc')
 
@@ -111,7 +112,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
 
       {/* List */}
       <Stack direction="vertical" gap="tight">
-        {filteredScps.map((scp) => (
+        {filteredScps.map((scp, index) => (
           <ScpListItem
             key={scp.id}
             id={scp.id}
@@ -120,7 +121,7 @@ export function ScpListWithToggle({ scps, isAuthenticated, userId }: ScpListWith
             rating={scp.rating}
             isRead={scp.is_read}
             isBookmarked={scp.is_bookmarked}
-            href={`/scp/${scp.scp_id}`}
+            href={getItemHref ? getItemHref(scp, index) : `/scp/${scp.scp_id}`}
             userId={userId ?? null}
           />
         ))}
