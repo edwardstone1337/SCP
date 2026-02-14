@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Return to login with error
-  const message = 'Could not verify magic link'
+  const message = 'Could not verify sign in'
   return NextResponse.redirect(
     new URL(`/login?error=${encodeURIComponent(message)}`, request.url)
   )

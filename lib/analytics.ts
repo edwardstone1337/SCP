@@ -16,9 +16,13 @@ export function trackSignInModalOpen(trigger: SignInTrigger) {
   })
 }
 
-export function trackSignInSubmit() {
+export type SignInMethod = 'magic_link' | 'google'
+
+export function trackSignInSubmit(method?: SignInMethod) {
   if (typeof window === 'undefined' || !window.gtag) return
-  window.gtag('event', 'sign_in_submit')
+  window.gtag('event', 'sign_in_submit', {
+    ...(method && { sign_in_method: method }),
+  })
 }
 
 export function trackSignInModalClose(trigger: SignInTrigger) {

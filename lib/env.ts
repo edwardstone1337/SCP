@@ -16,6 +16,6 @@ function getEnvVar(key: string): string {
 export const env = {
   supabaseUrl: getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
   supabaseAnonKey: getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
-  siteUrl: getEnvVar('NEXT_PUBLIC_SITE_URL'),
+  // NEXT_PUBLIC_SITE_URL is optional — getSiteUrl() falls back to window.location.origin
   // Add other required vars here
 } as const
