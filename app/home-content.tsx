@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { seriesToRoman } from '@/lib/utils/series'
 import { Grid } from '@/components/ui/grid'
@@ -10,6 +11,7 @@ import { SeriesCard } from '@/components/ui/series-card'
 import { DailyFeaturedSection } from '@/components/ui/daily-featured-section'
 import { TopRatedSection, type TopRatedScp } from '@/components/ui/top-rated-section'
 import { RecentlyViewedSection, type RecentlyViewedItem } from '@/components/ui/recently-viewed-section'
+import { Toast } from '@/components/ui/toast'
 
 interface SeriesProgress {
   series: string
@@ -31,9 +33,18 @@ interface HomeContentProps {
 }
 
 export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRated }: HomeContentProps) {
+  const searchParams = useSearchParams()
   const [seriesProgress, setSeriesProgress] = useState(initialProgress)
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([])
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [showAccountDeletedToast, setShowAccountDeletedToast] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('account_deleted') === 'true') {
+      setShowAccountDeletedToast(true)
+      window.history.replaceState(null, '', '/')
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const supabase = createClient()
@@ -81,6 +92,13 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
 
   return (
     <>
+      {showAccountDeletedToast && (
+        <Toast
+          message="Your account has been successfully deleted"
+          onDismiss={() => setShowAccountDeletedToast(false)}
+        />
+      )}
+
       {/* Daily Featured */}
       <DailyFeaturedSection scp={dailyScp} />
 

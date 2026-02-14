@@ -11,6 +11,7 @@ import { Stack } from '@/components/ui/stack'
 import { Text } from '@/components/ui/typography'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
+import { DeleteAccountModal } from '@/components/ui/delete-account-modal'
 import { signOut } from '@/app/actions/auth'
 import { trackSignInModalOpen } from '@/lib/analytics'
 import { seriesToRoman } from '@/lib/utils/series'
@@ -203,13 +204,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
               {/* Right: Auth + Menu (all viewports) */}
               <Stack direction="horizontal" align="center" gap="tight">
-                {user ? (
-                  <form action={signOut}>
-                    <Button type="submit" variant="secondary" size="md">
-                      Sign Out
-                    </Button>
-                  </form>
-                ) : (
+                {!user && (
                   <NextLink
                     href={signInHref}
                     onClick={handleSignInClick}
@@ -320,11 +315,48 @@ export function NavigationClient({ user }: NavigationClientProps) {
                 >
                   Saved
                 </Link>
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    style={{
+                      ...linkTouchStyle,
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family-sans)',
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </form>
                 {user.email && (
                   <Text size="sm" variant="secondary">
                     {user.email}
                   </Text>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeOverlay()
+                    openModal(<DeleteAccountModal />, 'Delete account')
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    color: 'var(--color-text-muted)',
+                    fontSize: 'var(--font-size-xs)',
+                    lineHeight: 'var(--line-height-xs)',
+                    fontFamily: 'var(--font-family-sans)',
+                    marginTop: 'var(--spacing-1)',
+                  }}
+                >
+                  Delete account
+                </button>
               </>
             )}
           </Stack>

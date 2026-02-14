@@ -17,6 +17,11 @@ const linkStyle: CSSProperties = {
   textUnderlineOffset: 'var(--border-width-thick)',
 }
 
+const separatorStyle: CSSProperties = {
+  color: 'var(--color-text-muted)',
+  fontSize: 'var(--font-size-xs)',
+}
+
 export function SiteFooter() {
   return (
     <footer
@@ -46,9 +51,19 @@ export function SiteFooter() {
             <p style={bodyTextStyle}>
               Data provided by the SCP Data API.
             </p>
-            <Link href="/about" variant="default" style={linkStyle}>
-              About &amp; Attribution
-            </Link>
+            <p>
+              <Link href="/about" variant="default" style={linkStyle}>
+                About &amp; Attribution
+              </Link>
+              <span style={separatorStyle} aria-hidden="true"> · </span>
+              <Link href="/privacy" variant="default" style={linkStyle}>
+                Privacy
+              </Link>
+              <span style={separatorStyle} aria-hidden="true"> · </span>
+              <Link href="/terms" variant="default" style={linkStyle}>
+                Terms
+              </Link>
+            </p>
           </Stack>
         </div>
       </Container>

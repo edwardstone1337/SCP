@@ -19,10 +19,10 @@ SCP Reader uses Google Analytics 4 for basic usage analytics. No other tracking,
 
 | Event Name | Trigger | Parameters | Purpose |
 | --- | --- | --- | --- |
-| `sign_in_modal_open` | User triggers auth from any entry point | `trigger_source`: `nav`, `bookmark`, `read_toggle`, `recently_viewed` | Identify which actions drive sign-up intent |
-| `sign_in_submit` | User submits email in `SignInPanel` | — | Measure modal-to-submit conversions |
+| `sign_in_modal_open` | User triggers auth from any entry point | `trigger_source`: `nav`, `bookmark`, `read_toggle`, `recently_viewed`, `top_rated` | Identify which actions drive sign-up intent |
+| `sign_in_submit` | User submits sign-in action in `SignInPanel` (magic link or Google) | `sign_in_method`: `magic_link` or `google` | Measure modal/page sign-in conversions by method |
 | `sign_in_modal_close` | User closes modal without submitting | `trigger_source` | Measure drop-off by trigger |
-| `auth_complete` | User returns from magic link verification | — | Measure end-to-end conversion |
+| `auth_complete` | User returns from auth verification/callback | — | Measure end-to-end conversion |
 | `outbound_wiki_click` | User clicks "View original on SCP Wiki" | `scp_id` | Track content leakage to source wiki |
 
 When adding new events, define the typed function in `lib/analytics.ts` first, then update this table. The utility file is the single source of truth for event names and parameters.

@@ -7,7 +7,7 @@ See @docs/FEATURES.md for customer-facing features
 
 ## Project Context
 
-**SCP Reader** — a Next.js 16 + Supabase reading tracker for SCP Foundation completionists. Users browse SCP articles, mark as read, bookmark, and track progress through 10 series (I–X). Article content is fetched from scp-data.tedivm.com (public, CORS-enabled, daily updates). Deployed on Vercel with ISR for cost optimization (pages served from edge CDN after initial generation, costs scale with content not visitors).
+**SCP Reader** — a Next.js 16 + Supabase reading tracker for SCP Foundation completionists. Users browse SCP articles, mark as read, bookmark, and track progress through 10 series (I–X). Auth supports magic links and Google OAuth. Article content is fetched from scp-data.tedivm.com (public, CORS-enabled, daily updates). Deployed on Vercel with ISR for cost optimization (pages served from edge CDN after initial generation, costs scale with content not visitors).
 
 ## Commands
 
@@ -41,13 +41,15 @@ If you need to modify content fetching, edit `lib/hooks/use-scp-content.ts`.
 
 ### Database
 
-See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `user_progress`, `user_bookmarks`, `user_recently_viewed` (all RLS: user's own rows only).
+See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `user_progress`, `user_bookmarks`, `user_recently_viewed` (all RLS: user's own rows only via `auth.uid() = user_id`).
 
 ### Non-Obvious File Locations
 
 - Three Supabase clients: `lib/supabase/{server,client,static}.ts`
 - Content hooks: `lib/hooks/use-scp-content.ts` (API fetch), `use-footnotes.ts` (tooltip UI), `use-content-links.ts` (routing logic)
 - Sanitization pipeline: `lib/utils/sanitize.ts` (DOMPurify + dark theme legibility fixes)
+- Auth URL helper: `lib/utils/site-url.ts` (`NEXT_PUBLIC_SITE_URL` or browser origin fallback)
+- Account deletion flow: `components/ui/delete-account-modal.tsx` + `app/actions/auth.ts::deleteAccount`
 
 ## Design System
 
@@ -106,3 +108,4 @@ See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `
 4. **DO NOT** skip the `npm run verify` step before merging → always run verify + manual smoke checks
 5. **DO NOT** destructive database migrations in feature branches → use additive migrations; coordinate destructive changes on main
 6. **DO NOT** use `console.log` for logging → use `logger` from `lib/logger.ts` with context
+7. **DO NOT** expose `SUPABASE_SERVICE_ROLE_KEY` to client code; it is server-only (seed + account deletion server action)

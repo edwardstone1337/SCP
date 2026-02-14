@@ -20,6 +20,20 @@ It intentionally focuses on user value, not internal implementation details.
 - Home "Top Rated" section highlights top-ranked SCPs in a responsive 1/3/4-card layout (mobile/tablet/desktop).
 - Dedicated `/top-rated` page provides the top 100 highest-rated SCPs.
 
+### Sign in with preferred method
+- Users can sign in with either Google (`Continue with Google`) or email magic link.
+- Same sign-in options appear in both the modal and the `/login` page.
+- App preserves redirect context so users return to their original page after auth.
+
+### Manage account lifecycle
+- Signed-in users can sign out and delete their account from the navigation menu.
+- Account deletion requires explicit confirmation in a modal before execution.
+- After deletion, users are returned to home with a success confirmation toast.
+
+### Access legal information
+- Footer now includes direct links to `/privacy` and `/terms`.
+- Privacy policy and terms are available as dedicated, public pages.
+
 ### Keep reading context in Top 100 flow
 - Opening from Top Rated links preserves rank context.
 - Reader navigation follows Top 100 rank order in that context.

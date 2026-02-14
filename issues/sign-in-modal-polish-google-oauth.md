@@ -1,5 +1,9 @@
 # Polish sign-in modal UI and add Google OAuth alongside magic link
 
+## Status: Complete (2026-02-14)
+
+Google OAuth wired in `SignInPanel` with "Continue with Google" button, Supabase provider configured, callback route updated for OAuth, `getSiteUrl()` auto-detects browser origin for correct redirects. Analytics tracks `sign_in_method` (`magic_link` | `google`). Magic link unchanged.
+
 ## TL;DR
 
 Upgrade the sign-in experience to feel more on-brand and reduce login friction by adding a first-class `Continue with Google` path while keeping magic link as a fallback.

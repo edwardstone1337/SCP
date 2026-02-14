@@ -4,6 +4,14 @@ All notable changes to SCP Reader are documented here.
 
 ## [Unreleased]
 ### Added
+- Google OAuth sign-in: users can now sign in with their Google account via "Continue with Google" button, available in both the sign-in modal and `/login` page; magic link remains as an alternative
+- `getSiteUrl()` now auto-detects the current browser origin when `NEXT_PUBLIC_SITE_URL` is not set, fixing OAuth redirect mismatches in local dev
+- Analytics `sign_in_submit` event now includes `sign_in_method` property (`magic_link` or `google`) to distinguish auth methods
+- Account deletion flow: signed-in users can permanently delete their account from the navigation menu (with confirmation modal), including progress, bookmarks, and recently viewed data
+- Home page now shows a dismissible success toast after account deletion (`/?account_deleted=true`)
+- Toast atom (`components/ui/toast.tsx`): reusable, auto-dismissing notification with success/error variants and close button
+- Delete account confirmation modal (`components/ui/delete-account-modal.tsx`): warns about permanent data loss, requires explicit confirmation
+- New legal pages: `/privacy` (Privacy Policy) and `/terms` (Terms of Service), linked from the site footer
 - New `/top-rated` page listing top 100 highest-rated SCPs, with read/bookmark toggles and sign-in CTA for progress tracking
 - Home page "Top Rated" section now renders top 4 entries on desktop, with responsive 1/3/4-column layout and quick links into ranked reading flow
 - Dark theme QA scanner (`scripts/dark-theme-scanner.ts`) with docs (`scripts/README-dark-theme-scanner.md`) and JSON report output in `scripts/output/`
@@ -11,6 +19,7 @@ All notable changes to SCP Reader are documented here.
 - JSON-LD structured data for SCP pages (CreativeWork schema), series pages (CollectionPage schema), and breadcrumb navigation (BreadcrumbList schema) for improved SEO and search result rich snippets
 
 ### Changed
+- Sign Out button moved from top navigation bar into the nav overlay menu, alongside Delete Account; top bar now shows only Sign In (when logged out) and Menu
 - SCP/series/home pages use static Supabase client (`createStaticClient`) for server data; auth-specific data (progress, recently viewed) fetched client-side where needed
 - Navigation: auth state resolved client-side via `getUser` + `onAuthStateChange`; layout wraps Navigation in `Suspense` for loading
 - SCP content: client fetches directly from SCP-Data API (`scp-data.tedivm.com`); internal proxy route removed

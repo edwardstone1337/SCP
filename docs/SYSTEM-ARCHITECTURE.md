@@ -19,7 +19,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | Layer | Technology |
 |-------|------------|
 | **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth (magic links / OTP) |
+| **Auth** | Supabase Auth (magic links + Google OAuth) |
 | **API** | Next.js Server Actions + Route Handlers |
 
 ### External Data
@@ -49,9 +49,11 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
 | `/scp/[id]` | SCP reader (content via direct SCP-Data API fetch, prev/next, bookmark/read) + CreativeWork/Breadcrumb JSON-LD | Public (toggles require login) |
 | `/saved` | Bookmarked SCPs with sort | **Protected** (redirects to login) |
-| `/login` | Magic-link login form | Public (redirects to `/` if already logged in) |
+| `/login` | Sign-in page (`SignInPanel`) with magic link + Google OAuth | Public |
 | `/auth/callback` | OAuth/magic-link callback; exchanges code for session | Internal |
 | `/auth/error` | Auth error display (Suspense + client) | Public |
+| `/privacy` | Privacy policy page | Public |
+| `/terms` | Terms of service page | Public |
 | `/components-test` | Component test page | Public |
 | **404** | `not-found.tsx` — SCP-themed "DOCUMENT NOT FOUND" | Public |
 
@@ -171,13 +173,15 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 ## Authentication Flow
 
-1. **Login:** User visits `/login`, enters email. Client calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Supabase sends magic link to email.
-2. **Callback:** User clicks link → `/auth/callback?code=...&next=...`. Route handler creates server Supabase client, calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`). On failure, redirects to `/login?error=...`.
-3. **Session:** No middleware. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated. Authenticated users on `/login` are redirected in the callback flow (no middleware).
-4. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
+1. **Login:** User opens `SignInPanel` (modal or `/login`) and chooses magic link or Google OAuth. Magic link calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Google calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: SITE_URL/auth/callback?next=... } })`.
+2. **Redirect URL source:** `SITE_URL` comes from `getSiteUrl()`: `NEXT_PUBLIC_SITE_URL` when set, else `window.location.origin` in browser, else `http://localhost:3000` fallback.
+3. **Callback:** Provider redirects to `/auth/callback?code=...&next=...`. Route handler creates server Supabase client, calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`) and appends `auth=complete`. On failure, redirects to `/login?error=...`.
+4. **Session:** No middleware. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated.
+5. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
+6. **Account deletion:** `DeleteAccountModal` calls `deleteAccount()` server action. The action verifies the user, deletes the Supabase auth user via admin API (`auth.admin.deleteUser`), signs out best-effort, and returns success so client redirects to `/?account_deleted=true` (toast confirmation on home).
 
 **Protected routes:** Only `/saved` is protected; unauthenticated users are redirected to `/login?redirect=/saved`.
-For protected client actions (nav Sign In, bookmark, mark-as-read, recently viewed sign-in), JS opens the sign-in modal and preserves current location as `pathname + search + hash`; non-JS users still fall back to `/login?redirect=...`.
+For protected client actions (nav Sign In, bookmark, mark-as-read, recently viewed, top-rated actions), JS opens the sign-in modal and preserves current location as `pathname + search + hash`; non-JS users still fall back to `/login?redirect=...`.
 
 ---
 
@@ -241,6 +245,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `card` | Container; variants default, interactive, bordered; optional accentBorder; forwards `role` and `aria-live`/`aria-busy` props. |
 | `container` | Max-width + padding; sizes xs … 2xl, full. |
 | `daily-featured-section` | Hero-style "Today's Featured SCP" block on home page; deterministic by UTC date (getDailyIndex); shows scp_id, title, rating, series; link wraps card. |
+| `delete-account-modal` | Confirmation modal for permanent account deletion; calls `deleteAccount()` server action and hard-redirects to `/?account_deleted=true` on success. |
 | `grid` | Responsive grid (e.g. cols="auto" → 2→3→4). |
 | `heading` | Heading level 1–4, optional accent; supports `id` prop forwarding. |
 | `icon` | Inline SVG icons (check, eye, star, bookmark, bookmark-filled, arrow-up, etc.). |
@@ -266,9 +271,10 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `spinner` | Loading spinner. |
 | `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose. |
 | `text` | Text with variant/size. |
+| `toast` | Dismissible fixed-bottom toast with auto-dismiss + fade-out; used for account deletion confirmation on home. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, top-right auth action and Menu button on all viewports (`Sign In` primary when logged out, `Sign Out` secondary when logged in, `Menu` secondary always). Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes a close button, Escape-to-close, and Tab focus trapping while open. It lists Series I–X (two-column grid), Saved (auth), and account email; active series/saved routes are highlighted with `aria-current="page"`.
+**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, `Sign In` CTA (logged out only), and `Menu` button on all viewports. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes a close button, Escape-to-close, and Tab focus trapping while open. It lists Series I–X (two-column grid), Saved (auth), Sign Out (auth), account email, and Delete account; active series/saved routes are highlighted with `aria-current="page"`.
 
 ---
 
@@ -361,11 +367,11 @@ All `.scp-content` styles live in `app/globals.css` and use design tokens from `
 |----------|---------|--------------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key for browser/server | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Bypass RLS (seed script only) | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key (seed + account deletion action) | No |
 | `SUPABASE_DB_PASSWORD` | DB password for CLI | No |
-| `NEXT_PUBLIC_SITE_URL` | Base URL for auth redirects | Yes |
+| `NEXT_PUBLIC_SITE_URL` | Optional base URL for auth redirects (fallback: browser origin) | Yes |
 
-Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); client uses `process.env` for `NEXT_PUBLIC_*` only.
+Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); client uses `process.env` for `NEXT_PUBLIC_*` only. `NEXT_PUBLIC_SITE_URL` is optional because `getSiteUrl()` resolves browser origin in client context.
 
 ### RLS Policies
 
@@ -374,8 +380,9 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 
 ### Service Role Key Usage
 
-- **Where:** `scripts/seed-scps.ts` only. Creates Supabase client with `SUPABASE_SERVICE_ROLE_KEY` to insert/upsert into `scps` while RLS blocks anon writes.
-- **Never** used in Next.js app code or exposed to the client.
+- **Where:** `scripts/seed-scps.ts` and `app/actions/auth.ts` (`deleteAccount` server action).
+- **Why:** Seed script inserts/updates `scps`. Account deletion needs admin auth API (`auth.admin.deleteUser`) which requires service role.
+- **Safety:** Used only in server context; never exposed to the client.
 
 ---
 
@@ -450,7 +457,7 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 ### Local Setup
 
 1. Clone repo, `npm install`.
-2. Copy `.env.example` to `.env.local`, set Supabase URL, anon key, `NEXT_PUBLIC_SITE_URL` (e.g. `http://localhost:3000`).
+2. Copy `.env.example` to `.env.local`, set Supabase URL and anon key. `NEXT_PUBLIC_SITE_URL` is recommended (e.g. `http://localhost:3000`) but optional in local dev.
 3. Run migrations (see below).
 4. Optional: `npm run seed` (requires `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`).
 5. `npm run dev` → app at `http://localhost:3000`.
@@ -473,12 +480,14 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 ```
 app/
 ├── actions/
-│   └── auth.ts              # signOut server action
+│   └── auth.ts              # signOut + deleteAccount server actions
 ├── auth/
-│   ├── callback/route.ts    # Magic link code exchange
+│   ├── callback/route.ts    # OAuth/magic-link code exchange
 │   └── error/client.tsx, page.tsx
 ├── login/
 │   └── page.tsx             # Login route; renders SignInPanel (page context)
+├── privacy/
+│   └── page.tsx             # Privacy policy page
 ├── saved/
 │   ├── saved-list.tsx       # Client list + sort
 │   ├── page.tsx, loading.tsx
@@ -491,6 +500,8 @@ app/
 ├── top-rated/
 │   ├── page.tsx             # Top 100 rated route (static client + ISR)
 │   └── top-rated-content.tsx # Client auth hydration + ranked list context links
+├── terms/
+│   └── page.tsx             # Terms of service page
 ├── series/
 │   ├── page.tsx             # Redirect to /
 │   ├── [seriesId]/page.tsx, series-content.tsx  # Range list (static client)
@@ -505,7 +516,7 @@ app/
 └── not-found.tsx            # 404
 
 components/
-├── ui/                      # Design system (see Component Library table; includes daily-featured-section, top-rated-section, recently-viewed-section, skeleton)
+├── ui/                      # Design system (see Component Library table; includes daily-featured-section, top-rated-section, recently-viewed-section, delete-account-modal, toast, skeleton)
 ├── navigation.tsx           # Client nav (getUser, onAuthStateChange, renders NavigationClient)
 └── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 
@@ -548,7 +559,6 @@ docs/
 | 2 | Reading settings | Medium–High | Font, size, line-height (Kindle-style) |
 | 3 | Search | Medium | By SCP number |
 | 4 | Tags/Filters | Medium | Classification filters |
-| 5 | SSO (e.g. Google Auth) | Low–Medium | Alternative to magic link |
 
 ---
 
