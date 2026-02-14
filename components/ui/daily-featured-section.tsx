@@ -19,18 +19,18 @@ export function DailyFeaturedSection({ scp }: DailyFeaturedSectionProps) {
   return (
     <section style={{ marginBottom: 'var(--spacing-6)' }}>
       <Stack direction="vertical" gap="normal">
-        <Text
-          size="sm"
-          variant="secondary"
+        <Heading
+          level={2}
+          className="text-sm font-normal text-[var(--color-text-secondary)]"
           style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
         >
-          Today&apos;s Featured SCP
-        </Text>
+          Daily Briefing
+        </Heading>
         <Link href={`/scp/${scp.scp_id}`} variant="default">
           <Card variant="interactive" padding="lg">
             <Stack direction="vertical" gap="normal">
               <Mono size="sm">{scp.scp_id}</Mono>
-              <Heading level={2}>{scp.title}</Heading>
+              <Heading level={3}>{scp.title}</Heading>
               <Stack direction="horizontal" gap="normal">
                 {scp.rating !== null && (
                   <Text size="sm" variant="secondary">

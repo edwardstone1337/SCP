@@ -109,3 +109,38 @@ See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `
 5. **DO NOT** destructive database migrations in feature branches → use additive migrations; coordinate destructive changes on main
 6. **DO NOT** use `console.log` for logging → use `logger` from `lib/logger.ts` with context
 7. **DO NOT** expose `SUPABASE_SERVICE_ROLE_KEY` to client code; it is server-only (seed + account deletion server action)
+
+### Client-Side Data Fetching Convention
+
+All `useEffect` hooks that call Supabase (or any async API) MUST use this pattern:
+
+```tsx
+useEffect(() => {
+  let mounted = true
+  const supabase = createClient()
+
+  async function loadData() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !mounted) return
+
+      // Use Promise.all for parallel queries
+      // Check `if (!mounted) return` before every setState
+
+    } catch (error) {
+      if (!mounted) return
+      logger.error('Failed to load data', { error, component: 'ComponentName' })
+    }
+  }
+
+  loadData()
+  return () => { mounted = false }
+}, [deps])
+```
+
+Rules:
+
+- No bare `.then()` chains — use async/await
+- Every `setState` must be guarded by `if (!mounted) return`
+- Every async function must be wrapped in try/catch with `logger.error`
+- Import `logger` from `@/lib/logger`

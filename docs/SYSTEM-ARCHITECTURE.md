@@ -42,7 +42,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 | Route | Purpose | Auth |
 |-------|---------|------|
-| `/` | Home: themed header (SECURE CONTAIN PROTECT), Daily Featured, series grid, Recently Viewed | Public (progress when logged in) |
+| `/` | Home: themed header + auth-aware subhead, Daily Briefing, Notable Anomalies, Containment Series, guest onboarding block | Public (progress/recents when logged in) |
 | `/top-rated` | Top 100 highest-rated SCP list, with ranked links into reader context | Public (toggles require login) |
 | `/series` | Redirects to `/` | — |
 | `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) + CollectionPage/Breadcrumb JSON-LD | Public |
@@ -175,7 +175,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 1. **Login:** User opens `SignInPanel` (modal or `/login`) and chooses magic link or Google OAuth. Magic link calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Google calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: SITE_URL/auth/callback?next=... } })`.
 2. **Redirect URL source:** `SITE_URL` comes from `getSiteUrl()`: `NEXT_PUBLIC_SITE_URL` when set, else `window.location.origin` in browser, else `http://localhost:3000` fallback.
-3. **Callback:** Provider redirects to `/auth/callback?code=...&next=...`. Route handler creates server Supabase client, calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`) and appends `auth=complete`. On failure, redirects to `/login?error=...`.
+3. **Callback:** Provider redirects to `/auth/callback?code=...&next=...`. Route handler uses centralized server Supabase client (`lib/supabase/server.ts`), calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`) and appends `auth=complete`. On failure, redirects to `/login?error=...`.
 4. **Session:** No middleware. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated.
 5. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
 6. **Account deletion:** `DeleteAccountModal` calls `deleteAccount()` server action. The action verifies the user, deletes the Supabase auth user via admin API (`auth.admin.deleteUser`), signs out best-effort, and returns success so client redirects to `/?account_deleted=true` (toast confirmation on home).
@@ -229,9 +229,9 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 ### Component Hierarchy
 
 - **Atoms:** Button, Link, Badge, Icon, Input, Label, Text, Heading, Mono.
-- **Molecules:** Card, Select, Message, Spinner, Skeleton, ProgressRing, ProgressText.
-- **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, TopRatedSection, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop.
-- **Layout:** Main, Container, Stack, Grid, Navigation, SkipLink, Logo. Navigation: server wrapper (`navigation.tsx`) + client (`navigation-client.tsx`).
+- **Molecules:** Card, Select, Message, Spinner, Skeleton, ProgressRing, ProgressText, SectionDivider.
+- **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, TopRatedSection, DailyFeaturedSection, RecentlyViewedSection, NewToFoundationSection, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop.
+- **Layout:** Main, Container, Stack, Grid, Navigation, SkipLink, Logo. Navigation: client auth wrapper (`navigation.tsx`) + overlay renderer (`navigation-client.tsx`).
 
 ### Component Library (components/ui/)
 
@@ -244,7 +244,8 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `button` | Variants: primary, secondary, ghost, danger, success; sizes sm/md/lg; supports href; forwardRef. |
 | `card` | Container; variants default, interactive, bordered; optional accentBorder; forwards `role` and `aria-live`/`aria-busy` props. |
 | `container` | Max-width + padding; sizes xs … 2xl, full. |
-| `daily-featured-section` | Hero-style "Today's Featured SCP" block on home page; deterministic by UTC date (getDailyIndex); shows scp_id, title, rating, series; link wraps card. |
+| `daily-featured-section` | Home "Daily Briefing" block; deterministic by UTC date (getDailyIndex); shows scp_id, title, rating, series; link wraps card. |
+| `hero-subhead` | Home header subhead; auth-aware copy ("Welcome back..." vs guest discovery copy). |
 | `delete-account-modal` | Confirmation modal for permanent account deletion; calls `deleteAccount()` server action and hard-redirects to `/?account_deleted=true` on success. |
 | `grid` | Responsive grid (e.g. cols="auto" → 2→3→4). |
 | `heading` | Heading level 1–4, optional accent; supports `id` prop forwarding. |
@@ -257,24 +258,25 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `message` | Success/error message block. |
 | `page-header` | Title + optional description. |
 | `progress-ring` | Circular progress (percentage). |
-| `progress-text` | Percentage or "read / total" text. |
+| `progress-text` | Percentage or fraction text; supports custom fraction label (e.g. `read`, `accessed`, `catalogued`). |
 | `range-list-item` | Range row with progress ring, link. |
 | `read-toggle-button` | Mark as Read/Unread; optional routeId for reader revalidation; optimistic update; opens sign-in modal when unauthenticated (preserves current location). |
-| `recently-viewed-section` | Recently Viewed block: last 5 SCPs for auth users; zero states for guests ("Sign in to track your reading history") and new users ("Articles you read will appear here"). |
+| `recently-viewed-section` | "Recent Files" block used for authenticated users on home; lists last 5 viewed SCPs and shows authenticated empty state ("Accessed files will appear here."). |
 | `scp-list-item` | SCP row: title, rating, id, read/bookmark toggles, full-card link. |
 | `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem; supports `defaultSort` and optional hidden sort control. |
 | `select` | Native select styled with design tokens. |
+| `section-divider` | Decorative horizontal divider with center glyph between home sections. |
 | `series-card` | Series card with progress, link to series. |
-| `top-rated-section` | Home page Top Rated block (top 4 by rating) with ranked reader links and CTA to `/top-rated`; responsive 1/3/4-card layout by breakpoint. |
+| `top-rated-section` | Home "Notable Anomalies" block (top 4 by rating) with ranked reader links and CTA to `/top-rated`; responsive 1/3/4-card layout by breakpoint. |
 | `skeleton` | Tokenized dark-theme shimmer placeholder with reduced-motion support. |
 | `skip-link` | Accessibility skip-to-content link using visually-hidden clipping pattern until focus/focus-visible; spacing tokens; highest layer via `--z-skip-link`. |
 | `spinner` | Loading spinner. |
 | `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose. |
 | `text` | Text with variant/size. |
-| `toast` | Dismissible fixed-bottom toast with auto-dismiss + fade-out; used for account deletion confirmation on home. |
+| `toast` | Dismissible fixed-bottom toast with auto-dismiss + fade-out; includes exit timer cleanup on unmount; used for account deletion confirmation on home. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, `Sign In` CTA (logged out only), and `Menu` button on all viewports. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes a close button, Escape-to-close, and Tab focus trapping while open. It lists Series I–X (two-column grid), Saved (auth), Sign Out (auth), account email, and Delete account; active series/saved routes are highlighted with `aria-current="page"`.
+**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, `Access Terminal` CTA (logged out only), and `Menu` button on all viewports. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes a close button, Escape-to-close, Tab focus trapping, and focus restoration to the menu trigger on close. It lists Series I–X (two-column grid), Saved (auth), Sign Out (auth), account email, and Delete account; active series/saved routes are highlighted with `aria-current="page"`.
 
 ---
 
@@ -297,14 +299,14 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 - **Storage:** `user_recently_viewed` (user_id, scp_id, viewed_at). Upsert on view; unique on (user_id, scp_id). Cap at 5: after upsert, oldest entries beyond the 5 most recent are deleted.
 - **Recording:** `recordView(scpUuid)` server action in `app/scp/[id]/actions.ts`. Called once on reader mount (client `useEffect` in `ScpReader`). No-op for guests.
-- **Display:** Home page (`/`) fetches last 5 for authenticated user via `getRecentlyViewed(userId)`; renders `RecentlyViewedSection`.
-- **Zero states:** Guests see "Sign in to track your reading history." New users (auth but no rows) see "Articles you read will appear here."
+- **Display:** Home page (`/`) fetches last 5 for authenticated user and renders `RecentlyViewedSection` only when authenticated.
+- **Zero states:** Authenticated users with no history see "Accessed files will appear here."
 
 ### Daily Featured SCP
 
 - **Selection:** Deterministic by UTC date. `getDailyIndex(totalCount)` in `lib/utils/daily-scp.ts` hashes `YYYY-MM-DD` to an integer and returns `hash % totalCount`. Same date → same SCP for all users.
 - **Fetch:** Home page calls `getDailyFeaturedScp()`: count from `scps`, then one row at offset `getDailyIndex(count)` ordered by `scp_number` (selects `scp_id`, `title`, `rating`, `series`).
-- **Display:** `DailyFeaturedSection` above the series grid: "Today's Featured SCP" label, card with SCP id, title, rating, series (Roman); outer `Link` to `/scp/[id]`, no nested anchor. Renders nothing when `scp` is null.
+- **Display:** `DailyFeaturedSection` near top of home: "Daily Briefing" label, card with SCP id, title, rating, series (Roman); outer `Link` to `/scp/[id]`, no nested anchor. Renders nothing when `scp` is null.
 
 ### Sorting
 
@@ -320,6 +322,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 ### Structured data (JSON-LD)
 
+- **Home page (`/`):** Injects `WebApplication` and `WebSite` JSON-LD via `generateHomepageJsonLd`.
 - **SCP page (`/scp/[id]`):** Injects `CreativeWork` and `BreadcrumbList` JSON-LD via `lib/utils/json-ld.ts`.
 - **Series page (`/series/[seriesId]`):** Injects `CollectionPage` and `BreadcrumbList` JSON-LD via `lib/utils/json-ld.ts`.
 - **Name handling:** `CreativeWork` name uses `SCP-XXX — Title` only when title differs from `scp_id`.
@@ -510,13 +513,13 @@ app/
 ├── components-test/page.tsx
 ├── layout.tsx               # Fonts, QueryProvider, SkipLink, Navigation
 ├── globals.css               # @theme, tokens, .scp-content
-├── home-content.tsx         # Client: series grid, Daily Featured, Recently Viewed (auth-aware)
-├── page.tsx                 # Home server (createStaticClient; series + daily → HomeContent)
+├── home-content.tsx         # Client: Daily Briefing, Notable Anomalies, series grid, guest onboarding, recents (auth-aware)
+├── page.tsx                 # Home server (createStaticClient; series + daily + top-rated + homepage JSON-LD)
 ├── loading.tsx              # Root route loading state
 └── not-found.tsx            # 404
 
 components/
-├── ui/                      # Design system (see Component Library table; includes daily-featured-section, top-rated-section, recently-viewed-section, delete-account-modal, toast, skeleton)
+├── ui/                      # Design system (see Component Library table; includes hero-subhead, section-divider, new-to-foundation-section, daily-featured-section, top-rated-section)
 ├── navigation.tsx           # Client nav (getUser, onAuthStateChange, renders NavigationClient)
 └── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 

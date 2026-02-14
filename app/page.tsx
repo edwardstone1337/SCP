@@ -5,15 +5,17 @@ import { getDailyIndex } from '@/lib/utils/daily-scp'
 import { getSiteUrl } from '@/lib/utils/site-url'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
-import { Heading, Text } from '@/components/ui/typography'
+import { Heading } from '@/components/ui/typography'
 import { Stack } from '@/components/ui/stack'
+import { HeroSubhead } from '@/components/ui/hero-subhead'
+import { generateHomepageJsonLd } from '@/lib/utils/json-ld'
 import { HomeContent } from './home-content'
 
 export const revalidate = 300 // ISR: regenerate every 5 minutes
 
 export const metadata: Metadata = {
   title: 'SCP Reader — Track Your SCP Foundation Reading Progress',
-  description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+  description: "Browse and track your reading progress through 9,300+ SCP Foundation entries. Discover anomalies by series, bookmark your favorites, and track every file you've accessed. A free reading companion for SCP completionists.",
   alternates: {
     canonical: getSiteUrl(),
   },
@@ -21,13 +23,13 @@ export const metadata: Metadata = {
     siteName: 'SCP Reader',
     type: 'website',
     title: 'SCP Reader — Track Your SCP Foundation Reading Progress',
-    description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+    description: "Browse and track your reading progress through 9,300+ SCP Foundation entries. Discover anomalies by series, bookmark your favorites, and track every file you've accessed. A free reading companion for SCP completionists.",
     url: getSiteUrl(),
   },
   twitter: {
     card: 'summary',
     title: 'SCP Reader — Track Your SCP Foundation Reading Progress',
-    description: "Track your reading progress through 9,800+ SCP Foundation entries. Browse by series, bookmark your favorites, and never lose your place.",
+    description: "Browse and track your reading progress through 9,300+ SCP Foundation entries. Discover anomalies by series, bookmark your favorites, and track every file you've accessed. A free reading companion for SCP completionists.",
   },
 }
 
@@ -127,8 +129,19 @@ export default async function Home() {
     getTopRatedScps(),
   ])
 
+  const siteUrl = getSiteUrl()
+  const homepageSchemas = generateHomepageJsonLd(siteUrl)
+
   return (
-    <Main>
+    <>
+      {homepageSchemas.map((schema, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
+      <Main>
       <Container size="lg">
         {/* Themed header */}
         <section style={{ marginBottom: 'var(--spacing-6)' }}>
@@ -146,13 +159,12 @@ export default async function Home() {
               }}
             />
           </Stack>
-          <Text variant="secondary" size="lg" style={{ marginTop: 'var(--spacing-4)' }}>
-            Track your progress through the SCP Foundation database.
-          </Text>
+          <HeroSubhead />
         </section>
 
         <HomeContent seriesProgress={seriesProgress} dailyScp={dailyScp} topRated={topRated} />
       </Container>
     </Main>
+    </>
   )
 }

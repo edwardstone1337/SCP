@@ -140,11 +140,13 @@ export function NavigationClient({ user }: NavigationClientProps) {
   }, [isOpen])
 
   useEffect(() => {
-    if (prevOpenRef.current && !isOpen) {
+    const wasOpen = prevOpenRef.current
+    prevOpenRef.current = isOpen
+
+    if (wasOpen && !isOpen) {
       const t = setTimeout(() => menuButtonRef.current?.focus(), 0)
       return () => clearTimeout(t)
     }
-    prevOpenRef.current = isOpen
   }, [isOpen])
 
   useEffect(() => {
@@ -211,7 +213,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
                     style={signInLinkStyle}
                     data-variant="primary"
                   >
-                    Sign In
+                    Access Terminal
                   </NextLink>
                 )}
                 <Button

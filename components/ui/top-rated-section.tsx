@@ -83,15 +83,15 @@ export function TopRatedSection({ scps }: TopRatedSectionProps) {
               gap: 'var(--spacing-2)',
             }}
           >
-            <Text
-              size="sm"
-              variant="secondary"
+            <Heading
+              level={2}
+              className="text-sm font-normal text-[var(--color-text-secondary)]"
               style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
             >
-              Top Rated
-            </Text>
+              Notable Anomalies
+            </Heading>
             <Button variant="secondary" href="/top-rated" style={{ fontSize: 'var(--font-size-sm)' }}>
-              View Top 100
+              View All
             </Button>
           </div>
 

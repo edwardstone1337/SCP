@@ -18,6 +18,8 @@ export interface ProgressTextProps {
   variant?: VariantKey
   size?: SizeKey
   className?: string
+  /** Custom label for the fraction variant (default: "read") */
+  label?: string
 }
 
 function formatPercentage(read: number, total: number): string {
@@ -26,12 +28,12 @@ function formatPercentage(read: number, total: number): string {
   return `${pct}%`
 }
 
-function formatFraction(read: number, total: number): string {
-  return `${read} / ${total} read`
+function formatFraction(read: number, total: number, label: string = 'read'): string {
+  return `${read} / ${total} ${label}`
 }
 
-function formatBoth(read: number, total: number): string {
-  return `${formatPercentage(read, total)} (${formatFraction(read, total)})`
+function formatBoth(read: number, total: number, label: string = 'read'): string {
+  return `${formatPercentage(read, total)} (${formatFraction(read, total, label)})`
 }
 
 export function ProgressText({
@@ -40,13 +42,14 @@ export function ProgressText({
   variant = 'percentage',
   size = 'md',
   className,
+  label,
 }: ProgressTextProps) {
-  const formatters: Record<VariantKey, (r: number, t: number) => string> = {
+  const formatters: Record<VariantKey, (r: number, t: number, l?: string) => string> = {
     percentage: formatPercentage,
     fraction: formatFraction,
     both: formatBoth,
   }
-  const text = formatters[variant](read, total)
+  const text = formatters[variant](read, total, label)
 
   const style: CSSProperties = {
     fontFamily: 'var(--font-mono)',

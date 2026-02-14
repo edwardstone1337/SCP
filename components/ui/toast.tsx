@@ -56,17 +56,19 @@ const dismissStyle: CSSProperties = {
 export function Toast({ message, onDismiss }: ToastProps) {
   const [isExiting, setIsExiting] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
 
   const startExit = () => {
     if (isExiting) return
     setIsExiting(true)
-    setTimeout(onDismiss, EXIT_ANIMATION_MS)
+    exitTimerRef.current = setTimeout(onDismiss, EXIT_ANIMATION_MS)
   }
 
   useEffect(() => {
     timerRef.current = setTimeout(startExit, AUTO_DISMISS_MS)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

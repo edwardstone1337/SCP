@@ -16,9 +16,15 @@ It intentionally focuses on user value, not internal implementation details.
 - If content load fails, reader provides retry and original-article fallback.
 
 ### Discover what to read next
-- Daily Featured SCP appears on home as a deterministic daily pick.
-- Home "Top Rated" section highlights top-ranked SCPs in a responsive 1/3/4-card layout (mobile/tablet/desktop).
+- Home "Daily Briefing" appears as a deterministic daily SCP pick.
+- Home "Notable Anomalies" highlights top-ranked SCPs in a responsive 1/3/4-card layout (mobile/tablet/desktop).
 - Dedicated `/top-rated` page provides the top 100 highest-rated SCPs.
+- Guest users get a "New to the Foundation?" onboarding block with quick-start paths (classics, highest rated, random file).
+
+### Personalized home briefing
+- Home hero subhead adapts by auth state (returning-user message vs guest discovery prompt).
+- Series progress labels adapt by auth state (`accessed` for signed-in users, `catalogued` for guests).
+- Home sections use dossier-style dividers and themed terminology for a consistent archive UX.
 
 ### Sign in with preferred method
 - Users can sign in with either Google (`Continue with Google`) or email magic link.
@@ -50,7 +56,7 @@ It intentionally focuses on user value, not internal implementation details.
 - `/saved` page shows bookmarked SCPs with sorting options.
 
 ### Recently viewed history
-- Home shows recent SCPs viewed by signed-in users.
+- Signed-in users see a "Recent Files" list on home.
 - List is capped to the latest 5 viewed items.
 
 ## Reading & List Controls
@@ -70,12 +76,13 @@ It intentionally focuses on user value, not internal implementation details.
 
 ## Search & Discoverability
 
-- SCP and series pages include structured metadata for richer search result context.
+- Home, SCP, and series pages include structured metadata for richer search result context.
 
 ## Guest vs Signed-In Experience
 
 - Guests can browse and read all public SCP content.
-- Personal tracking features (read state, bookmarks, saved list, recently viewed) are available after sign-in.
+- Personal tracking features (read state, bookmarks, saved list, recent files) are available after sign-in.
+- Primary logged-out navigation CTA is labeled "Access Terminal" to open sign-in flow.
 
 ## Update Rules (For Humans and AI Assistants)
 

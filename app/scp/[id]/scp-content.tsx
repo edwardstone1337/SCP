@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 import { useTopRatedList } from '@/lib/hooks/use-top-rated-list'
 import { ScpReader } from './scp-reader'
 
@@ -73,31 +74,42 @@ export function ScpContent({ scp: initialScp, prev, next }: ScpContentProps) {
   }
 
   useEffect(() => {
+    let mounted = true
     const supabase = createClient()
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      setUserId(user.id)
+    async function loadUserData() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || !mounted) return
+        setUserId(user.id)
 
-      Promise.all([
-        supabase
-          .from('user_progress')
-          .select('is_read')
-          .eq('user_id', user.id)
-          .eq('scp_id', initialScp.id)
-          .maybeSingle(),
-        supabase
-          .from('user_bookmarks')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('scp_id', initialScp.id)
-          .maybeSingle(),
-      ]).then(([progressRes, bookmarkRes]) => {
+        const [progressRes, bookmarkRes] = await Promise.all([
+          supabase
+            .from('user_progress')
+            .select('is_read')
+            .eq('user_id', user.id)
+            .eq('scp_id', initialScp.id)
+            .maybeSingle(),
+          supabase
+            .from('user_bookmarks')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('scp_id', initialScp.id)
+            .maybeSingle(),
+        ])
+
+        if (!mounted) return
         const is_read = progressRes.data?.is_read ?? false
         const is_bookmarked = !!bookmarkRes.data
         setScp((s) => ({ ...s, is_read, is_bookmarked }))
-      })
-    })
+      } catch (error) {
+        if (!mounted) return
+        logger.error('Failed to load user data', { error, component: 'ScpContent' })
+      }
+    }
+
+    loadUserData()
+    return () => { mounted = false }
   }, [initialScp.id])
 
   return (

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import NextLink from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 import { ScpListWithToggle } from '@/components/ui/scp-list-with-toggle'
 import { Card } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
@@ -60,27 +61,33 @@ export function TopRatedContent({ scps: initialScps }: TopRatedContentProps) {
   const { openModal } = useModal()
 
   useEffect(() => {
+    let mounted = true
     const supabase = createClient()
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      setIsAuthenticated(true)
-      setUserId(user.id)
+    async function loadUserData() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || !mounted) return
+        setIsAuthenticated(true)
+        setUserId(user.id)
 
-      const scpIds = initialScps.map((s) => s.id)
+        const scpIds = initialScps.map((s) => s.id)
 
-      Promise.all([
-        supabase
-          .from('user_progress')
-          .select('scp_id, is_read')
-          .eq('user_id', user.id)
-          .in('scp_id', scpIds),
-        supabase
-          .from('user_bookmarks')
-          .select('scp_id')
-          .eq('user_id', user.id)
-          .in('scp_id', scpIds),
-      ]).then(([progressRes, bookmarkRes]) => {
+        const [progressRes, bookmarkRes] = await Promise.all([
+          supabase
+            .from('user_progress')
+            .select('scp_id, is_read')
+            .eq('user_id', user.id)
+            .in('scp_id', scpIds),
+          supabase
+            .from('user_bookmarks')
+            .select('scp_id')
+            .eq('user_id', user.id)
+            .in('scp_id', scpIds),
+        ])
+
+        if (!mounted) return
+
         const progressData = progressRes.data
         const bookmarkData = bookmarkRes.data
         const readMap = new Map(progressData?.map((p) => [p.scp_id, p.is_read]) ?? [])
@@ -94,8 +101,14 @@ export function TopRatedContent({ scps: initialScps }: TopRatedContentProps) {
             rank: scp.rank, // Preserve rank from initial data
           }))
         )
-      })
-    })
+      } catch (error) {
+        if (!mounted) return
+        logger.error('Failed to load user data', { error, component: 'TopRatedContent' })
+      }
+    }
+
+    loadUserData()
+    return () => { mounted = false }
   }, [initialScps])
 
   const queryString = searchParams.toString()

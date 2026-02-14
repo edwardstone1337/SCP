@@ -1,4 +1,4 @@
-import { AUTHOR_NAME, LICENSE_URL } from '@/lib/constants'
+import { AUTHOR_NAME, LICENSE_URL, SITE_NAME } from '@/lib/constants'
 
 interface CreativeWorkParams {
   scp_id: string
@@ -82,4 +82,38 @@ export function generateCollectionPageJsonLd(params: CollectionPageParams) {
     description: params.description,
     url: params.url,
   }
+}
+
+/**
+ * Generate JSON-LD schemas for the homepage.
+ * Returns WebApplication + WebSite schemas.
+ */
+export function generateHomepageJsonLd(siteUrl: string) {
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: SITE_NAME,
+      url: siteUrl,
+      description:
+        'Browse and track your reading progress through 9,300+ SCP Foundation entries. A free reading companion for SCP completionists.',
+      applicationCategory: 'Entertainment',
+      operatingSystem: 'Any',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      creator: {
+        '@type': 'Person',
+        name: 'Edward Stone',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      url: siteUrl,
+    },
+  ]
 }

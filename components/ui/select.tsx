@@ -19,7 +19,7 @@ export function Select({ options, value, onChange, className, style, ...props }:
   const selectStyle: CSSProperties = {
     width: '100%',
     minHeight: '44px',
-    padding: '0.625rem var(--spacing-2)',
+    padding: '0.625rem var(--spacing-2)', // 10px: intentional deviation from 8px grid for 44px touch target
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-surface-border)',
     borderRadius: 'var(--radius-md)',

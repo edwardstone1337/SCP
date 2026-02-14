@@ -15,7 +15,7 @@
  * verify dark theme legibility across the top 100 SCPs:
  *   npx tsx scripts/dark-theme-scanner.ts
  */
-import DOMPurify from 'dompurify'
+import DOMPurify, { type DOMPurify as DOMPurifyInstance } from 'dompurify'
 
 let sanitizeHooksRegistered = false
 
@@ -349,8 +349,8 @@ function applyInlineStyleLegibilityFixes(html: string): string {
                                  backgroundValue.includes('gradient')
       if (hasBackgroundImage) {
         style.setProperty('background', 'none', 'important')
-        style.setProperty('background-color', 'var(--grey-2, #1e1e1e)', 'important')
-        style.setProperty('color', 'var(--grey-9, #e0e0e0)', 'important')
+        style.setProperty('background-color', 'var(--color-grey-9, #141414)', 'important')
+        style.setProperty('color', 'var(--color-grey-4, #e8e8e8)', 'important')
       } else {
         // For solid background colors, set dark text
         style.setProperty('color', '#1a1a1a')
@@ -369,7 +369,7 @@ function applyInlineStyleLegibilityFixes(html: string): string {
     }
   })
 
-  const borderReplacementColor = 'var(--grey-6, #888)'
+  const borderReplacementColor = 'var(--color-grey-7, #8c8c8c)'
   const borderColorProperties = ['border-color', 'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'] as const
   const borderShorthandProperties = ['border', 'border-top', 'border-right', 'border-bottom', 'border-left'] as const
 
@@ -402,32 +402,33 @@ function applyInlineStyleLegibilityFixes(html: string): string {
   return template.innerHTML
 }
 
-function registerSanitizeHooks(purifyInstance?: any) {
+function registerSanitizeHooks(purifyInstance?: DOMPurifyInstance) {
   const purify = purifyInstance || DOMPurify
 
   if (sanitizeHooksRegistered || (typeof window === 'undefined' && !purifyInstance)) {
     return
   }
 
-  purify.addHook('afterSanitizeElements', (node: any) => {
+  purify.addHook('afterSanitizeElements', (node: Node) => {
     // In Node.js, Element comes from the JSDOM window
     const ElementClass = (typeof window !== 'undefined' && window.Element) || Element
     if (!(node instanceof ElementClass)) {
       return
     }
+    const el = node as Element
 
-    if (node.classList.contains('licensebox')) {
-      node.remove()
+    if (el.classList.contains('licensebox')) {
+      el.remove()
       return
     }
 
-    if (node.tagName === 'A') {
-      const href = node.getAttribute('href')
+    if (el.tagName === 'A') {
+      const href = el.getAttribute('href')
       if (href && /^\s*javascript\s*:/i.test(href)) {
         // Neutralize javascript: hrefs instead of removing the element,
         // as Wikidot footnote refs use href="javascript:;" and useFootnotes
         // depends on these anchor elements being present in the DOM.
-        node.setAttribute('href', '#')
+        el.setAttribute('href', '#')
       }
     }
   })
@@ -442,7 +443,7 @@ function registerSanitizeHooks(purifyInstance?: any) {
  * @param html - The HTML string to sanitize
  * @param customDOMPurify - Optional DOMPurify instance (for Node.js environments)
  */
-export function sanitizeHtml(html: string, customDOMPurify?: any): string {
+export function sanitizeHtml(html: string, customDOMPurify?: DOMPurifyInstance): string {
   // If no custom DOMPurify provided and we're server-side, return as-is
   if (typeof window === 'undefined' && !customDOMPurify) {
     // Server-side: return as-is (will be sanitized on client)

@@ -3,7 +3,7 @@
 import NextLink from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Stack } from '@/components/ui/stack'
-import { Mono, Text } from '@/components/ui/typography'
+import { Heading, Mono, Text } from '@/components/ui/typography'
 import { Card } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { useModal } from '@/components/ui/modal-provider'
@@ -74,17 +74,21 @@ export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewed
     return (
       <section style={{ marginBottom: 'var(--spacing-6)' }}>
         <Stack direction="vertical" gap="normal">
-          <Text size="sm" variant="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Recently Viewed
-          </Text>
-          <Text variant="secondary">Sign in to track your reading history.</Text>
+          <Heading
+            level={2}
+            className="text-sm font-normal text-[var(--color-text-secondary)]"
+            style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+          >
+            Recent Files
+          </Heading>
+          <Text variant="secondary">Clearance required to track accessed files.</Text>
           <NextLink
             href={signInHref}
             onClick={handleSignInClick}
             style={signInLinkStyle}
             data-variant="secondary"
           >
-            Sign In
+            Request Clearance
           </NextLink>
         </Stack>
       </section>
@@ -96,10 +100,14 @@ export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewed
     return (
       <section style={{ marginBottom: 'var(--spacing-6)' }}>
         <Stack direction="vertical" gap="normal">
-          <Text size="sm" variant="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Recently Viewed
-          </Text>
-          <Text variant="secondary">Articles you read will appear here.</Text>
+          <Heading
+            level={2}
+            className="text-sm font-normal text-[var(--color-text-secondary)]"
+            style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+          >
+            Recent Files
+          </Heading>
+          <Text variant="secondary">Accessed files will appear here.</Text>
         </Stack>
       </section>
     )
@@ -109,9 +117,13 @@ export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewed
   return (
     <section style={{ marginBottom: 'var(--spacing-6)' }}>
       <Stack direction="vertical" gap="normal">
-        <Text size="sm" variant="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Recently Viewed
-        </Text>
+        <Heading
+          level={2}
+          className="text-sm font-normal text-[var(--color-text-secondary)]"
+          style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+        >
+          Recent Files
+        </Heading>
         <Stack direction="vertical" gap="tight">
           {items.map((item) => (
             <Link key={item.scp_id} href={`/scp/${item.scp_id}`} variant="default">

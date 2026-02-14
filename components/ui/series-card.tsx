@@ -14,6 +14,7 @@ export interface SeriesCardProps {
   read: number
   href: string
   className?: string
+  progressLabel?: string
 }
 
 export function SeriesCard({
@@ -23,6 +24,7 @@ export function SeriesCard({
   read,
   href,
   className,
+  progressLabel,
 }: SeriesCardProps) {
   const percentage = total > 0 ? Math.round((read / total) * 100) : 0
 
@@ -45,7 +47,7 @@ export function SeriesCard({
           <Heading level={3}>{roman}</Heading>
         </ProgressRing>
         <Stack gap="tight" style={{ marginTop: 'var(--spacing-2)', alignItems: 'center' }}>
-          <ProgressText read={read} total={total} variant="fraction" />
+          <ProgressText read={read} total={total} variant="fraction" label={progressLabel} />
         </Stack>
       </div>
     </Card>

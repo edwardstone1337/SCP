@@ -21,6 +21,18 @@ import { BackToTop } from '@/components/ui/back-to-top'
 import { Skeleton } from '@/components/ui/skeleton'
 import { recordView } from './actions'
 
+function getSafeUrl(url: string | undefined | null, scpId: string): string {
+  const fallback = `https://scp-wiki.wikidot.com/${scpId.toLowerCase()}`
+  if (!url) return fallback
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return url
+  } catch {
+    // invalid URL
+  }
+  return fallback
+}
+
 interface AdjacentScp {
   scp_id: string
   title: string
@@ -131,7 +143,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                       </>
                     ) : null}
                     <a
-                      href={content?.url ?? scp.url}
+                      href={getSafeUrl(content?.url ?? scp.url, scp.scp_id)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => trackOutboundWikiClick(scp.scp_id)}
@@ -233,7 +245,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                       Retry
                     </Button>
                     <a
-                      href={scp.url}
+                      href={getSafeUrl(scp.url, scp.scp_id)}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

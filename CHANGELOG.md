@@ -17,6 +17,8 @@ All notable changes to SCP Reader are documented here.
 - Dark theme QA scanner (`scripts/dark-theme-scanner.ts`) with docs (`scripts/README-dark-theme-scanner.md`) and JSON report output in `scripts/output/`
 - New `docs/FEATURES.md` focused on customer-facing capabilities and value
 - JSON-LD structured data for SCP pages (CreativeWork schema), series pages (CollectionPage schema), and breadcrumb navigation (BreadcrumbList schema) for improved SEO and search result rich snippets
+- Homepage now injects JSON-LD `WebApplication` and `WebSite` schemas for better homepage search context
+- New guest onboarding block on home ("New to the Foundation?") with quick actions: classics, top-rated, and random file
 
 ### Changed
 - Sign Out button moved from top navigation bar into the nav overlay menu, alongside Delete Account; top bar now shows only Sign In (when logged out) and Menu
@@ -28,6 +30,9 @@ All notable changes to SCP Reader are documented here.
 - Top 100 page list now defaults to rating-desc order and hides the sort dropdown to preserve rank context in links
 - `sanitizeHtml` now accepts an optional custom DOMPurify instance for Node/JSDOM usage; color parsing/luminance helpers are exported for scanner reuse
 - Documentation command workflow now explicitly requires updating `docs/FEATURES.md` for user-visible behavior changes
+- Homepage copy and section labels now use SCP dossier terminology ("Daily Briefing", "Notable Anomalies", "Recent Files", "Containment Series")
+- Navigation logged-out CTA label changed from "Sign In" to "Access Terminal"
+- Added home section dividers plus subtle background texture and top classification stripe for stronger themed presentation
 
 ### Performance
 - Removed SCP content proxy (`/api/scp-content/[contentFile]`); browser fetches directly from SCP-Data API, eliminating ~70% of Vercel origin transfer
@@ -45,6 +50,13 @@ All notable changes to SCP Reader are documented here.
 - Card component now forwards accessibility props for proper semantic markup
 - Footnote tooltips broken by DOMPurify XSS prevention: `javascript:` hrefs now replaced with `#` instead of removing anchor elements, preserving tooltip functionality while neutralizing XSS vectors
 - CreativeWork JSON-LD now avoids duplicate names when an SCP title matches its ID (e.g., "SCP-173")
+- Fixed focus restoration bug in navigation overlay that could steal focus on re-renders
+- Fixed toast exit animation timer not being cleaned up on unmount
+- Added error handling and unmount guards to core client-side auth/user-data hydration effects (home, navigation, SCP, series, range, top-rated)
+- Added URL scheme validation for external wiki links to prevent protocol-based XSS
+- Fixed incorrect CSS variable names in content sanitizer (--grey-* → --color-grey-*)
+- Replaced `any` types with proper DOMPurify types in sanitizer
+- Switched auth callback to use centralized Supabase client with env validation
 
 ### Removed
 - Next.js middleware (session/redirect logic removed)

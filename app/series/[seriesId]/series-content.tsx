@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 import { formatRange } from '@/lib/utils/series'
 import { Stack } from '@/components/ui/stack'
 import { RangeListItem } from '@/components/ui/range-list-item'
@@ -27,27 +28,36 @@ export function SeriesContent({ ranges: initialRanges, seriesId }: SeriesContent
   const [ranges, setRanges] = useState(initialRanges)
 
   useEffect(() => {
+    let mounted = true
     const supabase = createClient()
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
+    async function loadUserData() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || !mounted) return
 
-      supabase
-        .rpc('get_range_progress', {
+        const { data, error } = await supabase.rpc('get_range_progress', {
           series_id_param: seriesId,
           user_id_param: user.id,
         })
-        .then(({ data, error }) => {
-          if (error || !data) return
-          setRanges(
-            data.map((row: GetRangeProgressRow) => ({
-              rangeStart: row.range_start,
-              total: Number(row.total),
-              read: Number(row.read_count),
-            }))
-          )
-        })
-    })
+
+        if (error || !data || !mounted) return
+
+        setRanges(
+          data.map((row: GetRangeProgressRow) => ({
+            rangeStart: row.range_start,
+            total: Number(row.total),
+            read: Number(row.read_count),
+          }))
+        )
+      } catch (error) {
+        if (!mounted) return
+        logger.error('Failed to load user data', { error, component: 'SeriesContent' })
+      }
+    }
+
+    loadUserData()
+    return () => { mounted = false }
   }, [seriesId])
 
   return (
