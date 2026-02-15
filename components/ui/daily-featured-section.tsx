@@ -45,7 +45,7 @@ export function DailyFeaturedSection({ scp, userId }: DailyFeaturedSectionProps)
               </Text>
             </Stack>
             {userId && (
-              <div style={{ display: 'flex', gap: 'var(--spacing-1)', marginTop: 'var(--spacing-1)' }}>
+              <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-1)' }}>
                 <BookmarkButton
                   scpId={scp.id}
                   scpRouteId={scp.scp_id}

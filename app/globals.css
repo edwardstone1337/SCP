@@ -287,6 +287,12 @@
   .button-label {
     display: none;
   }
+
+  .action-button {
+    width: 44px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }
 
 /* Reader header: stack on mobile */
@@ -403,6 +409,37 @@ a[data-variant="nav"]:hover {
 @media (max-width: 767px) {
   .ui-card-padding-lg {
     padding: var(--spacing-2);
+  }
+}
+
+/* Recently viewed responsive layout */
+.recently-viewed-mobile {
+  display: block;
+}
+
+.recently-viewed-desktop {
+  display: none !important;
+}
+
+/* Force full-width buttons inside desktop recently-viewed cards */
+.recently-viewed-buttons > div,
+.recently-viewed-buttons button {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .recently-viewed-mobile {
+    display: none;
+  }
+
+  .recently-viewed-desktop {
+    display: flex !important;
+    gap: var(--spacing-2);
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: var(--spacing-1);
+    margin: calc(-1 * var(--spacing-1));
+    scrollbar-width: thin;
   }
 }
 

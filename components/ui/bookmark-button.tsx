@@ -85,7 +85,7 @@ export function BookmarkButton({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--spacing-2)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', alignSelf: 'flex-start', gap: 'var(--spacing-2)' }}>
       {error && (
         <div
           role="alert"
@@ -102,14 +102,19 @@ export function BookmarkButton({
         {!isPending && displayIsBookmarked ? 'Bookmark added' : !isPending && !displayIsBookmarked ? 'Bookmark removed' : ''}
       </span>
       <Button
-        variant={displayIsBookmarked ? 'primary' : 'secondary'}
+        className="action-button"
+        variant="secondary"
         size={size}
         onClick={handleToggle}
         loading={isPending}
         aria-label={displayIsBookmarked ? 'Remove bookmark' : 'Add bookmark'}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
-          <Icon name={displayIsBookmarked ? 'bookmark-filled' : 'bookmark'} size="sm" />
+          <Icon
+            name={displayIsBookmarked ? 'bookmark-filled' : 'bookmark'}
+            size="sm"
+            style={displayIsBookmarked ? { color: 'var(--color-accent)' } : undefined}
+          />
           <span className="button-label">
             {displayIsBookmarked ? 'Saved' : 'Save'}
           </span>

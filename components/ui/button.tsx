@@ -37,6 +37,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '44px',
+    lineHeight: 1,
     fontWeight: 700,
     fontFamily: 'var(--font-family-sans)',
     transition: 'all var(--transition-base)',

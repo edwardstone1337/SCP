@@ -64,7 +64,7 @@ export function Card({
       <Link
         href={href}
         className={cardClassName}
-        style={combinedStyle}
+        style={{ display: 'block', textDecoration: 'none', color: 'inherit', ...combinedStyle }}
         data-variant={variant}
         data-card-padding={padding}
       >

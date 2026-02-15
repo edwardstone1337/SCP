@@ -107,37 +107,52 @@ export function RecentlyViewedSection({ items, isAuthenticated, userId }: Recent
     )
   }
 
-  // Authenticated with items — horizontal scroll
+  // Authenticated with items
   return (
     <section style={{ marginBottom: 'var(--spacing-6)' }}>
       <Stack direction="vertical" gap="normal">
         <SectionLabel>Recent Files</SectionLabel>
-        <div
-          style={{
-            display: 'flex',
-            gap: 'var(--spacing-2)',
-            overflowX: 'auto',
-            paddingBottom: 'var(--spacing-1)',
-            scrollbarWidth: 'thin',
-          }}
-        >
+
+        {/* Mobile: vertical list */}
+        <div className="recently-viewed-mobile">
+          <Stack direction="vertical" gap="tight">
+            {items.map((item) => (
+              <Card key={item.scp_id} variant="interactive" padding="sm" href={`/scp/${item.scp_id}`}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-2)' }}>
+                  <Mono size="base">{item.scp_id}</Mono>
+                  {userId && item.id && (
+                    <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexShrink: 0 }}>
+                      <BookmarkButton
+                        scpId={item.id}
+                        scpRouteId={item.scp_id}
+                        isBookmarked={item.is_bookmarked ?? false}
+                        userId={userId}
+                        size="sm"
+                      />
+                      <ReadToggleButton
+                        scpId={item.id}
+                        routeId={item.scp_id}
+                        isRead={item.is_read ?? false}
+                        userId={userId}
+                        size="sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </Stack>
+        </div>
+
+        {/* Desktop: horizontal scroll */}
+        <div className="recently-viewed-desktop">
           {items.map((item) => (
-            <div
-              key={item.scp_id}
-              style={{
-                minWidth: '260px',
-                maxWidth: '300px',
-                flexShrink: 0,
-              }}
-            >
-              <Card variant="interactive" padding="sm" href={`/scp/${item.scp_id}`}>
+            <div key={item.scp_id} style={{ width: '220px', flexShrink: 0 }}>
+              <Card variant="interactive" padding="md" href={`/scp/${item.scp_id}`}>
                 <Stack direction="vertical" gap="tight">
                   <Mono size="base">{item.scp_id}</Mono>
-                  {item.title && item.title !== item.scp_id && (
-                    <Text size="sm" variant="secondary">{item.title}</Text>
-                  )}
                   {userId && item.id && (
-                    <div style={{ display: 'flex', gap: 'var(--spacing-1)', marginTop: 'var(--spacing-1)' }}>
+                    <div className="recently-viewed-buttons" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)', width: '100%' }}>
                       <BookmarkButton
                         scpId={item.id}
                         scpRouteId={item.scp_id}

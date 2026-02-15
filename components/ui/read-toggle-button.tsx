@@ -89,7 +89,7 @@ export function ReadToggleButton({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--spacing-2)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', alignSelf: 'flex-start', gap: 'var(--spacing-2)' }}>
       {error && (
         <div
           role="alert"
