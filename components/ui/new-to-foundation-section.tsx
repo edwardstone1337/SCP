@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 import { Stack } from '@/components/ui/stack'
 import { Text } from '@/components/ui/typography'
 import { SectionLabel } from '@/components/ui/section-label'
@@ -18,10 +19,22 @@ export function NewToFoundationSection() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
+    let mounted = true
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setIsAuthenticated(true)
-    })
+
+    async function checkAuth() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!mounted) return
+        if (user) setIsAuthenticated(true)
+      } catch (error) {
+        if (!mounted) return
+        logger.error('Failed to check auth', { error, component: 'NewToFoundationSection' })
+      }
+    }
+
+    checkAuth()
+    return () => { mounted = false }
   }, [])
 
   if (isAuthenticated) return null

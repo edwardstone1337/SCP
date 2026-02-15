@@ -412,34 +412,22 @@ a[data-variant="nav"]:hover {
   }
 }
 
-/* Recently viewed responsive layout */
-.recently-viewed-mobile {
-  display: block;
-}
-
-.recently-viewed-desktop {
-  display: none !important;
-}
-
-/* Force full-width buttons inside desktop recently-viewed cards */
-.recently-viewed-buttons > div,
-.recently-viewed-buttons button {
-  width: 100%;
+/* Recently viewed responsive grid */
+.recently-viewed-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-2);
 }
 
 @media (min-width: 768px) {
-  .recently-viewed-mobile {
-    display: none;
+  .recently-viewed-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
+}
 
-  .recently-viewed-desktop {
-    display: flex !important;
-    gap: var(--spacing-2);
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: var(--spacing-1);
-    margin: calc(-1 * var(--spacing-1));
-    scrollbar-width: thin;
+@media (min-width: 1024px) {
+  .recently-viewed-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

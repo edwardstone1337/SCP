@@ -95,8 +95,12 @@ export async function generateMetadata({
     }
   }
 
+  const hasDescriptiveTitle = scpData.title && scpData.title !== scpData.scp_id
+
   // Try to get a description from the content
-  let description = `Read ${scpData.scp_id} on SCP Reader. Track your reading progress through the SCP Foundation database.`
+  let description = hasDescriptiveTitle
+    ? `Read ${scpData.scp_id} (${scpData.title}) on SCP Reader. Track your reading progress through the SCP Foundation database.`
+    : `Read ${scpData.scp_id} on SCP Reader. Track your reading progress through the SCP Foundation database.`
 
   if (scpData.content_file) {
     const contentText = await getScpContentText(scpData.content_file, scpData.scp_id)
@@ -110,7 +114,9 @@ export async function generateMetadata({
   }
 
   const canonicalUrl = `${getSiteUrl()}/scp/${id}`
-  const title = scpData.scp_id
+  const title = hasDescriptiveTitle
+    ? `${scpData.title} | ${scpData.scp_id}`
+    : scpData.scp_id
 
   return {
     title,

@@ -113,65 +113,45 @@ export function RecentlyViewedSection({ items, isAuthenticated, userId }: Recent
       <Stack direction="vertical" gap="normal">
         <SectionLabel>Recent Files</SectionLabel>
 
-        {/* Mobile: vertical list */}
-        <div className="recently-viewed-mobile">
-          <Stack direction="vertical" gap="tight">
-            {items.map((item) => (
-              <Card key={item.scp_id} variant="interactive" padding="sm" href={`/scp/${item.scp_id}`}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-2)' }}>
-                  <Mono size="base">{item.scp_id}</Mono>
-                  {userId && item.id && (
-                    <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexShrink: 0 }}>
-                      <BookmarkButton
-                        scpId={item.id}
-                        scpRouteId={item.scp_id}
-                        isBookmarked={item.is_bookmarked ?? false}
-                        userId={userId}
-                        size="sm"
-                      />
-                      <ReadToggleButton
-                        scpId={item.id}
-                        routeId={item.scp_id}
-                        isRead={item.is_read ?? false}
-                        userId={userId}
-                        size="sm"
-                      />
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </Stack>
-        </div>
-
-        {/* Desktop: horizontal scroll */}
-        <div className="recently-viewed-desktop">
+        <div className="recently-viewed-grid">
           {items.map((item) => (
-            <div key={item.scp_id} style={{ width: '220px', flexShrink: 0 }}>
-              <Card variant="interactive" padding="md" href={`/scp/${item.scp_id}`}>
-                <Stack direction="vertical" gap="tight">
-                  <Mono size="base">{item.scp_id}</Mono>
-                  {userId && item.id && (
-                    <div className="recently-viewed-buttons" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)', width: '100%' }}>
-                      <BookmarkButton
-                        scpId={item.id}
-                        scpRouteId={item.scp_id}
-                        isBookmarked={item.is_bookmarked ?? false}
-                        userId={userId}
-                        size="sm"
-                      />
-                      <ReadToggleButton
-                        scpId={item.id}
-                        routeId={item.scp_id}
-                        isRead={item.is_read ?? false}
-                        userId={userId}
-                        size="sm"
-                      />
-                    </div>
-                  )}
-                </Stack>
-              </Card>
-            </div>
+            <Card key={item.scp_id} variant="interactive" padding="md" href={`/scp/${item.scp_id}`}>
+              <Stack direction="vertical" gap="tight">
+                {item.title && item.title !== item.scp_id && (
+                  <Text
+                    size="base"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      lineHeight: '1.4',
+                    }}
+                  >
+                    {item.title}
+                  </Text>
+                )}
+                <Mono size="base">{item.scp_id}</Mono>
+                {userId && item.id && (
+                  <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+                    <BookmarkButton
+                      scpId={item.id}
+                      scpRouteId={item.scp_id}
+                      isBookmarked={item.is_bookmarked ?? false}
+                      userId={userId}
+                      size="sm"
+                    />
+                    <ReadToggleButton
+                      scpId={item.id}
+                      routeId={item.scp_id}
+                      isRead={item.is_read ?? false}
+                      userId={userId}
+                      size="sm"
+                    />
+                  </div>
+                )}
+              </Stack>
+            </Card>
           ))}
         </div>
       </Stack>

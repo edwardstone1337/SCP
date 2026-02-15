@@ -71,6 +71,7 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
   const [enrichedTopRated, setEnrichedTopRated] = useState<EnrichedTopRatedScp[]>(
     topRated.map((scp) => ({ ...scp, is_read: false, is_bookmarked: false }))
   )
+  const [authLoading, setAuthLoading] = useState(true)
   const [showAccountDeletedToast, setShowAccountDeletedToast] = useState(false)
 
   useEffect(() => {
@@ -98,7 +99,7 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
             .select('viewed_at, scps (id, scp_id, title)')
             .eq('user_id', user.id)
             .order('viewed_at', { ascending: false })
-            .limit(5),
+            .limit(6),
         ])
 
         if (!mounted) return
@@ -181,6 +182,10 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
       } catch (error) {
         if (!mounted) return
         logger.error('Failed to load user data', { error, component: 'HomeContent' })
+      } finally {
+        if (mounted) {
+          setAuthLoading(false)
+        }
       }
     }
 
@@ -211,7 +216,7 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
       )}
 
       {/* Guest: Notable Anomalies */}
-      {!isAuthenticated && (
+      {!isAuthenticated && !authLoading && (
         <>
           <TopRatedSection scps={enrichedTopRated} />
           <SectionDivider />
@@ -243,7 +248,7 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
       </section>
 
       {/* Guest: New to the Foundation */}
-      {!isAuthenticated && (
+      {!isAuthenticated && !authLoading && (
         <>
           <SectionDivider />
           <NewToFoundationSection />

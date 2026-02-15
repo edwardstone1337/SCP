@@ -141,13 +141,13 @@ export async function recordView(scpUuid: string) {
     return
   }
 
-  // Cap at 5: delete oldest entries beyond the 5 most recent
+  // Keep 6 most recent — matches homepage display limit
   const { data: recent } = await supabase
     .from('user_recently_viewed')
     .select('id')
     .eq('user_id', user.id)
     .order('viewed_at', { ascending: false })
-    .range(5, 100)
+    .range(6, 100)
 
   if (recent && recent.length > 0) {
     const { error: deleteError } = await supabase

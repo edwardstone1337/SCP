@@ -1,7 +1,7 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { Heading, Text } from '@/components/ui/typography'
+import { Heading, Mono, Text } from '@/components/ui/typography'
 import { Icon } from '@/components/ui/icon'
 import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { ReadToggleButton } from '@/components/ui/read-toggle-button'
@@ -67,9 +67,16 @@ export function ScpListItem({
     >
       <div style={rowStyle}>
         <div style={leftStyle}>
-          <Heading level={4} style={titleLinkStyle}>
-            {title}
-          </Heading>
+          {title && title !== scpId ? (
+            <>
+              <Heading level={4} style={titleLinkStyle}>
+                {title}
+              </Heading>
+              <Mono size="sm" style={{ color: 'var(--color-text-secondary)' }}>{scpId}</Mono>
+            </>
+          ) : (
+            <Mono size="base" style={titleLinkStyle}>{scpId}</Mono>
+          )}
           <div style={metaStyle}>
             <Icon name="star" size="sm" style={{ color: 'var(--color-text-secondary)' }} />
             <Text variant="secondary" size="sm">{rating}</Text>

@@ -26,7 +26,8 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | Item | Details |
 |------|---------|
 | **Source** | SCP-Data API (`scp-data.tedivm.com`) |
-| **Sync** | Manual seed script: `npm run seed` |
+| **Seed** | `npm run seed` — populates `scps` from API index |
+| **Title enrichment** | `npm run enrich-titles` — updates `scps.title` from SCP Wiki series index pages; ~9.2k entries have descriptive titles |
 
 ### Deployment
 | Item | Details |
@@ -97,7 +98,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `id` | UUID | PK, default `gen_random_uuid()` |
 | `scp_number` | INT | NOT NULL |
 | `scp_id` | TEXT | NOT NULL, UNIQUE (e.g. `SCP-173`) |
-| `title` | TEXT | NOT NULL |
+| `title` | TEXT | NOT NULL; seed from SCP-Data API; optionally enriched from Wiki series index via `npm run enrich-titles` |
 | `series` | TEXT | NOT NULL (e.g. `series-1`) |
 | `rating` | INT | nullable |
 | `url` | TEXT | NOT NULL |
@@ -286,7 +287,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `profile-dropdown` | Avatar-triggered dropdown for signed-in users; Settings, Sign Out. |
 | `range-list-item` | Range row with progress ring, link. |
 | `read-toggle-button` | Mark as Read/Unread; optional routeId for reader revalidation; optimistic update; opens sign-in modal when unauthenticated (preserves current location). |
-| `recently-viewed-section` | "Recent Files" block used for authenticated users on home; lists last 5 viewed SCPs and shows authenticated empty state ("Accessed files will appear here."). |
+| `recently-viewed-section` | "Recent Files" block for authenticated users on home; responsive grid (1/2/3 cols); last 6 viewed SCPs with title when available; empty state "Accessed files will appear here." |
 | `scp-list-item` | SCP row: title, rating, id, read/bookmark toggles, full-card link. |
 | `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem; supports `defaultSort` and optional hidden sort control. |
 | `section-label` | Uppercase section label (sm font, secondary color). |
@@ -325,7 +326,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 - **Storage:** `user_recently_viewed` (user_id, scp_id, viewed_at). Upsert on view; unique on (user_id, scp_id). Cap at 5: after upsert, oldest entries beyond the 5 most recent are deleted.
 - **Recording:** `recordView(scpUuid)` server action in `app/scp/[id]/actions.ts`. Called once on reader mount (client `useEffect` in `ScpReader`). No-op for guests.
-- **Display:** Home page (`/`) fetches last 5 for authenticated user and renders `RecentlyViewedSection` only when authenticated.
+- **Display:** Home page (`/`) fetches last 6 for authenticated user and renders `RecentlyViewedSection` in a responsive grid (1/2/3 columns); cards show descriptive title when available. Guest sections (Notable Anomalies, New to the Foundation) wait for auth to resolve (`authLoading`) before showing.
 - **Zero states:** Authenticated users with no history see "Accessed files will appear here."
 
 ### Daily Featured SCP
@@ -363,7 +364,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 ### Content Loading
 
-- **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. If `content_file` is null, reader shows "Content is not available."
+- **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. `generateMetadata` sets document title to `Title | SCP-XXX` when `title !== scp_id`, else `scp_id`; meta description includes title when present. If `content_file` is null, reader shows "Content is not available."
 - **Body:** Client `useScpContent(contentFile, scpId)` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient failures.
 - **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-side by default; optional custom instance for Node/JSDOM tooling) then `dangerouslySetInnerHTML` in an `article` with class `scp-content` and `aria-labelledby` for semantic association to the page title.
 - **Image Safe Mode:** When `preferences.imageSafeMode` is true (premium feature), `useImageSafeMode` hides images in `.scp-content`, inserts clickable placeholders, and reveals on tap. Operates on real DOM; styles in `globals.css` (`.image-safe-placeholder`, `.image-safe-hidden`).
@@ -405,7 +406,7 @@ All `.scp-content` styles live in `app/globals.css` and use design tokens from `
 |----------|---------|--------------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key for browser/server | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key (seed, account deletion, Stripe webhook) | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key (seed, enrich-titles, account deletion, Stripe webhook) | No |
 | `SUPABASE_DB_PASSWORD` | DB password for CLI | No |
 | `NEXT_PUBLIC_SITE_URL` | Optional base URL for auth redirects (fallback: browser origin) | Yes |
 | `STRIPE_SECRET_KEY` | Stripe API key for checkout sessions and webhook verification | No |
@@ -423,8 +424,8 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts` and Str
 
 ### Service Role Key Usage
 
-- **Where:** `scripts/seed-scps.ts`, `app/actions/auth.ts` (`deleteAccount`), and `app/api/stripe/webhook/route.ts`.
-- **Why:** Seed inserts/updates `scps`. Account deletion needs `auth.admin.deleteUser`. Stripe webhook upserts `user_profiles.premium_until` (bypasses RLS).
+- **Where:** `scripts/seed-scps.ts`, `scripts/enrich-titles.ts`, `app/actions/auth.ts` (`deleteAccount`), and `app/api/stripe/webhook/route.ts`.
+- **Why:** Seed inserts/updates `scps`. Enrich-titles updates `scps.title` from Wiki. Account deletion needs `auth.admin.deleteUser`. Stripe webhook upserts `user_profiles.premium_until` (bypasses RLS).
 - **Safety:** Used only in server context; never exposed to the client.
 
 ---
@@ -518,6 +519,12 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts` and Str
 - **Requires:** `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_SUPABASE_URL` in `.env.local`.
 - **Process:** Fetches `https://scp-data.tedivm.com/data/scp/items/index.json`, maps to `scps` schema, upserts in batches (500) with `onConflict: 'scp_id'`.
 
+### Title Enrichment
+
+- **Command:** `npm run enrich-titles` (runs `tsx scripts/enrich-titles.ts`).
+- **Requires:** Same as seed (`SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL`).
+- **Process:** Fetches SCP Wiki series index pages (I–X), parses list items for `SCP-NNN - Title` format, updates `scps.title` in batches. Use `--dry-run` to preview without writing. Entries without a ` - ` separator on the wiki keep their existing title (typically `scp_id`).
+
 ---
 
 ## File Structure
@@ -603,7 +610,8 @@ lib/
 scripts/
 ├── dark-theme-scanner.ts    # QA: scan top 100 SCPs for dark-theme legibility issues
 ├── README-dark-theme-scanner.md # Scanner usage and interpretation guide
-├── output/                  # Scanner JSON reports (generated artifacts)
+├── enrich-titles.ts         # Wiki series index → scps.title (service role)
+├── output/                  # Scanner JSON reports, enrichment dry-run (generated artifacts)
 └── seed-scps.ts             # SCP-Data API → scps table (service role)
 
 supabase/

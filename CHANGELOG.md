@@ -34,8 +34,12 @@ All notable changes to SCP Reader are documented here.
 - JSON-LD structured data for SCP pages (CreativeWork schema), series pages (CollectionPage schema), and breadcrumb navigation (BreadcrumbList schema) for improved SEO and search result rich snippets
 - Homepage now injects JSON-LD `WebApplication` and `WebSite` schemas for better homepage search context
 - New guest onboarding block on home ("New to the Foundation?") with quick actions: classics, top-rated, and random file
+- **Title enrichment:** Script `scripts/enrich-titles.ts` (npm run enrich-titles) populates `scps.title` from SCP Wiki series index pages; 9,246 entries updated. The remaining ~78 entries have no ` - ` separator on the index and continue to display the SCP number only.
 
 ### Changed
+- **SCP page metadata:** Document title and meta description use descriptive title when available (e.g. "The Sculpture | SCP-173"); otherwise SCP number only.
+- **Recent Files:** Home shows up to 6 recently viewed items in a responsive grid (1/2/3 columns); cards display descriptive title when available, with SCP number below.
+- **Guest home sections:** Notable Anomalies and "New to the Foundation?" wait for auth to resolve before rendering, avoiding brief flash of content for signed-in users.
 - **Typography consolidation:** `Heading`, `Text`, `Mono`, `Label` merged into `typography.tsx`; standalone heading, hero-subhead, label, message, text components removed
 - **Navigation:** Signed-in users see avatar ProfileDropdown (Settings, Sign Out); overlay shows Series, Notable Anomalies, Upgrade (if applicable), Saved; Delete Account moved to Settings > Account > Danger Zone
 - Navigation overlay: Upgrade to Premium link for signed-in non-premium users

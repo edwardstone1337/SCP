@@ -18,6 +18,7 @@ npm run lint         # Run ESLint
 npm run verify       # Run lint + build + auth smoke test (use before merge)
 npm run smoke:auth   # Auth smoke test only
 npm run seed         # Seed SCP data from scp-data.tedivm.com (requires .env.local)
+npm run enrich-titles # Populate scps.title from Wiki series index (requires SUPABASE_SERVICE_ROLE_KEY); use --dry-run to preview
 
 # QA Tools
 npx tsx scripts/dark-theme-scanner.ts  # Scan top 100 SCPs for dark theme issues (run after modifying lib/utils/sanitize.ts)
@@ -108,7 +109,7 @@ See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `
 4. **DO NOT** skip the `npm run verify` step before merging → always run verify + manual smoke checks
 5. **DO NOT** destructive database migrations in feature branches → use additive migrations; coordinate destructive changes on main
 6. **DO NOT** use `console.log` for logging → use `logger` from `lib/logger.ts` with context
-7. **DO NOT** expose `SUPABASE_SERVICE_ROLE_KEY` to client code; it is server-only (seed + account deletion server action)
+7. **DO NOT** expose `SUPABASE_SERVICE_ROLE_KEY` to client code; it is server-only (seed, enrich-titles, account deletion, Stripe webhook)
 
 ### Client-Side Data Fetching Convention
 

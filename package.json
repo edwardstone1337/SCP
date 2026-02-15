@@ -9,7 +9,8 @@
     "lint": "eslint",
     "smoke:auth": "node scripts/auth-smoke.mjs",
     "verify": "npm run lint && npm run build && npm run smoke:auth",
-    "seed": "tsx scripts/seed-scps.ts"
+    "seed": "tsx scripts/seed-scps.ts",
+    "enrich-titles": "tsx scripts/enrich-titles.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",

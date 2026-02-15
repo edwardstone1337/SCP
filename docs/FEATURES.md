@@ -9,6 +9,7 @@ It intentionally focuses on user value, not internal implementation details.
 - Home page shows all 10 SCP series (I-X) with per-series progress.
 - Each series opens range pages (001-099, 100-199, etc).
 - Each range page lists SCPs with quick actions.
+- SCP cards and list items show descriptive titles (e.g., "SCP-173 - The Sculpture") where available; otherwise the SCP number only.
 
 ### Read SCP articles in-app
 - SCP reader opens full article content inside the app.
@@ -72,8 +73,8 @@ It intentionally focuses on user value, not internal implementation details.
 - `/saved` page shows bookmarked SCPs with sorting options.
 
 ### Recently viewed history
-- Signed-in users see a "Recent Files" list on home.
-- List is capped to the latest 5 viewed items.
+- Signed-in users see a "Recent Files" list on home in a responsive grid (1/2/3 columns by breakpoint).
+- List is capped to the latest 6 viewed items; cards show descriptive title when available, with SCP number.
 
 ## Reading & List Controls
 

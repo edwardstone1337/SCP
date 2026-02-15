@@ -1,6 +1,6 @@
 # Enrich SCP titles from Wiki series index pages
 
-**Type:** enhancement · **Priority:** normal · **Effort:** medium · **Blocked:** yes
+**Type:** enhancement · **Priority:** normal · **Effort:** medium · **Status:** done
 
 ## TL;DR
 
@@ -37,9 +37,10 @@ SCP cards (Daily Briefing, Notable Anomalies, list items) show only the SCP numb
 - **Entries with no ` - ` separator** — fall back to no title (or keep `scp_id`).
 - **Multiple links in one list item** — use first SCP link.
 
-## Blocked by
+## Done
 
-**Wikidot availability** — Site was unreachable during initial discovery (timeouts/blocks). Retry when it's back up.
+- Implemented `scripts/enrich-titles.ts`; ran enrichment and updated **9,246** `scps.title` rows from Wiki series index pages.
+- The remaining **78** DB entries (9,324 − 9,246) have no descriptive title on the wiki index (no ` - ` separator); they continue to show the SCP number only, as before.
 
 ## Relevant files
 
@@ -54,4 +55,4 @@ SCP cards (Daily Briefing, Notable Anomalies, list items) show only the SCP numb
 
 ## Labels
 
-`enhancement` `data` `blocked`
+`enhancement` `data`
