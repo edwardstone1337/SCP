@@ -110,33 +110,12 @@ export function useFootnotes(
   const activeRefElementRef = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
-    // DEBUG: Log whether the effect runs and its dependency values
-    console.log('[useFootnotes] effect running', {
-      contentLoaded,
-      hasContainer: !!containerRef.current,
-      containerTag: containerRef.current?.tagName,
-      containerChildCount: containerRef.current?.childNodes.length,
-      containerInnerHTMLLength: containerRef.current?.innerHTML.length,
-    })
-
     if (!contentLoaded || !containerRef.current) {
-      console.log('[useFootnotes] EARLY RETURN — contentLoaded:', contentLoaded, 'container:', containerRef.current)
       return
     }
 
     const container = containerRef.current
     const refLinks = container.querySelectorAll<HTMLAnchorElement>('a[id^="footnoteref-"]')
-    // DEBUG: Log query results
-    console.log('[useFootnotes] querySelectorAll result:', {
-      refLinksCount: refLinks.length,
-      containerElement: container,
-      allAnchors: container.querySelectorAll('a').length,
-      allSups: container.querySelectorAll('sup').length,
-      // Check if footnotes exist with different selectors
-      byClass: container.querySelectorAll('a.footnoteref').length,
-      byIdPrefix: container.querySelectorAll('[id^="footnoteref"]').length,
-      sampleHTML: container.innerHTML.substring(0, 500),
-    })
     if (refLinks.length === 0) return
 
     let tooltipEl = tooltipRef.current
@@ -218,7 +197,6 @@ export function useFootnotes(
 
     const teardowns: Array<() => void> = []
 
-    console.log('[useFootnotes] attaching handlers to', refLinks.length, 'refs')
     refLinks.forEach((refEl) => {
       const match = refEl.id.match(/^footnoteref-(\d+)$/)
       const num = match ? parseInt(match[1], 10) : 0
@@ -228,10 +206,8 @@ export function useFootnotes(
       refEl.setAttribute('tabindex', '0')
       refEl.setAttribute('role', 'button')
       refEl.setAttribute('aria-label', `Footnote ${num}`)
-      console.log('[useFootnotes] handler attached to', refEl.id, refEl)
 
       const onClick = (e: MouseEvent): void => {
-        console.log('[useFootnotes] CLICK HANDLER FIRED', refEl.id)
         e.preventDefault()
         e.stopPropagation()
         openTooltip(refEl, num)

@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger'
 import { NavigationClient } from './navigation-client'
 
 export function Navigation() {
-  const [user, setUser] = useState<{ email?: string } | null>(null)
+  const [user, setUser] = useState<{ id?: string; email?: string } | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -16,7 +16,7 @@ export function Navigation() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser()
         if (!mounted) return
-        setUser(authUser ? { email: authUser.email ?? undefined } : null)
+        setUser(authUser ? { id: authUser.id, email: authUser.email ?? undefined } : null)
       } catch (error) {
         if (!mounted) return
         logger.error('Failed to load user', { error, component: 'Navigation' })
@@ -27,7 +27,8 @@ export function Navigation() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user ? { email: session.user.email ?? undefined } : null)
+        if (!mounted) return
+        setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null)
       }
     )
 

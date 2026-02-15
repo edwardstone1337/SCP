@@ -36,6 +36,15 @@ It intentionally focuses on user value, not internal implementation details.
 - Account deletion requires explicit confirmation in a modal before execution.
 - After deletion, users are returned to home with a success confirmation toast.
 
+### Upgrade to Premium (Clearance Level 5)
+- Signed-in users can upgrade via "Upgrade to Premium" in the nav menu.
+- Stripe checkout flow; one-time payment for lifetime premium.
+- Success and cancel redirects to dedicated confirmation pages.
+
+### Configure reading preferences
+- Settings page (`/settings`) for reading preferences (protected).
+- Image Safe Mode: hide article images by default; tap to reveal individually (Premium feature).
+
 ### Access legal information
 - Footer now includes direct links to `/privacy` and `/terms`.
 - Privacy policy and terms are available as dedicated, public pages.
@@ -44,6 +53,13 @@ It intentionally focuses on user value, not internal implementation details.
 - Opening from Top Rated links preserves rank context.
 - Reader navigation follows Top 100 rank order in that context.
 - Reader shows context banner (`Top Rated · #N of 100`) with return link.
+
+## Premium Features
+
+### Image Safe Mode
+- Hides images in SCP articles by default when enabled.
+- Click "Click to reveal image" placeholder to show individual images.
+- Toggle in Settings (Reading Preferences); requires Premium.
 
 ## Personal Tracking Features
 
@@ -83,6 +99,12 @@ It intentionally focuses on user value, not internal implementation details.
 - Guests can browse and read all public SCP content.
 - Personal tracking features (read state, bookmarks, saved list, recent files) are available after sign-in.
 - Primary logged-out navigation CTA is labeled "Access Terminal" to open sign-in flow.
+
+## Premium vs Free Experience
+
+- Free users can access all core reading and tracking features.
+- Premium (Clearance Level 5) unlocks Image Safe Mode and future premium features (reading settings, achievements).
+- Nav menu shows "Upgrade to Premium" for signed-in free users; premium users see a "Premium" badge next to their email.
 
 ## Update Rules (For Humans and AI Assistants)
 

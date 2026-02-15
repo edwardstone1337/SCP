@@ -49,8 +49,13 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
 | `/scp/[id]` | SCP reader (content via direct SCP-Data API fetch, prev/next, bookmark/read) + CreativeWork/Breadcrumb JSON-LD | Public (toggles require login) |
 | `/saved` | Bookmarked SCPs with sort | **Protected** (redirects to login) |
+| `/settings` | Reading preferences (Image Safe Mode toggle); premium-gated features | **Protected** |
+| `/premium/success` | Post-checkout success; invalidates premium/preferences cache | Public (redirects after Stripe) |
+| `/premium/cancelled` | Post-checkout cancel; no charges | Public |
 | `/login` | Sign-in page (`SignInPanel`) with magic link + Google OAuth | Public |
 | `/auth/callback` | OAuth/magic-link callback; exchanges code for session | Internal |
+| `/api/stripe/checkout` | POST; creates Stripe checkout session; returns redirect URL | Auth required |
+| `/api/stripe/webhook` | POST; handles `checkout.session.completed`; sets `premium_until` | Stripe signed |
 | `/auth/error` | Auth error display (Suspense + client) | Public |
 | `/privacy` | Privacy policy page | Public |
 | `/terms` | Terms of service page | Public |
@@ -151,6 +156,20 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 **RLS:** Enabled. Users can SELECT/INSERT/UPDATE/DELETE only their own rows (`auth.uid() = user_id`).
 
+---
+
+#### `user_profiles`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID | PK, FK → `auth.users(id)` ON DELETE CASCADE (one profile per user) |
+| `premium_until` | TIMESTAMPTZ | nullable; set by Stripe webhook via service role |
+| `preferences` | JSONB | default `{}`; updated via `update_user_preferences` RPC |
+| `created_at` | TIMESTAMPTZ | NOT NULL, default NOW() |
+
+**RLS:** Enabled. SELECT + INSERT own row; no UPDATE policy (premium_until writable only by service role; preferences via RPC).
+
+**Auto-creation:** Trigger `on_auth_user_created` inserts profile on `auth.users` INSERT.
+
 ### Row Level Security Summary
 
 | Table | Select | Insert | Update | Delete |
@@ -159,6 +178,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `user_progress` | Own | Own | Own | Own |
 | `user_bookmarks` | Own | Own | — | Own |
 | `user_recently_viewed` | Own | Own | Own | Own |
+| `user_profiles` | Own | Own | — (RPC + service role) | — |
 
 ---
 
@@ -168,6 +188,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 |----------|---------|
 | `get_series_progress(user_id_param UUID)` | Returns `(series, total, read)` per series; pass `null` for guests (read=0). |
 | `get_range_progress(series_id_param TEXT, user_id_param UUID)` | Returns `(range_start, total, read_count)` per 100-number range; used for range list. |
+| `update_user_preferences(new_preferences JSONB)` | Updates `user_profiles.preferences` for `auth.uid()`; SECURITY DEFINER (bypasses RLS). |
 
 ---
 
@@ -180,7 +201,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 5. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
 6. **Account deletion:** `DeleteAccountModal` calls `deleteAccount()` server action. The action verifies the user, deletes the Supabase auth user via admin API (`auth.admin.deleteUser`), signs out best-effort, and returns success so client redirects to `/?account_deleted=true` (toast confirmation on home).
 
-**Protected routes:** Only `/saved` is protected; unauthenticated users are redirected to `/login?redirect=/saved`.
+**Protected routes:** `/saved` and `/settings` are protected; unauthenticated users are redirected to `/login?redirect=...`.
 For protected client actions (nav Sign In, bookmark, mark-as-read, recently viewed, top-rated actions), JS opens the sign-in modal and preserves current location as `pathname + search + hash`; non-JS users still fall back to `/login?redirect=...`.
 
 ---
@@ -247,6 +268,8 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `daily-featured-section` | Home "Daily Briefing" block; deterministic by UTC date (getDailyIndex); shows scp_id, title, rating, series; link wraps card. |
 | `hero-subhead` | Home header subhead; auth-aware copy ("Welcome back..." vs guest discovery copy). |
 | `delete-account-modal` | Confirmation modal for permanent account deletion; calls `deleteAccount()` server action and hard-redirects to `/?account_deleted=true` on success. |
+| `premium-gate` | Wraps premium-only UI; shows sign-in CTA (guest) or upgrade CTA (signed-in non-premium); renders children for premium users. |
+| `upgrade-modal` | Modal for Stripe checkout; calls `/api/stripe/checkout` POST, redirects to Stripe; lists premium features. |
 | `grid` | Responsive grid (e.g. cols="auto" → 2→3→4). |
 | `heading` | Heading level 1–4, optional accent; supports `id` prop forwarding. |
 | `icon` | Inline SVG icons (check, eye, star, bookmark, bookmark-filled, arrow-up, etc.). |
@@ -276,7 +299,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `toast` | Dismissible fixed-bottom toast with auto-dismiss + fade-out; includes exit timer cleanup on unmount; used for account deletion confirmation on home. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, `Access Terminal` CTA (logged out only), and `Menu` button on all viewports. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes a close button, Escape-to-close, Tab focus trapping, and focus restoration to the menu trigger on close. It lists Series I–X (two-column grid), Saved (auth), Sign Out (auth), account email, and Delete account; active series/saved routes are highlighted with `aria-current="page"`.
+**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, `Access Terminal` CTA (logged out only), and `Menu` button on all viewports. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes Series I–X (two-column grid), Upgrade to Premium (auth, non-premium only), Saved (auth), Settings (auth), Sign Out (auth), account email with optional Premium badge, and Delete account; active series/saved/settings routes highlighted with `aria-current="page"`.
 
 ---
 
@@ -314,6 +337,14 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 - **Top 100 list (`/top-rated`):** Uses `ScpListWithToggle` with fixed default sort (`rating-desc`) and hidden sort dropdown; keeps "Hide read" filter when applicable. Item links include `?context=top-rated&rank=N` to preserve ranked navigation context in reader.
 - **Saved list (`SavedList`):** Client-side. Options: Recently Saved, Oldest Saved, Oldest/Newest First, Top/Lowest Rated. Same `Select` component.
 
+### Premium tier & Stripe
+
+- **user_profiles:** `premium_until` set by Stripe webhook on `checkout.session.completed`; `preferences` (e.g. `imageSafeMode`) updated via `update_user_preferences` RPC.
+- **Checkout:** `/api/stripe/checkout` POST creates a one-time payment session; redirects to success/cancel URLs. Requires auth; blocks if already premium.
+- **Webhook:** `/api/stripe/webhook` verifies signature, reads `client_reference_id` (user id), upserts `user_profiles` with `premium_until` via service role. Use `stripe listen --forward-to localhost:3000/api/stripe/webhook` for local testing.
+- **usePremium(userId):** TanStack Query over `user_profiles.premium_until`; `isPremium = premium_until > now`.
+- **PremiumGate:** Wraps premium-only UI; sign-in CTA for guests, upgrade CTA for non-premium users.
+
 ### Top Rated navigation context
 
 - **Entry points:** Home Top Rated cards and `/top-rated` list links append `context=top-rated&rank=<1..100>` to reader URLs.
@@ -332,6 +363,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 - **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. If `content_file` is null, reader shows "Content is not available."
 - **Body:** Client `useScpContent(contentFile, scpId)` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient failures.
 - **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-side by default; optional custom instance for Node/JSDOM tooling) then `dangerouslySetInnerHTML` in an `article` with class `scp-content` and `aria-labelledby` for semantic association to the page title.
+- **Image Safe Mode:** When `preferences.imageSafeMode` is true (premium feature), `useImageSafeMode` hides images in `.scp-content`, inserts clickable placeholders, and reveals on tap. Operates on real DOM; styles in `globals.css` (`.image-safe-placeholder`, `.image-safe-hidden`).
 - **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback).
 
 ### Reader typography & layout
@@ -370,11 +402,14 @@ All `.scp-content` styles live in `app/globals.css` and use design tokens from `
 |----------|---------|--------------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key for browser/server | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key (seed + account deletion action) | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key (seed, account deletion, Stripe webhook) | No |
 | `SUPABASE_DB_PASSWORD` | DB password for CLI | No |
 | `NEXT_PUBLIC_SITE_URL` | Optional base URL for auth redirects (fallback: browser origin) | Yes |
+| `STRIPE_SECRET_KEY` | Stripe API key for checkout sessions and webhook verification | No |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret for `/api/stripe/webhook` | No |
+| `NEXT_PUBLIC_STRIPE_PRICE_ID` | Stripe Price ID for premium upgrade (one-time payment) | Yes |
 
-Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); client uses `process.env` for `NEXT_PUBLIC_*` only. `NEXT_PUBLIC_SITE_URL` is optional because `getSiteUrl()` resolves browser origin in client context.
+Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts` and Stripe routes); client uses `process.env` for `NEXT_PUBLIC_*` only. `NEXT_PUBLIC_SITE_URL` is optional because `getSiteUrl()` resolves browser origin in client context.
 
 ### RLS Policies
 
@@ -383,8 +418,8 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 
 ### Service Role Key Usage
 
-- **Where:** `scripts/seed-scps.ts` and `app/actions/auth.ts` (`deleteAccount` server action).
-- **Why:** Seed script inserts/updates `scps`. Account deletion needs admin auth API (`auth.admin.deleteUser`) which requires service role.
+- **Where:** `scripts/seed-scps.ts`, `app/actions/auth.ts` (`deleteAccount`), and `app/api/stripe/webhook/route.ts`.
+- **Why:** Seed inserts/updates `scps`. Account deletion needs `auth.admin.deleteUser`. Stripe webhook upserts `user_profiles.premium_until` (bypasses RLS).
 - **Safety:** Used only in server context; never exposed to the client.
 
 ---
@@ -461,9 +496,11 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 
 1. Clone repo, `npm install`.
 2. Copy `.env.example` to `.env.local`, set Supabase URL and anon key. `NEXT_PUBLIC_SITE_URL` is recommended (e.g. `http://localhost:3000`) but optional in local dev.
-3. Run migrations (see below).
-4. Optional: `npm run seed` (requires `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`).
-5. `npm run dev` → app at `http://localhost:3000`.
+3. Set Stripe env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PRICE_ID` (required for checkout; use Stripe test keys).
+4. Run migrations (see below).
+5. Optional: `npm run seed` (requires `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`).
+6. `npm run dev` → app at `http://localhost:3000`.
+7. For premium flow testing: run `stripe listen --forward-to localhost:3000/api/stripe/webhook` in a separate terminal to forward webhook events.
 
 ### Database Migrations
 
@@ -484,6 +521,10 @@ Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts`); clien
 app/
 ├── actions/
 │   └── auth.ts              # signOut + deleteAccount server actions
+├── api/
+│   └── stripe/
+│       ├── checkout/route.ts  # POST: create checkout session
+│       └── webhook/route.ts   # POST: handle checkout.session.completed
 ├── auth/
 │   ├── callback/route.ts    # OAuth/magic-link code exchange
 │   └── error/client.tsx, page.tsx
@@ -494,6 +535,13 @@ app/
 ├── saved/
 │   ├── saved-list.tsx       # Client list + sort
 │   ├── page.tsx, loading.tsx
+├── settings/
+│   ├── page.tsx             # Protected; renders SettingsContent
+│   └── settings-content.tsx # Reading preferences (Image Safe Mode toggle, premium-gated)
+├── premium/
+│   ├── success/page.tsx     # Post-checkout success; PremiumCacheInvalidator
+│   ├── success/premium-cache-invalidator.tsx # Invalidates TanStack Query premium/preferences
+│   └── cancelled/page.tsx   # Post-checkout cancel
 ├── scp/[id]/
 │   ├── actions.ts           # toggleReadStatus, toggleBookmarkStatus, recordView
 │   ├── page.tsx             # Server: metadata + adjacent (createStaticClient)
@@ -528,10 +576,13 @@ lib/
 ├── supabase/client.ts       # Browser client (anon)
 ├── supabase/server.ts       # Server client (cookies, env)
 ├── supabase/static.ts       # createStaticClient (no cookies; static/ISR pages)
-├── env.ts                   # Server env validation
+├── env.ts                   # Server env validation (Supabase + Stripe)
 ├── hooks/
 │   ├── use-content-links.ts # In-article link interception (SCP→client nav, external→new tab, wiki→rewrite)
 │   ├── use-footnotes.ts     # Footnote tooltip handlers (refs ↔ footnote-N)
+│   ├── use-image-safe-mode.ts # DOM-based image hide/reveal for Image Safe Mode (premium)
+│   ├── use-preferences.ts   # TanStack Query + RPC for user_profiles.preferences
+│   ├── use-premium.ts       # TanStack Query for user_profiles.premium_until
 │   ├── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
 │   └── use-top-rated-list.ts # Top 100 ranked `scp_id` list for reader contextual prev/next
 ├── providers/query-provider.tsx
@@ -546,7 +597,9 @@ scripts/
 
 supabase/
 └── migrations/              # SQL migrations (see Database Schema)
-    └── 20260205_create_user_recently_viewed.sql
+    ├── 20260205_create_user_recently_viewed.sql
+    ├── 20260215_create_user_profiles_table.sql   # user_profiles, premium_until, trigger
+    └── 20260215_add_preferences_and_update_rpc.sql # preferences column, update_user_preferences RPC
 
 docs/
 └── *.md                     # Documentation

@@ -725,6 +725,50 @@ select:focus-visible {
   }
 }
 
+/* Image Safe Mode — placeholder buttons and hidden images */
+.image-safe-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-height: 200px;
+  background: var(--color-grey-8);
+  border: 1px dashed var(--color-grey-7);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+  padding: var(--spacing-2);
+  /* Reset button defaults */
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--color-text-muted);
+  margin: var(--spacing-4) 0;
+}
+
+.image-safe-placeholder:hover,
+.image-safe-placeholder:focus-visible {
+  background: var(--color-grey-7);
+  color: var(--color-text-primary);
+}
+
+.image-safe-placeholder:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.image-safe-placeholder svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.6;
+}
+
+.scp-content img.image-safe-hidden {
+  display: none !important;
+}
+
 /* Screen reader only - visually hidden but accessible */
 .sr-only {
   position: absolute;

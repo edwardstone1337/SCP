@@ -46,15 +46,17 @@ export default function RootLayout({
       <body>
         <Analytics />
         <AuthCompleteTracker />
-        <ModalProvider>
-          <SkipLink />
-          <Suspense>
-            <Navigation />
-          </Suspense>
-          <QueryProvider>{children}</QueryProvider>
-          <SiteFooter />
-          <SharedFooter />
-        </ModalProvider>
+        <QueryProvider>
+          <ModalProvider>
+            <SkipLink />
+            <Suspense>
+              <Navigation />
+            </Suspense>
+            {children}
+            <SiteFooter />
+            <SharedFooter />
+          </ModalProvider>
+        </QueryProvider>
       </body>
     </html>
   );

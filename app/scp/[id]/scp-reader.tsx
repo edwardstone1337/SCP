@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react'
 import { useContentLinks } from '@/lib/hooks/use-content-links'
 import { useFootnotes } from '@/lib/hooks/use-footnotes'
+import { useImageSafeMode } from '@/lib/hooks/use-image-safe-mode'
+import { usePreferences } from '@/lib/hooks/use-preferences'
 import { useScpContent } from '@/lib/hooks/use-scp-content'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { getRange, seriesToRoman } from '@/lib/utils/series'
@@ -68,6 +70,14 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
 
   useFootnotes(contentContainerRef, !!content)
   useContentLinks(contentContainerRef, !!content)
+
+  const { preferences, isLoading: prefsLoading } = usePreferences(userId ?? null)
+  useImageSafeMode({
+    containerRef: contentContainerRef,
+    isEnabled: !!content && preferences.imageSafeMode === true,
+    isLoading: prefsLoading,
+    contentKey: scp.id,
+  })
 
   useEffect(() => {
     if (!hasRecordedView.current) {

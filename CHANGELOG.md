@@ -4,6 +4,13 @@ All notable changes to SCP Reader are documented here.
 
 ## [Unreleased]
 ### Added
+- **Premium tier (Clearance Level 5):** Stripe-powered upgrade flow; users can purchase lifetime premium from nav menu or Settings; checkout success/cancel redirects to `/premium/success` and `/premium/cancelled`
+- **Image Safe Mode:** Premium feature that hides article images by default with tap-to-reveal placeholders; toggle in Settings (Reading Preferences); uses `user_profiles.preferences.imageSafeMode`
+- **Settings page (`/settings`):** Protected route for reading preferences; includes Image Safe Mode toggle (premium-gated); "Terminal Configuration" heading
+- **user_profiles table:** Stores `premium_until` (Stripe-managed) and `preferences` JSONB; auto-created on signup; `update_user_preferences` RPC for preference writes
+- **Stripe integration:** `/api/stripe/checkout` (POST) creates checkout session; `/api/stripe/webhook` handles `checkout.session.completed` and sets `premium_until` via service role
+- **PremiumGate and UpgradeModal components:** Gate premium features behind sign-in + premium status; modal opens Stripe checkout
+- **usePreferences, usePremium, useImageSafeMode hooks:** TanStack Query-backed preference/premium checks; DOM-based image hiding for safe mode
 - Google OAuth sign-in: users can now sign in with their Google account via "Continue with Google" button, available in both the sign-in modal and `/login` page; magic link remains as an alternative
 - `getSiteUrl()` now auto-detects the current browser origin when `NEXT_PUBLIC_SITE_URL` is not set, fixing OAuth redirect mismatches in local dev
 - Analytics `sign_in_submit` event now includes `sign_in_method` property (`magic_link` or `google`) to distinguish auth methods
@@ -21,6 +28,8 @@ All notable changes to SCP Reader are documented here.
 - New guest onboarding block on home ("New to the Foundation?") with quick actions: classics, top-rated, and random file
 
 ### Changed
+- Navigation overlay: added Settings and Upgrade to Premium links for signed-in users; premium badge shown next to email when active
+- `lib/env.ts` now requires Stripe env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PRICE_ID` (used by checkout and webhook routes)
 - Sign Out button moved from top navigation bar into the nav overlay menu, alongside Delete Account; top bar now shows only Sign In (when logged out) and Menu
 - SCP/series/home pages use static Supabase client (`createStaticClient`) for server data; auth-specific data (progress, recently viewed) fetched client-side where needed
 - Navigation: auth state resolved client-side via `getUser` + `onAuthStateChange`; layout wraps Navigation in `Suspense` for loading

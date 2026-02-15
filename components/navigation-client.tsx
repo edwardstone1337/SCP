@@ -12,9 +12,11 @@ import { Text } from '@/components/ui/typography'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { DeleteAccountModal } from '@/components/ui/delete-account-modal'
+import { UpgradeModal } from '@/components/ui/upgrade-modal'
 import { signOut } from '@/app/actions/auth'
 import { trackSignInModalOpen } from '@/lib/analytics'
 import { seriesToRoman } from '@/lib/utils/series'
+import { usePremium } from '@/lib/hooks/use-premium'
 
 const SERIES_LIST = Array.from({ length: 10 }, (_, i) => {
   const id = `series-${i + 1}`
@@ -82,15 +84,27 @@ const signInLinkStyle: React.CSSProperties = {
   borderRadius: 'var(--radius-button)',
 }
 
+const premiumBadgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  fontSize: 'var(--font-size-xs)',
+  lineHeight: 'var(--line-height-xs)',
+  color: 'var(--color-accent)',
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase',
+  marginLeft: 'var(--spacing-1)',
+}
+
 interface NavigationClientProps {
-  user: { email?: string } | null
+  user: { id?: string; email?: string } | null
 }
 
 export function NavigationClient({ user }: NavigationClientProps) {
   const { openModal } = useModal()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { isPremium } = usePremium(user?.id ?? null)
   const isSaved = pathname === '/saved'
+  const isSettings = pathname === '/settings'
   const queryString = searchParams.toString()
   const redirectPath = `${pathname}${queryString ? `?${queryString}` : ''}`
   const signInHref =
@@ -305,6 +319,28 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
             {user && (
               <>
+                {!isPremium && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeOverlay()
+                      openModal(<UpgradeModal />, 'Upgrade to Premium')
+                    }}
+                    style={{
+                      ...linkTouchStyle,
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      color: 'var(--color-accent)',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family-sans)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Upgrade to Premium
+                  </button>
+                )}
                 <Link
                   href="/saved"
                   variant="nav"
@@ -316,6 +352,18 @@ export function NavigationClient({ user }: NavigationClientProps) {
                   onClick={closeOverlay}
                 >
                   Saved
+                </Link>
+                <Link
+                  href="/settings"
+                  variant="nav"
+                  style={{
+                    ...linkTouchStyle,
+                    ...(isSettings && { color: 'var(--color-accent)' }),
+                  }}
+                  aria-current={isSettings ? 'page' : undefined}
+                  onClick={closeOverlay}
+                >
+                  Settings
                 </Link>
                 <form action={signOut}>
                   <button
@@ -337,6 +385,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
                 {user.email && (
                   <Text size="sm" variant="secondary">
                     {user.email}
+                    {isPremium && <span style={premiumBadgeStyle}>Premium</span>}
                   </Text>
                 )}
                 <button
