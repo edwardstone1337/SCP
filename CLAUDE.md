@@ -63,13 +63,14 @@ See `supabase/migrations/` for schema. Key tables: `scps` (public, read-only), `
 ## Content Rendering Pipeline
 
 1. **Fetch from API**: `useScpContent` fetches HTML from `scp-data.tedivm.com/data/scp/items/{contentFile}` (React Query, 1h stale, 24h gc)
-2. **DOMPurify sanitization**: Strips disallowed tags/attributes, removes `.licensebox` elements, blocks `javascript:` hrefs
-3. **Dark theme legibility fixes**: `applyInlineStyleLegibilityFixes` in `sanitize.ts` handles author inline styles that conflict with dark theme:
+2. **Wikidot image recovery**: `recoverWikidotImages` parses `raw_source` for image refs missing from `raw_content`, injects `<div class="recovered-image"><img ...></div>` at segment boundaries
+3. **DOMPurify sanitization**: Strips disallowed tags/attributes, removes `.licensebox` elements, blocks `javascript:` hrefs
+4. **Dark theme legibility fixes**: `applyInlineStyleLegibilityFixes` in `sanitize.ts` handles author inline styles that conflict with dark theme:
    - Replaces near-black text colors (`luminance < 0.4`) with light grey background
    - Replaces near-black border colors (`luminance < 0.15`) with grey-6
    - Adds dark text color when background is specified without explicit color
-4. **Footnote handling**: `useFootnotes` attaches click/keyboard handlers to `a[id^="footnoteref-"]`, shows tooltip with footnote body on interaction
-5. **Link routing**: `useContentLinks` intercepts clicks — SCP-to-SCP links use in-app navigation, external links open new tab, relative wiki paths rewritten to scpwiki.com
+5. **Footnote handling**: `useFootnotes` attaches click/keyboard handlers to `a[id^="footnoteref-"]`, shows tooltip with footnote body on interaction
+6. **Link routing**: `useContentLinks` intercepts clicks — SCP-to-SCP links use in-app navigation, external links open new tab, relative wiki paths rewritten to scpwiki.com
 
 ## ISR & Cost Strategy
 

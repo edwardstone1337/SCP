@@ -35,6 +35,7 @@ All notable changes to SCP Reader are documented here.
 - Homepage now injects JSON-LD `WebApplication` and `WebSite` schemas for better homepage search context
 - New guest onboarding block on home ("New to the Foundation?") with quick actions: classics, top-rated, and random file
 - **Title enrichment:** Script `scripts/enrich-titles.ts` (npm run enrich-titles) populates `scps.title` from SCP Wiki series index pages; 9,246 entries updated. The remaining ~78 entries have no ` - ` separator on the index and continue to display the SCP number only.
+- **Wikidot image recovery:** When images are missing from rendered content (`raw_content`) but present in source (`raw_source`), the app parses source for Wikidot image refs and injects them into the article; supports `[[image ...]]` and `component:image-block` patterns; `.recovered-image` styling in globals.css.
 
 ### Changed
 - **SCP page metadata:** Document title and meta description use descriptive title when available (e.g. "The Sculpture | SCP-173"); otherwise SCP number only.
@@ -78,6 +79,7 @@ All notable changes to SCP Reader are documented here.
 - Fixed focus restoration bug in navigation overlay that could steal focus on re-renders
 - Fixed toast exit animation timer not being cleaned up on unmount
 - Added error handling and unmount guards to core client-side auth/user-data hydration effects (home, navigation, SCP, series, range, top-rated)
+- Articles now display images that were previously missing when source contains Wikidot image refs the upstream renderer omitted.
 - Added URL scheme validation for external wiki links to prevent protocol-based XSS
 - Fixed incorrect CSS variable names in content sanitizer (--grey-* → --color-grey-*)
 - Replaced `any` types with proper DOMPurify types in sanitizer

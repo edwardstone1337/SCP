@@ -14,6 +14,7 @@ It intentionally focuses on user value, not internal implementation details.
 ### Read SCP articles in-app
 - SCP reader opens full article content inside the app.
 - Reader includes Previous/Next navigation between SCPs.
+- Images that were missing from the upstream render are recovered from source when possible, so more articles display complete imagery.
 - If content load fails, reader provides retry and original-article fallback.
 
 ### Discover what to read next

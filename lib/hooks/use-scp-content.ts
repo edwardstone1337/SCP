@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { recoverWikidotImages } from '@/lib/utils/recover-wikidot-images'
 
 interface ScpContent {
   raw_content: string
@@ -58,8 +59,13 @@ export function useScpContent(contentFile: string | null, scpId: string) {
       const entry = data[scpId]
       if (!entry) return null
 
+      const recoveredContent = recoverWikidotImages(
+        entry.raw_content ?? '',
+        entry.raw_source ?? '',
+        scpId
+      )
       return {
-        raw_content: entry.raw_content,
+        raw_content: recoveredContent,
         raw_source: entry.raw_source,
         creator: entry.creator,
         url: entry.url,

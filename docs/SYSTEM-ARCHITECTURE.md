@@ -366,6 +366,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 - **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. `generateMetadata` sets document title to `Title | SCP-XXX` when `title !== scp_id`, else `scp_id`; meta description includes title when present. If `content_file` is null, reader shows "Content is not available."
 - **Body:** Client `useScpContent(contentFile, scpId)` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient failures.
+- **Image recovery:** `recoverWikidotImages(raw_content, raw_source, scpId)` parses `raw_source` for Wikidot image refs (`[[image ...]]`, `component:image-block`) not present in `raw_content`, injects `<div class="recovered-image"><img ...></div>` at segment boundaries; supports bare filenames and Wikidot URLs (sandbox, cross-wiki).
 - **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-side by default; optional custom instance for Node/JSDOM tooling) then `dangerouslySetInnerHTML` in an `article` with class `scp-content` and `aria-labelledby` for semantic association to the page title.
 - **Image Safe Mode:** When `preferences.imageSafeMode` is true (premium feature), `useImageSafeMode` hides images in `.scp-content`, inserts clickable placeholders, and reveals on tap. Operates on real DOM; styles in `globals.css` (`.image-safe-placeholder`, `.image-safe-hidden`).
 - **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback).
@@ -376,6 +377,7 @@ All `.scp-content` styles live in `app/globals.css` and use design tokens from `
 
 - **Tables:** borders, padding, horizontal scroll; header background; alternating row stripe (`--color-table-stripe`).
 - **Images:** max-width 100%, auto height, border-radius, vertical margin.
+- **Recovered images (Wikidot):** `.recovered-image` wrapper (margin, max-width) for images injected from source when missing in rendered content.
 - **Pre/code blocks:** background, border, overflow-x, mono font, margin.
 - **Horizontal rules:** border-top, margin.
 - **Heading hierarchy:** h1–h6 with tokenized font sizes and margins (h4 `--font-size-md`, h5/h6 smaller with uppercase/secondary where applicable).
@@ -604,7 +606,7 @@ lib/
 │   ├── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
 │   └── use-top-rated-list.ts # Top 100 ranked `scp_id` list for reader contextual prev/next
 ├── providers/query-provider.tsx
-├── utils/cn.ts, daily-scp.ts, json-ld.ts, loading-messages.ts, sanitize.ts, series.ts, site-url.ts
+├── utils/cn.ts, daily-scp.ts, json-ld.ts, loading-messages.ts, recover-wikidot-images.ts, sanitize.ts, series.ts, site-url.ts
 └── logger.ts
 
 scripts/

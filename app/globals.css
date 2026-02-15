@@ -624,6 +624,17 @@ select:focus-visible {
   margin: var(--spacing-4) 0;
 }
 
+/* Wikidot recovered images (from raw_source when missing in raw_content) */
+.scp-content .recovered-image {
+  margin: 1rem auto;
+  max-width: 100%;
+}
+
+.scp-content .recovered-image img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Phase 1: Pre/code blocks — background, overflow, font */
 .scp-content pre {
   background-color: var(--color-grey-9);
