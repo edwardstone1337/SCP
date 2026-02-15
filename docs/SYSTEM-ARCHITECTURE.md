@@ -60,6 +60,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/privacy` | Privacy policy page | Public |
 | `/terms` | Terms of service page | Public |
 | `/components-test` | Component test page | Public |
+| `/maintenance` | SCP-themed "Foundation Archive Compromised" full-page; shown when `NEXT_PUBLIC_MAINTENANCE_MODE=true` | Internal (rewrite target) |
 | **404** | `not-found.tsx` — SCP-themed "DOCUMENT NOT FOUND" | Public |
 
 ### Data Flow
@@ -197,7 +198,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 1. **Login:** User opens `SignInPanel` (modal or `/login`) and chooses magic link or Google OAuth. Magic link calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Google calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: SITE_URL/auth/callback?next=... } })`.
 2. **Redirect URL source:** `SITE_URL` comes from `getSiteUrl()`: `NEXT_PUBLIC_SITE_URL` when set, else `window.location.origin` in browser, else `http://localhost:3000` fallback.
 3. **Callback:** Provider redirects to `/auth/callback?code=...&next=...`. Route handler uses centralized server Supabase client (`lib/supabase/server.ts`), calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`) and appends `auth=complete`. On failure, redirects to `/login?error=...`.
-4. **Session:** No middleware. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated.
+4. **Session:** `proxy.ts` (Next.js 16) refreshes Supabase session on each request; redirects authenticated users away from `/login`. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated.
 5. **Logout:** Logout uses the `signOut()` server action in `app/actions/auth.ts`, which calls `supabase.auth.signOut()`, then `revalidatePath('/', 'layout')` and `redirect('/')`.
 6. **Account deletion:** `DeleteAccountModal` calls `deleteAccount()` server action. The action verifies the user, deletes the Supabase auth user via admin API (`auth.admin.deleteUser`), signs out best-effort, and returns success so client redirects to `/?account_deleted=true` (toast confirmation on home).
 
@@ -270,6 +271,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `delete-account-modal` | Confirmation modal for permanent account deletion; calls `deleteAccount()` server action and hard-redirects to `/?account_deleted=true` on success. |
 | `premium-gate` | Wraps premium-only UI; shows sign-in CTA (guest) or upgrade CTA (signed-in non-premium); renders children for premium users. |
 | `upgrade-modal` | Modal for Stripe checkout; calls `/api/stripe/checkout` POST, redirects to Stripe; lists premium features. |
+| `degraded-banner` | Warning banner "PARTIAL CONTAINMENT FAILURE" when `NEXT_PUBLIC_DEGRADED_MODE=true`; design-token compliant; renders in layout. |
 | `grid` | Responsive grid (e.g. cols="auto" → 2→3→4). |
 | `heading` | Heading level 1–4, optional accent; supports `id` prop forwarding. |
 | `icon` | Inline SVG icons (check, eye, star, bookmark, bookmark-filled, arrow-up, etc.). |
@@ -408,6 +410,8 @@ All `.scp-content` styles live in `app/globals.css` and use design tokens from `
 | `STRIPE_SECRET_KEY` | Stripe API key for checkout sessions and webhook verification | No |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signing secret for `/api/stripe/webhook` | No |
 | `NEXT_PUBLIC_STRIPE_PRICE_ID` | Stripe Price ID for premium upgrade (one-time payment) | Yes |
+| `NEXT_PUBLIC_MAINTENANCE_MODE` | When `true`, proxy rewrites all non-API routes to `/maintenance` | Yes |
+| `NEXT_PUBLIC_DEGRADED_MODE` | When `true`, layout shows warning banner | Yes |
 
 Server-side validation in `lib/env.ts` (used by `lib/supabase/server.ts` and Stripe routes); client uses `process.env` for `NEXT_PUBLIC_*` only. `NEXT_PUBLIC_SITE_URL` is optional because `getSiteUrl()` resolves browser origin in client context.
 
@@ -559,12 +563,16 @@ app/
 │   ├── [seriesId]/[range]/page.tsx, range-content.tsx  # SCP list (static client)
 │   └── [seriesId]/loading.tsx, [seriesId]/[range]/loading.tsx
 ├── components-test/page.tsx
-├── layout.tsx               # Fonts, QueryProvider, SkipLink, Navigation
+├── maintenance/
+│   └── page.tsx             # SCP-themed full-page lockdown (rewrite target when NEXT_PUBLIC_MAINTENANCE_MODE=true)
+├── layout.tsx               # Fonts, QueryProvider, SkipLink, Navigation, DegradedBanner (when degraded)
 ├── globals.css               # @theme, tokens, .scp-content
 ├── home-content.tsx         # Client: Daily Briefing, Notable Anomalies, series grid, guest onboarding, recents (auth-aware)
 ├── page.tsx                 # Home server (createStaticClient; series + daily + top-rated + homepage JSON-LD)
 ├── loading.tsx              # Root route loading state
 └── not-found.tsx            # 404
+
+proxy.ts                     # Next.js 16 proxy: maintenance rewrite, Supabase session refresh, /login redirect
 
 components/
 ├── ui/                      # Design system (see Component Library table; includes hero-subhead, section-divider, new-to-foundation-section, daily-featured-section, top-rated-section)
@@ -573,6 +581,7 @@ components/
 
 lib/
 ├── constants.ts             # Site/authorship constants (name, description, license)
+├── flags.ts                 # Feature flags: premiumEnabled, maintenanceMode, degradedMode
 ├── supabase/client.ts       # Browser client (anon)
 ├── supabase/server.ts       # Server client (cookies, env)
 ├── supabase/static.ts       # createStaticClient (no cookies; static/ISR pages)

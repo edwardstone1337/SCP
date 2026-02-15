@@ -2,6 +2,8 @@
 
 Next.js 16 + Supabase + TypeScript + Tailwind. Phase 3: Authentication.
 
+**Capabilities:** Browse SCP by series, mark read, bookmark, track progress. Premium tier (feature-flagged) with Image Safe Mode. Maintenance and degraded modes for incident response.
+
 ## Getting Started
 
 1. Copy `.env.example` to `.env.local` and add your Supabase URL and anon key.
@@ -50,6 +52,23 @@ SCP article content is fetched **directly from the SCP-Data API** by the browser
 - **Customer-facing features**: `docs/FEATURES.md`
 - **Verification command**: `npm run verify` (lint + build + auth smoke test)
 - **Auth smoke only**: `npm run smoke:auth`
+
+## Environment Variables
+
+For full functionality (including premium flow and maintenance):
+
+- **Supabase:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`
+- **Stripe (premium):** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PRICE_ID` — required for checkout; use test keys locally
+- **Incident response:** `NEXT_PUBLIC_MAINTENANCE_MODE=true` (full-page lockdown) or `NEXT_PUBLIC_DEGRADED_MODE=true` (warning banner)
+
+See `lib/env.ts` for server-side validation.
+
+## Maintenance & Degraded Mode
+
+- **Maintenance:** Set `NEXT_PUBLIC_MAINTENANCE_MODE=true` → all pages rewrite to SCP-themed lockdown. API routes stay reachable (Stripe webhooks continue).
+- **Degraded:** Set `NEXT_PUBLIC_DEGRADED_MODE=true` → warning banner appears; site remains usable.
+
+Details in `docs/PREMIUM_LAUNCH.md`.
 
 ## Deploy on Vercel
 

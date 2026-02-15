@@ -10,7 +10,10 @@ All notable changes to SCP Reader are documented here.
 - **user_profiles table:** Stores `premium_until` (Stripe-managed) and `preferences` JSONB; auto-created on signup; `update_user_preferences` RPC for preference writes
 - **Stripe integration:** `/api/stripe/checkout` (POST) creates checkout session; `/api/stripe/webhook` handles `checkout.session.completed` and sets `premium_until` via service role
 - **PremiumGate and UpgradeModal components:** Gate premium features behind sign-in + premium status; modal opens Stripe checkout
-- **usePreferences, usePremium, useImageSafeMode hooks:** TanStack Query-backed preference/premium checks; DOM-based image hiding for safe mode
+- **usePreferences, usePremium, useImageSafeMode hooks:** TanStack Query-backed preference/premium checks; DOM-based image hide/reveal with placeholders, eye-off SVG icon, full keyboard/screen-reader accessibility
+- **Feature flag (`lib/flags.ts`):** `premiumEnabled` (dev only), `maintenanceMode`, `degradedMode`; Premium upgrade UI hidden in production; all infrastructure (Stripe routes, DB, webhooks) deployed but UI gated; see `docs/PREMIUM_LAUNCH.md` for launch checklist
+- **Maintenance mode:** SCP-themed "FOUNDATION ARCHIVE COMPROMISED" full-page lockdown; activated via `NEXT_PUBLIC_MAINTENANCE_MODE=true`; `proxy.ts` rewrites all non-API routes to `/maintenance`; self-contained inline styles, skips API routes for Stripe webhooks
+- **Degraded mode:** Warning banner ("PARTIAL CONTAINMENT FAILURE"); activated via `NEXT_PUBLIC_DEGRADED_MODE=true`; design-token compliant; renders in layout when `degradedMode` flag is on
 - Google OAuth sign-in: users can now sign in with their Google account via "Continue with Google" button, available in both the sign-in modal and `/login` page; magic link remains as an alternative
 - `getSiteUrl()` now auto-detects the current browser origin when `NEXT_PUBLIC_SITE_URL` is not set, fixing OAuth redirect mismatches in local dev
 - Analytics `sign_in_submit` event now includes `sign_in_method` property (`magic_link` or `google`) to distinguish auth methods
@@ -52,6 +55,9 @@ All notable changes to SCP Reader are documented here.
 - All public pages now served from Vercel edge CDN; serverless functions only run on cache miss
 
 ### Fixed
+- Error handling and logging in settings page and `usePremium` hook; avoids silent failures when profile fetch fails
+- Replaced `console.log` with `logger` in `useFootnotes`; removed stray debug logging
+- Navigation: added mounted guard in `onAuthStateChange` handler to prevent state updates after unmount
 - Navigation overlay accessibility: improved focus handling, Escape handling, and explicit open/close labels/buttons
 - Reader accessibility semantics: article content now uses `article` landmark + heading association, loading state announces via live region, and toggle buttons announce read/bookmark state updates
 - Skip link now uses robust visually-hidden focus-reveal pattern for consistent keyboard/screen-reader behavior

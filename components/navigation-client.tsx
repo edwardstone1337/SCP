@@ -17,6 +17,7 @@ import { signOut } from '@/app/actions/auth'
 import { trackSignInModalOpen } from '@/lib/analytics'
 import { seriesToRoman } from '@/lib/utils/series'
 import { usePremium } from '@/lib/hooks/use-premium'
+import { flags } from '@/lib/flags'
 
 const SERIES_LIST = Array.from({ length: 10 }, (_, i) => {
   const id = `series-${i + 1}`
@@ -319,7 +320,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
             {user && (
               <>
-                {!isPremium && (
+                {flags.premiumEnabled && !isPremium && (
                   <button
                     type="button"
                     onClick={() => {
@@ -385,7 +386,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
                 {user.email && (
                   <Text size="sm" variant="secondary">
                     {user.email}
-                    {isPremium && <span style={premiumBadgeStyle}>Premium</span>}
+                    {flags.premiumEnabled && isPremium && <span style={premiumBadgeStyle}>Premium</span>}
                   </Text>
                 )}
                 <button

@@ -11,6 +11,8 @@ import { SharedFooter } from "@/components/shared-footer";
 import { Analytics } from "@/components/ui/analytics";
 import { AuthCompleteTracker } from "@/components/ui/auth-complete-tracker";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
+import { flags } from "@/lib/flags";
+import { DegradedBanner } from "@/components/ui/degraded-banner";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -44,17 +46,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${roboto.variable} ${robotoMono.variable}`}>
       <body>
-        <Analytics />
-        <AuthCompleteTracker />
+        {!flags.maintenanceMode && <Analytics />}
+        {!flags.maintenanceMode && <AuthCompleteTracker />}
         <QueryProvider>
           <ModalProvider>
-            <SkipLink />
-            <Suspense>
-              <Navigation />
-            </Suspense>
+            {!flags.maintenanceMode && flags.degradedMode && <DegradedBanner />}
+            {!flags.maintenanceMode && <SkipLink />}
+            {!flags.maintenanceMode && (
+              <Suspense>
+                <Navigation />
+              </Suspense>
+            )}
             {children}
-            <SiteFooter />
-            <SharedFooter />
+            {!flags.maintenanceMode && <SiteFooter />}
+            {!flags.maintenanceMode && <SharedFooter />}
           </ModalProvider>
         </QueryProvider>
       </body>

@@ -6,6 +6,8 @@ import { PremiumGate } from '@/components/ui/premium-gate'
 import { Stack } from '@/components/ui/stack'
 import { Text } from '@/components/ui/typography'
 import { logger } from '@/lib/logger'
+import { flags } from '@/lib/flags'
+import { usePremium } from '@/lib/hooks/use-premium'
 
 interface SettingsContentProps {
   userId: string
@@ -65,7 +67,9 @@ const savedIndicatorStyle: CSSProperties = {
 
 export function SettingsContent({ userId }: SettingsContentProps) {
   const { preferences, updatePreference, isLoading } = usePreferences(userId)
+  const { isPremium } = usePremium(userId)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const showPremiumFeatures = flags.premiumEnabled || isPremium
 
   const handleImageSafeModeToggle = useCallback(async () => {
     const newValue = !preferences.imageSafeMode
@@ -92,43 +96,49 @@ export function SettingsContent({ userId }: SettingsContentProps) {
         <Stack direction="vertical" gap="normal">
           <h2 style={sectionHeadingStyle}>Reading Preferences</h2>
 
-          <PremiumGate userId={userId} featureName="Image Safe Mode">
-            <div style={toggleRowStyle}>
-              <div>
-                <Text size="sm" style={{ fontWeight: 500 }}>
-                  Image Safe Mode
-                </Text>
-                <Text variant="secondary" size="sm">
-                  Hide images by default — tap to reveal individual images while reading
-                </Text>
-              </div>
-              <Stack direction="horizontal" align="center" gap="tight">
-                {saveMessage && (
-                  <span
-                    style={{
-                      ...savedIndicatorStyle,
-                      color: saveMessage === 'Saved' ? 'var(--color-green-5)' : 'var(--color-red-7)',
-                    }}
-                    role="status"
-                    aria-live="polite"
+          {showPremiumFeatures ? (
+            <PremiumGate userId={userId} featureName="Image Safe Mode">
+              <div style={toggleRowStyle}>
+                <div>
+                  <Text size="sm" style={{ fontWeight: 500 }}>
+                    Image Safe Mode
+                  </Text>
+                  <Text variant="secondary" size="sm">
+                    Hide images by default — tap to reveal individual images while reading
+                  </Text>
+                </div>
+                <Stack direction="horizontal" align="center" gap="tight">
+                  {saveMessage && (
+                    <span
+                      style={{
+                        ...savedIndicatorStyle,
+                        color: saveMessage === 'Saved' ? 'var(--color-green-5)' : 'var(--color-red-7)',
+                      }}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {saveMessage}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!!preferences.imageSafeMode}
+                    aria-label="Toggle image safe mode"
+                    disabled={isLoading}
+                    onClick={handleImageSafeModeToggle}
+                    style={switchTrackStyle(!!preferences.imageSafeMode)}
                   >
-                    {saveMessage}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={!!preferences.imageSafeMode}
-                  aria-label="Toggle image safe mode"
-                  disabled={isLoading}
-                  onClick={handleImageSafeModeToggle}
-                  style={switchTrackStyle(!!preferences.imageSafeMode)}
-                >
-                  <span style={switchThumbStyle(!!preferences.imageSafeMode)} />
-                </button>
-              </Stack>
-            </div>
-          </PremiumGate>
+                    <span style={switchThumbStyle(!!preferences.imageSafeMode)} />
+                  </button>
+                </Stack>
+              </div>
+            </PremiumGate>
+          ) : (
+            <Text variant="secondary" size="sm">
+              No reading preferences available yet. More options coming soon.
+            </Text>
+          )}
 
           {/* Future settings: font size, theme, line height, etc. */}
         </Stack>

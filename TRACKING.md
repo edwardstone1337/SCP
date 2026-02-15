@@ -1,5 +1,21 @@
 # Analytics & Tracking
 
+## Project State & Backlog
+
+### Completed (Shipped)
+- **Google OAuth:** Sign-in with Google; magic link remains available.
+- **Premium infrastructure:** `user_profiles`, Stripe checkout/webhook, duplicate purchase guard, UpgradeModal, PremiumGate. **Feature-flagged** (`premiumEnabled` dev only); infrastructure deployed.
+- **Image Safe Mode:** DOM-based hide/reveal, placeholders, eye-off SVG, a11y. **Feature-flagged** (premium gated; premium UI hidden in prod).
+- **Maintenance mode:** Full-page "FOUNDATION ARCHIVE COMPROMISED" lockdown via `proxy.ts` rewrite; env `NEXT_PUBLIC_MAINTENANCE_MODE`.
+- **Degraded mode:** Warning banner "PARTIAL CONTAINMENT FAILURE"; env `NEXT_PUBLIC_DEGRADED_MODE`.
+
+### Backlog
+- **Broken image fallback:** SCP CDN images currently not loading; investigate `scp-wiki.wdfiles.com` before premium launch.
+- **Cookie consent:** GDPR/ePrivacy; GA4 sets cookies; add lightweight consent before EU traffic.
+- **Premium launch:** Flip `premiumEnabled` in `lib/flags.ts` after Stripe live + image fix; see `docs/PREMIUM_LAUNCH.md`.
+
+---
+
 ## Overview
 SCP Reader uses Google Analytics 4 for basic usage analytics. No other tracking, advertising, or third-party analytics tools are in use.
 

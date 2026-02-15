@@ -2,6 +2,21 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
+  // Maintenance mode: rewrite all page routes to /maintenance
+  const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
+  if (maintenanceMode) {
+    const { pathname } = request.nextUrl
+    // Allow the maintenance page itself, API routes, and static assets through
+    if (
+      pathname !== '/maintenance' &&
+      !pathname.startsWith('/api') &&
+      !pathname.startsWith('/_next') &&
+      !pathname.includes('.')
+    ) {
+      return NextResponse.rewrite(new URL('/maintenance', request.url))
+    }
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })

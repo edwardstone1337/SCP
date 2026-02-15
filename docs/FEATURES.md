@@ -106,6 +106,11 @@ It intentionally focuses on user value, not internal implementation details.
 - Premium (Clearance Level 5) unlocks Image Safe Mode and future premium features (reading settings, achievements).
 - Nav menu shows "Upgrade to Premium" for signed-in free users; premium users see a "Premium" badge next to their email.
 
+## Incident Response (Ops)
+
+- **Maintenance mode:** When enabled (`NEXT_PUBLIC_MAINTENANCE_MODE`), users see a full-page SCP-themed "Foundation Archive Compromised" lockdown. API routes remain reachable (e.g. Stripe webhooks).
+- **Degraded mode:** When enabled (`NEXT_PUBLIC_DEGRADED_MODE`), a warning banner ("Partial Containment Failure") appears at the top; the site remains fully usable.
+
 ## Update Rules (For Humans and AI Assistants)
 
 Update this file whenever a PR changes user-visible behavior.
