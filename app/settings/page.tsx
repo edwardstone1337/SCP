@@ -27,7 +27,7 @@ export default async function SettingsPage() {
       <Container size="md">
         <Breadcrumb items={[{ label: 'Settings' }]} />
         <PageHeader title="Terminal Configuration" />
-        <SettingsContent userId={user.id} />
+        <SettingsContent userId={user.id} userEmail={user.email ?? undefined} />
       </Container>
     </Main>
   )

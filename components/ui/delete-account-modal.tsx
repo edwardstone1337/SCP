@@ -5,16 +5,8 @@ import { useModal } from '@/components/ui/modal-provider'
 import { createClient } from '@/lib/supabase/client'
 import { deleteAccount } from '@/app/actions/auth'
 import { Stack } from '@/components/ui/stack'
-import { Text } from '@/components/ui/typography'
+import { Heading, Text } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
-
-const headingStyle: CSSProperties = {
-  fontSize: 'var(--font-size-xl)',
-  lineHeight: 'var(--line-height-xl)',
-  fontWeight: 700,
-  color: 'var(--color-text-primary)',
-  margin: 0,
-}
 
 const warningStyle: CSSProperties = {
   fontSize: 'var(--font-size-sm)',
@@ -58,7 +50,7 @@ export function DeleteAccountModal() {
 
   return (
     <Stack direction="vertical" gap="normal">
-      <h2 style={headingStyle}>Delete Account</h2>
+      <Heading level={3}>Delete Account</Heading>
 
       <Text variant="secondary" style={warningStyle}>
         This will permanently delete your account and all your reading progress,
@@ -81,7 +73,7 @@ export function DeleteAccountModal() {
           Cancel
         </Button>
         <Button
-          variant="primary"
+          variant="danger"
           size="md"
           loading={isDeleting}
           disabled={isDeleting}

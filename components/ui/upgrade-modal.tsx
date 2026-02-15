@@ -3,17 +3,9 @@
 import { CSSProperties, useState } from 'react'
 import { useModal } from '@/components/ui/modal-provider'
 import { Stack } from '@/components/ui/stack'
-import { Text, Mono } from '@/components/ui/typography'
+import { Heading, Text, Mono } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { logger } from '@/lib/logger'
-
-const headingStyle: CSSProperties = {
-  fontSize: 'var(--font-size-xl)',
-  lineHeight: 'var(--line-height-xl)',
-  fontWeight: 700,
-  color: 'var(--color-text-primary)',
-  margin: 0,
-}
 
 const classificationStyle: CSSProperties = {
   fontSize: 'var(--font-size-xs)',
@@ -111,7 +103,7 @@ export function UpgradeModal() {
     <Stack direction="vertical" gap="normal">
       <Stack direction="vertical" gap="tight">
         <Mono style={classificationStyle}>Clearance Upgrade</Mono>
-        <h2 style={headingStyle}>Upgrade to Clearance Level 5</h2>
+        <Heading level={3}>Upgrade to Clearance Level 5</Heading>
         <Text variant="secondary" size="sm">
           Unlock advanced containment tools for your archive terminal.
         </Text>

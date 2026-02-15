@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Stack } from '@/components/ui/stack'
-import { Heading, Text } from '@/components/ui/typography'
+import { Text } from '@/components/ui/typography'
+import { SectionLabel } from '@/components/ui/section-label'
 import { Button } from '@/components/ui/button'
 
 function formatScpId(num: number): string {
@@ -33,13 +34,7 @@ export function NewToFoundationSection() {
   return (
     <section style={{ marginBottom: 'var(--spacing-6)' }}>
       <Stack direction="vertical" gap="normal">
-        <Heading
-          level={2}
-          className="text-sm font-normal text-[var(--color-text-secondary)]"
-          style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-        >
-          New to the Foundation?
-        </Heading>
+        <SectionLabel>New to the Foundation?</SectionLabel>
         <Text variant="secondary">
           The SCP Foundation is a collaborative fiction project documenting thousands of anomalous
           objects, entities, and phenomena. SCP Reader lets you browse the full archive and track

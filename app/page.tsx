@@ -5,10 +5,8 @@ import { getDailyIndex } from '@/lib/utils/daily-scp'
 import { getSiteUrl } from '@/lib/utils/site-url'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
-import { Heading } from '@/components/ui/typography'
-import { Stack } from '@/components/ui/stack'
-import { HeroSubhead } from '@/components/ui/hero-subhead'
 import { generateHomepageJsonLd } from '@/lib/utils/json-ld'
+import { HeroSection } from './hero-section'
 import { HomeContent } from './home-content'
 
 export const revalidate = 300 // ISR: regenerate every 5 minutes
@@ -40,6 +38,7 @@ interface SeriesProgress {
 }
 
 interface TopRatedScp {
+  id: string
   scp_id: string
   title: string
   rating: number
@@ -70,6 +69,7 @@ async function getSeriesProgress(): Promise<SeriesProgress[]> {
 }
 
 async function getDailyFeaturedScp(): Promise<{
+  id: string
   scp_id: string
   title: string
   rating: number | null
@@ -87,7 +87,7 @@ async function getDailyFeaturedScp(): Promise<{
 
   const { data, error } = await supabase
     .from('scps')
-    .select('scp_id, title, rating, series')
+    .select('id, scp_id, title, rating, series')
     .order('scp_number', { ascending: true })
     .range(index, index)
     .single()
@@ -104,7 +104,7 @@ async function getTopRatedScps(): Promise<TopRatedScp[]> {
 
   const { data, error } = await supabase
     .from('scps')
-    .select('scp_id, title, rating')
+    .select('id, scp_id, title, rating')
     .not('rating', 'is', null)
     .order('rating', { ascending: false })
     .limit(4)
@@ -143,24 +143,7 @@ export default async function Home() {
       ))}
       <Main>
       <Container size="lg">
-        {/* Themed header */}
-        <section style={{ marginBottom: 'var(--spacing-6)' }}>
-          <Stack direction="horizontal" align="start" gap="normal">
-            <Heading level={1} className="leading-tight tracking-tight">
-              SECURE{'\n'}CONTAIN{'\n'}PROTECT
-            </Heading>
-            <div
-              style={{
-                width: 'var(--spacing-1)',
-                height: 80,
-                marginTop: 'var(--spacing-1)',
-                flexShrink: 0,
-                backgroundColor: 'var(--color-accent)',
-              }}
-            />
-          </Stack>
-          <HeroSubhead />
-        </section>
+        <HeroSection />
 
         <HomeContent seriesProgress={seriesProgress} dailyScp={dailyScp} topRated={topRated} />
       </Container>

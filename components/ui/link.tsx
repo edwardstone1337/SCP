@@ -4,6 +4,9 @@ import NextLink from 'next/link'
 interface LinkProps {
   href: string
   variant?: 'default' | 'back' | 'nav'
+  external?: boolean
+  target?: string
+  rel?: string
   children: ReactNode
   className?: string
   style?: CSSProperties
@@ -15,6 +18,9 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   {
     href,
     variant = 'default',
+    external = false,
+    target,
+    rel,
     children,
     className,
     style: styleProp,
@@ -55,6 +61,24 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     ...baseStyle,
     ...variantStyles[variant],
     ...styleProp,
+  }
+
+  if (external) {
+    return (
+      <a
+        ref={ref}
+        href={href}
+        className={className}
+        style={combinedStyle}
+        data-variant={variant}
+        target={target ?? '_blank'}
+        rel={rel ?? 'noopener noreferrer'}
+        onClick={onClick}
+        {...(ariaCurrent !== undefined && { 'aria-current': ariaCurrent })}
+      >
+        {children}
+      </a>
+    )
   }
 
   return (

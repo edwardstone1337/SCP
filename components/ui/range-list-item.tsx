@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { ProgressRing } from '@/components/ui/progress-ring'
-import { Text } from '@/components/ui/text'
+import { Text } from '@/components/ui/typography'
 import { Mono } from '@/components/ui/typography'
 import { CSSProperties } from 'react'
 

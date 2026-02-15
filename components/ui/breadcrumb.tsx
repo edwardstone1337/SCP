@@ -1,5 +1,5 @@
 import { Link } from '@/components/ui/link'
-import { Text } from '@/components/ui/text'
+import { Text } from '@/components/ui/typography'
 import { cn } from '@/lib/utils/cn'
 
 export interface BreadcrumbItem {
@@ -62,7 +62,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
                   {item.label}
                 </Link>
               ) : (
-                <Text variant="secondary" size="sm">
+                <Text as="span" variant="secondary" size="sm">
                   {item.label}
                 </Text>
               )}

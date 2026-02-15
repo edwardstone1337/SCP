@@ -2,6 +2,7 @@ import { CSSProperties, type ReactNode } from 'react'
 
 export type IconName =
   | 'check'
+  | 'check-circle'
   | 'eye'
   | 'star'
   | 'arrow-back'
@@ -13,6 +14,7 @@ interface IconProps {
   name: IconName
   size?: 'sm' | 'md' | 'lg'
   className?: string
+  style?: CSSProperties
 }
 
 const BOOKMARK_SVG = (
@@ -27,6 +29,13 @@ const BOOKMARK_FILLED_SVG = (
   </svg>
 )
 
+const CHECK_CIRCLE_SVG = (
+  <svg width="1em" height="1em" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="currentColor" />
+    <path d="M7 13l3 3 7-7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
 const ARROW_UP_SVG = (
   <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 19V5M5 12l7-7 7 7" />
@@ -35,6 +44,7 @@ const ARROW_UP_SVG = (
 
 const icons: Record<IconName, string | ReactNode> = {
   check: '✓',
+  'check-circle': CHECK_CIRCLE_SVG,
   eye: '👁️',
   star: '★',
   'arrow-back': '←',
@@ -43,11 +53,11 @@ const icons: Record<IconName, string | ReactNode> = {
   'bookmark-filled': BOOKMARK_FILLED_SVG,
 }
 
-export function Icon({ name, size = 'md', className }: IconProps) {
+export function Icon({ name, size = 'md', className, style: styleProp }: IconProps) {
   const sizes = {
-    sm: '16px',
-    md: '24px',
-    lg: '32px',
+    sm: 'var(--spacing-2)',
+    md: 'var(--spacing-3)',
+    lg: 'var(--spacing-4)',
   }
 
   const style: CSSProperties = {
@@ -59,6 +69,7 @@ export function Icon({ name, size = 'md', className }: IconProps) {
     justifyContent: 'center',
     flexShrink: 0,
     lineHeight: 0,
+    ...styleProp,
   }
 
   return (

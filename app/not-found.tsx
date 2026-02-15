@@ -3,6 +3,7 @@ import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Heading, Text, Mono } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Logo } from '@/components/ui/logo'
 
 export default function NotFound() {
@@ -26,19 +27,11 @@ export default function NotFound() {
             This incident has been logged.
           </Text>
 
-          <div
-            style={{
-              padding: 'var(--spacing-3)',
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-surface-border)',
-              marginTop: 'var(--spacing-2)',
-            }}
-          >
+          <Card variant="bordered" padding="md" style={{ marginTop: 'var(--spacing-2)' }}>
             <Text size="sm" variant="secondary">
               If you believe this is an error, contact your Site Director or return to the main archive.
             </Text>
-          </div>
+          </Card>
 
           <Stack direction="horizontal" gap="normal" style={{ marginTop: 'var(--spacing-4)' }}>
             <Button href="/" variant="primary">

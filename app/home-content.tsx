@@ -7,10 +7,10 @@ import { logger } from '@/lib/logger'
 import { seriesToRoman } from '@/lib/utils/series'
 import { Grid } from '@/components/ui/grid'
 import { Stack } from '@/components/ui/stack'
-import { Heading } from '@/components/ui/typography'
+import { SectionLabel } from '@/components/ui/section-label'
 import { SeriesCard } from '@/components/ui/series-card'
 import { DailyFeaturedSection } from '@/components/ui/daily-featured-section'
-import { TopRatedSection, type TopRatedScp } from '@/components/ui/top-rated-section'
+import { TopRatedSection } from '@/components/ui/top-rated-section'
 import { RecentlyViewedSection, type RecentlyViewedItem } from '@/components/ui/recently-viewed-section'
 import { NewToFoundationSection } from '@/components/ui/new-to-foundation-section'
 import { Toast } from '@/components/ui/toast'
@@ -23,23 +23,54 @@ interface SeriesProgress {
 }
 
 interface DailyScp {
+  id: string
   scp_id: string
   title: string
   rating: number | null
   series: string
 }
 
+interface HomeTopRatedScp {
+  id: string
+  scp_id: string
+  title: string
+  rating: number
+}
+
+interface EnrichedDailyScp extends DailyScp {
+  is_read: boolean
+  is_bookmarked: boolean
+}
+
+interface EnrichedTopRatedScp extends HomeTopRatedScp {
+  is_read: boolean
+  is_bookmarked: boolean
+}
+
+interface EnrichedRecentlyViewedItem extends RecentlyViewedItem {
+  id: string
+  is_read: boolean
+  is_bookmarked: boolean
+}
+
 interface HomeContentProps {
   seriesProgress: SeriesProgress[]
   dailyScp: DailyScp | null
-  topRated: TopRatedScp[]
+  topRated: HomeTopRatedScp[]
 }
 
 export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRated }: HomeContentProps) {
   const searchParams = useSearchParams()
   const [seriesProgress, setSeriesProgress] = useState(initialProgress)
-  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([])
+  const [recentlyViewed, setRecentlyViewed] = useState<EnrichedRecentlyViewedItem[]>([])
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [enrichedDailyScp, setEnrichedDailyScp] = useState<EnrichedDailyScp | null>(
+    dailyScp ? { ...dailyScp, is_read: false, is_bookmarked: false } : null
+  )
+  const [enrichedTopRated, setEnrichedTopRated] = useState<EnrichedTopRatedScp[]>(
+    topRated.map((scp) => ({ ...scp, is_read: false, is_bookmarked: false }))
+  )
   const [showAccountDeletedToast, setShowAccountDeletedToast] = useState(false)
 
   useEffect(() => {
@@ -58,12 +89,13 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
         const { data: { user } } = await supabase.auth.getUser()
         if (!user || !mounted) return
         setIsAuthenticated(true)
+        setUserId(user.id)
 
         const [progressRes, rvRes] = await Promise.all([
           supabase.rpc('get_series_progress', { user_id_param: user.id }),
           supabase
             .from('user_recently_viewed')
-            .select('viewed_at, scps (scp_id, title)')
+            .select('viewed_at, scps (id, scp_id, title)')
             .eq('user_id', user.id)
             .order('viewed_at', { ascending: false })
             .limit(5),
@@ -80,19 +112,72 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
           setSeriesProgress(sorted)
         }
 
+        // Parse recently viewed with UUID
+        let rvItems: EnrichedRecentlyViewedItem[] = []
         if (rvRes.data) {
-          const items = (rvRes.data as unknown as Array<{
+          rvItems = (rvRes.data as unknown as Array<{
             viewed_at: string
-            scps: { scp_id: string; title: string } | null
+            scps: { id: string; scp_id: string; title: string } | null
           }>)
             .filter((row) => row.scps)
             .map((row) => ({
+              id: row.scps!.id,
               scp_id: row.scps!.scp_id,
               title: row.scps!.title,
               viewed_at: row.viewed_at,
+              is_read: false,
+              is_bookmarked: false,
             }))
-          setRecentlyViewed(items)
         }
+
+        // Collect all SCP UUIDs for bookmark/read state
+        const allScpIds: string[] = []
+        if (dailyScp?.id) allScpIds.push(dailyScp.id)
+        topRated.forEach((scp) => allScpIds.push(scp.id))
+        rvItems.forEach((item) => allScpIds.push(item.id))
+
+        if (allScpIds.length > 0) {
+          const [readRes, bookmarkRes] = await Promise.all([
+            supabase
+              .from('user_progress')
+              .select('scp_id, is_read')
+              .eq('user_id', user.id)
+              .in('scp_id', allScpIds),
+            supabase
+              .from('user_bookmarks')
+              .select('scp_id')
+              .eq('user_id', user.id)
+              .in('scp_id', allScpIds),
+          ])
+
+          if (!mounted) return
+
+          const readMap = new Map(readRes.data?.map((p) => [p.scp_id, p.is_read]) ?? [])
+          const bookmarkSet = new Set(bookmarkRes.data?.map((b) => b.scp_id) ?? [])
+
+          setEnrichedDailyScp(
+            dailyScp
+              ? { ...dailyScp, is_read: readMap.get(dailyScp.id) ?? false, is_bookmarked: bookmarkSet.has(dailyScp.id) }
+              : null
+          )
+
+          setEnrichedTopRated(
+            topRated.map((scp) => ({
+              ...scp,
+              is_read: readMap.get(scp.id) ?? false,
+              is_bookmarked: bookmarkSet.has(scp.id),
+            }))
+          )
+
+          rvItems = rvItems.map((item) => ({
+            ...item,
+            is_read: readMap.get(item.id) ?? false,
+            is_bookmarked: bookmarkSet.has(item.id),
+          }))
+        }
+
+        if (!mounted) return
+        setRecentlyViewed(rvItems)
       } catch (error) {
         if (!mounted) return
         logger.error('Failed to load user data', { error, component: 'HomeContent' })
@@ -101,7 +186,7 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
 
     loadUserData()
     return () => { mounted = false }
-  }, [])
+  }, [dailyScp, topRated])
 
   return (
     <>
@@ -113,25 +198,30 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
       )}
 
       {/* Daily Featured */}
-      <DailyFeaturedSection scp={dailyScp} />
+      <DailyFeaturedSection scp={enrichedDailyScp} userId={userId} />
 
       <SectionDivider />
 
-      {/* Top Rated */}
-      <TopRatedSection scps={topRated} />
+      {/* Auth: Recently Viewed (moved up, below Daily) */}
+      {isAuthenticated && (
+        <>
+          <RecentlyViewedSection items={recentlyViewed} isAuthenticated={isAuthenticated} userId={userId} />
+          <SectionDivider />
+        </>
+      )}
 
-      <SectionDivider />
+      {/* Guest: Notable Anomalies */}
+      {!isAuthenticated && (
+        <>
+          <TopRatedSection scps={enrichedTopRated} />
+          <SectionDivider />
+        </>
+      )}
 
       {/* Series Grid */}
       <section style={{ marginBottom: 'var(--spacing-6)' }}>
         <Stack direction="vertical" gap="normal">
-          <Heading
-            level={2}
-            className="text-sm font-normal text-[var(--color-text-secondary)]"
-            style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-          >
-            Containment Series
-          </Heading>
+          <SectionLabel>Containment Series</SectionLabel>
           <Grid cols="auto">
             {seriesProgress.map(({ series, total, read }) => {
               const roman = seriesToRoman(series)
@@ -152,14 +242,12 @@ export function HomeContent({ seriesProgress: initialProgress, dailyScp, topRate
         </Stack>
       </section>
 
-      <SectionDivider />
-
-      {/* New to the Foundation - only show for unauthenticated users */}
-      <NewToFoundationSection />
-
-      {/* Recently Viewed - only show for authenticated users */}
-      {isAuthenticated && (
-        <RecentlyViewedSection items={recentlyViewed} isAuthenticated={isAuthenticated} />
+      {/* Guest: New to the Foundation */}
+      {!isAuthenticated && (
+        <>
+          <SectionDivider />
+          <NewToFoundationSection />
+        </>
       )}
     </>
   )

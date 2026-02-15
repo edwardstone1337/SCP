@@ -1,10 +1,17 @@
 import { CSSProperties } from 'react'
 import { cn } from '@/lib/utils/cn'
 
-const sizeMap = {
-  sm: 16,
-  md: 24,
-  lg: 32,
+const sizeTokenMap = {
+  sm: 'var(--spacing-2)',
+  md: 'var(--spacing-3)',
+  lg: 'var(--spacing-4)',
+} as const
+
+/** Border width scales with size (16px→2, 24px→3, 32px→4). Numeric for CSS border-width. */
+const borderWidthMap = {
+  sm: 2,
+  md: 3,
+  lg: 4,
 } as const
 
 interface SpinnerProps {
@@ -18,8 +25,8 @@ interface SpinnerProps {
  * Uses --color-accent for the spinner color. Centered by default.
  */
 export function Spinner({ size = 'md', className, style }: SpinnerProps) {
-  const px = sizeMap[size]
-  const borderWidth = Math.max(2, Math.floor(px / 8))
+  const sizeToken = sizeTokenMap[size]
+  const borderWidth = borderWidthMap[size]
 
   return (
     <div
@@ -30,16 +37,16 @@ export function Spinner({ size = 'md', className, style }: SpinnerProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: px,
-        height: px,
+        width: sizeToken,
+        height: sizeToken,
         flexShrink: 0,
         ...style,
       }}
     >
       <div
         style={{
-          width: px,
-          height: px,
+          width: sizeToken,
+          height: sizeToken,
           border: `${borderWidth}px solid var(--color-grey-8)`,
           borderTopColor: 'var(--color-accent)',
           borderRadius: 'var(--radius-full)',

@@ -28,8 +28,11 @@ Guiding principle: **If a user would have to think "what does this mean?", keep 
 | Access your recently viewed files | `components/ui/sign-in-panel.tsx` (value bullet) | **Keep** | — |
 | Clearance Email | `components/ui/sign-in-panel.tsx` (label) | **Keep** | — |
 | you@example.com | `components/ui/sign-in-panel.tsx` (placeholder) | **Keep** | — |
-| Send Access Link | `components/ui/sign-in-panel.tsx` (CTA button) | **Keep** | — |
-| No password required. A one-time secure link will be sent to your inbox. | `components/ui/sign-in-panel.tsx` (trust line) | **Keep** | — |
+| Send Access Link | `components/ui/sign-in-panel.tsx` (email form submit button) | **Keep** | — |
+| Request Email Clearance | `components/ui/sign-in-panel.tsx` (secondary CTA; expands email form) | **New** | — |
+| Cancel | `components/ui/sign-in-panel.tsx` (collapses email form) | **New** | — |
+| No password required. A one-time secure link will be sent to your inbox. | `components/ui/sign-in-panel.tsx` (trust line) | **Removed** | Removed in Google-primary layout. |
+| — or — | `components/ui/sign-in-panel.tsx` (divider between methods) | **Removed** | Removed in Google-primary layout. |
 | Access link dispatched. Check your inbox to verify your clearance. | `components/ui/sign-in-panel.tsx` (success message) | **Keep** | — |
 | Enter a valid clearance email to continue. | `components/ui/sign-in-panel.tsx` (client validation) | **Keep** | — |
 | (error.message from Supabase) | `components/ui/sign-in-panel.tsx` (error from API) | **Keep** (system message) | — |

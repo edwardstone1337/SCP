@@ -9,6 +9,7 @@ export function SectionDivider({ symbol = '◆' }: SectionDividerProps) {
       style={{
         display: 'flex',
         alignItems: 'center',
+        marginBottom: 'var(--spacing-4)',
       }}
     >
       <div

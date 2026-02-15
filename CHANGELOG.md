@@ -4,9 +4,14 @@ All notable changes to SCP Reader are documented here.
 
 ## [Unreleased]
 ### Added
+- **HeroSection** (`app/hero-section.tsx`): Auth-aware hero ("SECURE CONTAIN PROTECT" for guests; "Welcome back, Researcher" for signed-in)
+- **ProfileDropdown**: Avatar-based account menu for signed-in users; Settings and Sign Out in dropdown
+- **Avatar, MenuItem, PremiumBadge, SectionLabel, Toggle** UI components
+- **docs/scp-data-api-shape.md**: API response shape and field documentation for SCP-Data
+- **20260215_enforce_premium_preferences.sql**: RPC rejects non-premium `imageSafeMode` updates
 - **Premium tier (Clearance Level 5):** Stripe-powered upgrade flow; users can purchase lifetime premium from nav menu or Settings; checkout success/cancel redirects to `/premium/success` and `/premium/cancelled`
 - **Image Safe Mode:** Premium feature that hides article images by default with tap-to-reveal placeholders; toggle in Settings (Reading Preferences); uses `user_profiles.preferences.imageSafeMode`
-- **Settings page (`/settings`):** Protected route for reading preferences; includes Image Safe Mode toggle (premium-gated); "Terminal Configuration" heading
+- **Settings page (`/settings`):** Protected route for reading preferences and account; Reading Preferences (Image Safe Mode toggle, premium-gated); Account section with Delete Account in Danger Zone
 - **user_profiles table:** Stores `premium_until` (Stripe-managed) and `preferences` JSONB; auto-created on signup; `update_user_preferences` RPC for preference writes
 - **Stripe integration:** `/api/stripe/checkout` (POST) creates checkout session; `/api/stripe/webhook` handles `checkout.session.completed` and sets `premium_until` via service role
 - **PremiumGate and UpgradeModal components:** Gate premium features behind sign-in + premium status; modal opens Stripe checkout
@@ -17,7 +22,7 @@ All notable changes to SCP Reader are documented here.
 - Google OAuth sign-in: users can now sign in with their Google account via "Continue with Google" button, available in both the sign-in modal and `/login` page; magic link remains as an alternative
 - `getSiteUrl()` now auto-detects the current browser origin when `NEXT_PUBLIC_SITE_URL` is not set, fixing OAuth redirect mismatches in local dev
 - Analytics `sign_in_submit` event now includes `sign_in_method` property (`magic_link` or `google`) to distinguish auth methods
-- Account deletion flow: signed-in users can permanently delete their account from the navigation menu (with confirmation modal), including progress, bookmarks, and recently viewed data
+- Account deletion flow: signed-in users can permanently delete their account from Settings > Account > Danger Zone (with confirmation modal), including progress, bookmarks, and recently viewed data
 - Home page now shows a dismissible success toast after account deletion (`/?account_deleted=true`)
 - Toast atom (`components/ui/toast.tsx`): reusable, auto-dismissing notification with success/error variants and close button
 - Delete account confirmation modal (`components/ui/delete-account-modal.tsx`): warns about permanent data loss, requires explicit confirmation
@@ -31,9 +36,11 @@ All notable changes to SCP Reader are documented here.
 - New guest onboarding block on home ("New to the Foundation?") with quick actions: classics, top-rated, and random file
 
 ### Changed
-- Navigation overlay: added Settings and Upgrade to Premium links for signed-in users; premium badge shown next to email when active
+- **Typography consolidation:** `Heading`, `Text`, `Mono`, `Label` merged into `typography.tsx`; standalone heading, hero-subhead, label, message, text components removed
+- **Navigation:** Signed-in users see avatar ProfileDropdown (Settings, Sign Out); overlay shows Series, Notable Anomalies, Upgrade (if applicable), Saved; Delete Account moved to Settings > Account > Danger Zone
+- Navigation overlay: Upgrade to Premium link for signed-in non-premium users
 - `lib/env.ts` now requires Stripe env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PRICE_ID` (used by checkout and webhook routes)
-- Sign Out button moved from top navigation bar into the nav overlay menu, alongside Delete Account; top bar now shows only Sign In (when logged out) and Menu
+- Sign Out and Settings moved into ProfileDropdown (avatar menu); top bar shows Sign In (logged out), ProfileDropdown + Menu (logged in)
 - SCP/series/home pages use static Supabase client (`createStaticClient`) for server data; auth-specific data (progress, recently viewed) fetched client-side where needed
 - Navigation: auth state resolved client-side via `getUser` + `onAuthStateChange`; layout wraps Navigation in `Suspense` for loading
 - SCP content: client fetches directly from SCP-Data API (`scp-data.tedivm.com`); internal proxy route removed
@@ -43,7 +50,6 @@ All notable changes to SCP Reader are documented here.
 - `sanitizeHtml` now accepts an optional custom DOMPurify instance for Node/JSDOM usage; color parsing/luminance helpers are exported for scanner reuse
 - Documentation command workflow now explicitly requires updating `docs/FEATURES.md` for user-visible behavior changes
 - Homepage copy and section labels now use SCP dossier terminology ("Daily Briefing", "Notable Anomalies", "Recent Files", "Containment Series")
-- Navigation logged-out CTA label changed from "Sign In" to "Access Terminal"
 - Added home section dividers plus subtle background texture and top classification stripe for stronger themed presentation
 
 ### Performance
@@ -74,6 +80,7 @@ All notable changes to SCP Reader are documented here.
 - Switched auth callback to use centralized Supabase client with env validation
 
 ### Removed
+- **Standalone typography components:** `heading.tsx`, `hero-subhead.tsx`, `label.tsx`, `message.tsx`, `text.tsx` (replaced by `typography.tsx` exports)
 - Next.js middleware (session/redirect logic removed)
 - `/api/scp-content/[contentFile]` proxy route
 

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface GridProps {
@@ -8,6 +8,7 @@ interface GridProps {
   /** Gap between items - defaults to var(--spacing-card-gap) */
   gap?: string
   className?: string
+  style?: CSSProperties
 }
 
 export function Grid({
@@ -15,6 +16,7 @@ export function Grid({
   cols = 'auto',
   gap = 'var(--spacing-card-gap)',
   className,
+  style,
 }: GridProps) {
   return (
     <div
@@ -28,6 +30,7 @@ export function Grid({
           display: 'grid',
           gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
         }),
+        ...style,
       }}
     >
       {children}

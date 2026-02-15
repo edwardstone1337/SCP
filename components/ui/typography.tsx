@@ -1,10 +1,11 @@
 import { ReactNode, CSSProperties } from 'react'
-import { cn } from '@/lib/utils/cn'
 
 // Heading Component
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+
 interface HeadingProps {
-  level: 1 | 2 | 3 | 4
-  as?: 'h1' | 'h2' | 'h3' | 'h4'
+  level: HeadingLevel
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   accent?: boolean
   children: ReactNode
   className?: string
@@ -12,40 +13,69 @@ interface HeadingProps {
   id?: string
 }
 
-export function Heading({ level, as, accent, children, className, style, id }: HeadingProps) {
-  const Component = as || (`h${level}` as 'h1' | 'h2' | 'h3' | 'h4')
+const headingFontSizeMap: Record<HeadingLevel, string> = {
+  1: 'var(--font-size-3xl)', // 38px
+  2: 'var(--font-size-2xl)', // 30px
+  3: 'var(--font-size-xl)',  // 24px
+  4: 'var(--font-size-lg)',  // 20px
+  5: 'var(--font-size-base)', // 16px
+  6: 'var(--font-size-sm)',  // 14px
+}
 
-  const styles = {
-    1: 'text-5xl font-bold',
-    2: 'text-4xl font-bold',
-    3: 'text-3xl font-bold',
-    4: 'text-2xl font-bold',
+const headingLineHeightMap: Record<HeadingLevel, string> = {
+  1: 'var(--line-height-3xl)',
+  2: 'var(--line-height-2xl)',
+  3: 'var(--line-height-xl)',
+  4: 'var(--line-height-lg)',
+  5: 'var(--line-height-base)',
+  6: 'var(--line-height-sm)',
+}
+
+export function Heading({ level, as, accent, children, className, style, id }: HeadingProps) {
+  const Component = as || (`h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6')
+
+  const headingStyle: CSSProperties = {
+    fontSize: headingFontSizeMap[level],
+    lineHeight: headingLineHeightMap[level],
+    fontWeight: 700,
+    fontFamily: 'var(--font-family-sans)',
+    color: accent ? 'var(--color-accent)' : 'var(--color-text-primary)',
+    margin: 0,
+    ...style,
   }
 
   return (
-    <Component
-      id={id}
-      className={cn(
-        styles[level],
-        accent && 'text-[var(--color-accent)]',
-        !accent && 'text-[var(--color-text-primary)]',
-        className
-      )}
-      style={style}
-    >
+    <Component id={id} className={className} style={headingStyle}>
       {children}
     </Component>
   )
 }
 
 // Text Component
+type TextVariant = 'primary' | 'secondary' | 'muted'
+type TextSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl'
+
 interface TextProps {
-  variant?: 'primary' | 'secondary' | 'muted'
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl'
+  variant?: TextVariant
+  size?: TextSize
   children: ReactNode
   className?: string
   as?: 'p' | 'span' | 'div'
   style?: CSSProperties
+}
+
+const textColorMap: Record<TextVariant, CSSProperties> = {
+  primary: { color: 'var(--color-text-primary)' },
+  secondary: { color: 'var(--color-text-secondary)' },
+  muted: { color: 'var(--color-grey-7)' },
+}
+
+const textSizeMap: Record<TextSize, CSSProperties> = {
+  xs: { fontSize: 'var(--font-size-xs)', lineHeight: 'var(--line-height-xs)' },
+  sm: { fontSize: 'var(--font-size-sm)', lineHeight: 'var(--line-height-sm)' },
+  base: { fontSize: 'var(--font-size-base)', lineHeight: 'var(--line-height-base)' },
+  lg: { fontSize: 'var(--font-size-lg)', lineHeight: 'var(--line-height-lg)' },
+  xl: { fontSize: 'var(--font-size-xl)', lineHeight: 'var(--line-height-xl)' },
 }
 
 export function Text({
@@ -56,45 +86,48 @@ export function Text({
   as: Component = 'p',
   style,
 }: TextProps) {
-  const colors = {
-    primary: 'text-[var(--color-text-primary)]',
-    secondary: 'text-[var(--color-text-secondary)]',
-    muted: 'text-[var(--color-grey-7)]',
-  }
-
-  const sizes = {
-    xs: 'text-xs',
-    sm: 'text-sm',
-    base: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
+  const textStyle: CSSProperties = {
+    fontFamily: 'var(--font-family-sans)',
+    margin: 0,
+    ...textColorMap[variant],
+    ...textSizeMap[size],
+    ...style,
   }
 
   return (
-    <Component className={cn(colors[variant], sizes[size], className)} style={style}>
+    <Component className={className} style={textStyle}>
       {children}
     </Component>
   )
 }
 
 // Mono Component (for SCP IDs, etc)
+type MonoSize = 'xs' | 'sm' | 'base' | 'lg'
+
 interface MonoProps {
   children: ReactNode
   className?: string
-  size?: 'xs' | 'sm' | 'base' | 'lg'
+  size?: MonoSize
   style?: CSSProperties
 }
 
+const monoSizeMap: Record<MonoSize, CSSProperties> = {
+  xs: { fontSize: 'var(--font-size-xs)', lineHeight: 'var(--line-height-xs)' },
+  sm: { fontSize: 'var(--font-size-sm)', lineHeight: 'var(--line-height-sm)' },
+  base: { fontSize: 'var(--font-size-base)', lineHeight: 'var(--line-height-base)' },
+  lg: { fontSize: 'var(--font-size-lg)', lineHeight: 'var(--line-height-lg)' },
+}
+
 export function Mono({ children, className, size = 'base', style }: MonoProps) {
-  const sizes = {
-    xs: 'text-xs',
-    sm: 'text-sm',
-    base: 'text-base',
-    lg: 'text-lg',
+  const monoStyle: CSSProperties = {
+    fontFamily: 'var(--font-family-mono)',
+    margin: 0,
+    ...monoSizeMap[size],
+    ...style,
   }
 
   return (
-    <span className={cn('font-mono', sizes[size], className)} style={style}>{children}</span>
+    <span className={className} style={monoStyle}>{children}</span>
   )
 }
 
@@ -108,17 +141,21 @@ interface LabelProps {
 }
 
 export function Label({ htmlFor, children, className, required, style }: LabelProps) {
+  const labelStyle: CSSProperties = {
+    display: 'block',
+    fontSize: 'var(--font-size-sm)',
+    lineHeight: 'var(--line-height-sm)',
+    fontWeight: 500,
+    fontFamily: 'var(--font-family-sans)',
+    color: 'var(--color-text-primary)',
+    marginBottom: 'var(--spacing-2)',
+    ...style,
+  }
+
   return (
-    <label
-      htmlFor={htmlFor}
-      className={cn(
-        'block text-sm font-medium text-[var(--color-text-primary)] mb-2',
-        className
-      )}
-      style={style}
-    >
+    <label htmlFor={htmlFor} className={className} style={labelStyle}>
       {children}
-      {required && <span className="text-[var(--color-accent)] ml-1">*</span>}
+      {required && <span style={{ color: 'var(--color-accent)', marginLeft: 'var(--spacing-1)' }}>*</span>}
     </label>
   )
 }

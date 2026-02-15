@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import NextLink from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logger } from '@/lib/logger'
@@ -27,29 +26,6 @@ interface ScpItem {
 
 interface TopRatedContentProps {
   scps: ScpItem[]
-}
-
-const signInLinkStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '44px',
-  fontWeight: 700,
-  fontFamily: 'var(--font-family-sans)',
-  transition: 'all var(--transition-base)',
-  cursor: 'pointer',
-  textDecoration: 'none',
-  borderWidth: 'var(--border-width-normal)',
-  borderStyle: 'solid',
-  backgroundColor: 'transparent',
-  color: 'var(--color-text-primary)',
-  borderColor: 'var(--color-surface-border)',
-  fontSize: 'var(--font-size-sm)',
-  paddingLeft: 'var(--spacing-2)',
-  paddingRight: 'var(--spacing-2)',
-  paddingTop: 'var(--spacing-1)',
-  paddingBottom: 'var(--spacing-1)',
-  borderRadius: 'var(--radius-button)',
 }
 
 export function TopRatedContent({ scps: initialScps }: TopRatedContentProps) {
@@ -114,13 +90,7 @@ export function TopRatedContent({ scps: initialScps }: TopRatedContentProps) {
   const queryString = searchParams.toString()
   const redirectPath = pathname || '/top-rated'
   const redirectPathWithQuery = `${redirectPath}${queryString ? `?${queryString}` : ''}`
-  const signInHref = `/login?redirect=${encodeURIComponent(redirectPathWithQuery)}`
-
-  const handleSignInClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-      return
-    }
-    event.preventDefault()
+  const openSignInModal = () => {
     const redirectTo =
       typeof window !== 'undefined'
         ? `${window.location.pathname}${window.location.search}${window.location.hash}`
@@ -151,22 +121,21 @@ export function TopRatedContent({ scps: initialScps }: TopRatedContentProps) {
               <Text variant="secondary" style={{ textAlign: 'center' }}>
                 Sign in to track your progress through the Top 100
               </Text>
-              <NextLink
-                href={signInHref}
-                onClick={handleSignInClick}
-                style={signInLinkStyle}
-                data-variant="secondary"
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={openSignInModal}
               >
                 Sign In
-              </NextLink>
+              </Button>
             </Stack>
           </Card>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <Stack direction="horizontal" justify="center">
             <Button variant="secondary" href="/series/series-1">
               Continue reading from the beginning
             </Button>
-          </div>
+          </Stack>
         )}
       </section>
     </>

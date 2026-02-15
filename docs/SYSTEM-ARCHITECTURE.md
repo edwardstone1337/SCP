@@ -19,7 +19,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | Layer | Technology |
 |-------|------------|
 | **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth (magic links + Google OAuth) |
+| **Auth** | Supabase Auth (Google OAuth primary, magic link secondary) |
 | **API** | Next.js Server Actions + Route Handlers |
 
 ### External Data
@@ -42,7 +42,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 | Route | Purpose | Auth |
 |-------|---------|------|
-| `/` | Home: themed header + auth-aware subhead, Daily Briefing, Notable Anomalies, Containment Series, guest onboarding block | Public (progress/recents when logged in) |
+| `/` | Home: HeroSection (auth-aware hero), Daily Briefing, Notable Anomalies, Containment Series, guest onboarding block | Public (progress/recents when logged in) |
 | `/top-rated` | Top 100 highest-rated SCP list, with ranked links into reader context | Public (toggles require login) |
 | `/series` | Redirects to `/` | — |
 | `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) + CollectionPage/Breadcrumb JSON-LD | Public |
@@ -52,7 +52,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/settings` | Reading preferences (Image Safe Mode toggle); premium-gated features | **Protected** |
 | `/premium/success` | Post-checkout success; invalidates premium/preferences cache | Public (redirects after Stripe) |
 | `/premium/cancelled` | Post-checkout cancel; no charges | Public |
-| `/login` | Sign-in page (`SignInPanel`) with magic link + Google OAuth | Public |
+| `/login` | Sign-in page (`SignInPanel`) with Google OAuth (primary) + magic link (expandable) | Public |
 | `/auth/callback` | OAuth/magic-link callback; exchanges code for session | Internal |
 | `/api/stripe/checkout` | POST; creates Stripe checkout session; returns redirect URL | Auth required |
 | `/api/stripe/webhook` | POST; handles `checkout.session.completed`; sets `premium_until` | Stripe signed |
@@ -189,13 +189,13 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 |----------|---------|
 | `get_series_progress(user_id_param UUID)` | Returns `(series, total, read)` per series; pass `null` for guests (read=0). |
 | `get_range_progress(series_id_param TEXT, user_id_param UUID)` | Returns `(range_start, total, read_count)` per 100-number range; used for range list. |
-| `update_user_preferences(new_preferences JSONB)` | Updates `user_profiles.preferences` for `auth.uid()`; SECURITY DEFINER (bypasses RLS). |
+| `update_user_preferences(new_preferences JSONB)` | Updates `user_profiles.preferences` for `auth.uid()`; SECURITY DEFINER (bypasses RLS). Rejects non-premium users from setting `imageSafeMode` (enforced in `20260215_enforce_premium_preferences.sql`). |
 
 ---
 
 ## Authentication Flow
 
-1. **Login:** User opens `SignInPanel` (modal or `/login`) and chooses magic link or Google OAuth. Magic link calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`. Google calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: SITE_URL/auth/callback?next=... } })`.
+1. **Login:** User opens `SignInPanel` (modal or `/login`). Google OAuth is presented as the primary action (`Continue with Google`); clicking it calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: SITE_URL/auth/callback?next=... } })`. Magic link is a secondary option exposed via "Request Email Clearance" (expands inline email form); submitting calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: SITE_URL/auth/callback?next=... } })`.
 2. **Redirect URL source:** `SITE_URL` comes from `getSiteUrl()`: `NEXT_PUBLIC_SITE_URL` when set, else `window.location.origin` in browser, else `http://localhost:3000` fallback.
 3. **Callback:** Provider redirects to `/auth/callback?code=...&next=...`. Route handler uses centralized server Supabase client (`lib/supabase/server.ts`), calls `exchangeCodeForSession(code)`, then redirects to `next` (or `/`) and appends `auth=complete`. On failure, redirects to `/login?error=...`.
 4. **Session:** `proxy.ts` (Next.js 16) refreshes Supabase session on each request; redirects authenticated users away from `/login`. Nav uses client-side Supabase (`getUser` + `onAuthStateChange`); layout wraps `Navigation` in `Suspense`. Server routes that need auth (e.g. `/saved`) use cookie-based `createClient()` and `getUser()` then redirect if unauthenticated.
@@ -233,7 +233,7 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 - **Fonts:** Roboto (sans), Roboto Mono (mono); loaded in `layout.tsx` via `next/font/google`, variables `--font-roboto`, `--font-roboto-mono`.
 - **Semantic:** `--font-family-sans`, `--font-family-mono`; sizes `--font-size-xs` … `--font-size-5xl`; line heights `--line-height-xs` … `--line-height-5xl`.
-- **Components:** `Heading` (level 1–4, optional `accent`), `Text` (variant/size), `Mono`, `Label` (see `components/ui/typography.tsx`).
+- **Components:** All typography in `typography.tsx`: `Heading` (level 1–6, optional `accent`, `id`), `Text` (variant/size, as p/span/div), `Mono`, `Label` (htmlFor, required).
 
 ### Spacing
 
@@ -250,15 +250,16 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 
 ### Component Hierarchy
 
-- **Atoms:** Button, Link, Badge, Icon, Input, Label, Text, Heading, Mono.
-- **Molecules:** Card, Select, Message, Spinner, Skeleton, ProgressRing, ProgressText, SectionDivider.
-- **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, TopRatedSection, DailyFeaturedSection, RecentlyViewedSection, NewToFoundationSection, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop.
+- **Atoms:** Button, Link, Badge, Icon, Input, Avatar, Toggle. Typography: Heading, Text, Mono, Label (from `typography.tsx`).
+- **Molecules:** Card, Select, MenuItem, Spinner, Skeleton, ProgressRing, ProgressText, SectionDivider, PremiumBadge.
+- **Organisms:** SeriesCard, RangeListItem, ScpListItem, ScpListWithToggle, TopRatedSection, DailyFeaturedSection, RecentlyViewedSection, NewToFoundationSection, PageHeader, Breadcrumb, BookmarkButton, ReadToggleButton, BackToTop, ProfileDropdown, SectionLabel.
 - **Layout:** Main, Container, Stack, Grid, Navigation, SkipLink, Logo. Navigation: client auth wrapper (`navigation.tsx`) + overlay renderer (`navigation-client.tsx`).
 
 ### Component Library (components/ui/)
 
 | Component | Description |
 |-----------|-------------|
+| `avatar` | User avatar; derives initials from email; size sm. |
 | `back-to-top` | Fixed button after scroll threshold; smooth scroll to top. |
 | `badge` | Badge variants: default, accent, progress. |
 | `bookmark-button` | Save/Saved toggle; optimistic update; on error revert + logger; opens sign-in modal when unauthenticated (preserves current location). |
@@ -267,28 +268,28 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `card` | Container; variants default, interactive, bordered; optional accentBorder; forwards `role` and `aria-live`/`aria-busy` props. |
 | `container` | Max-width + padding; sizes xs … 2xl, full. |
 | `daily-featured-section` | Home "Daily Briefing" block; deterministic by UTC date (getDailyIndex); shows scp_id, title, rating, series; link wraps card. |
-| `hero-subhead` | Home header subhead; auth-aware copy ("Welcome back..." vs guest discovery copy). |
 | `delete-account-modal` | Confirmation modal for permanent account deletion; calls `deleteAccount()` server action and hard-redirects to `/?account_deleted=true` on success. |
+| `premium-badge` | Small "Premium" badge for nav/account displays. |
 | `premium-gate` | Wraps premium-only UI; shows sign-in CTA (guest) or upgrade CTA (signed-in non-premium); renders children for premium users. |
 | `upgrade-modal` | Modal for Stripe checkout; calls `/api/stripe/checkout` POST, redirects to Stripe; lists premium features. |
 | `degraded-banner` | Warning banner "PARTIAL CONTAINMENT FAILURE" when `NEXT_PUBLIC_DEGRADED_MODE=true`; design-token compliant; renders in layout. |
 | `grid` | Responsive grid (e.g. cols="auto" → 2→3→4). |
-| `heading` | Heading level 1–4, optional accent; supports `id` prop forwarding. |
 | `icon` | Inline SVG icons (check, eye, star, bookmark, bookmark-filled, arrow-up, etc.). |
 | `input` | Styled input with design tokens. |
-| `label` | Form label. |
 | `link` | Next Link wrapper; variants default, back, nav; forwardRef. |
 | `logo` | SCP logo (sm/md/lg). |
 | `main` | Main content wrapper (padding, background). |
-| `message` | Success/error message block. |
+| `menu-item` | Nav/dropdown menu item; supports href or formAction. |
 | `page-header` | Title + optional description. |
 | `progress-ring` | Circular progress (percentage). |
 | `progress-text` | Percentage or fraction text; supports custom fraction label (e.g. `read`, `accessed`, `catalogued`). |
+| `profile-dropdown` | Avatar-triggered dropdown for signed-in users; Settings, Sign Out. |
 | `range-list-item` | Range row with progress ring, link. |
 | `read-toggle-button` | Mark as Read/Unread; optional routeId for reader revalidation; optimistic update; opens sign-in modal when unauthenticated (preserves current location). |
 | `recently-viewed-section` | "Recent Files" block used for authenticated users on home; lists last 5 viewed SCPs and shows authenticated empty state ("Accessed files will appear here."). |
 | `scp-list-item` | SCP row: title, rating, id, read/bookmark toggles, full-card link. |
 | `scp-list-with-toggle` | Sort Select + "Hide read" toggle (label/id for a11y) + list of ScpListItem; supports `defaultSort` and optional hidden sort control. |
+| `section-label` | Uppercase section label (sm font, secondary color). |
 | `select` | Native select styled with design tokens. |
 | `section-divider` | Decorative horizontal divider with center glyph between home sections. |
 | `series-card` | Series card with progress, link to series. |
@@ -296,12 +297,12 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 | `skeleton` | Tokenized dark-theme shimmer placeholder with reduced-motion support. |
 | `skip-link` | Accessibility skip-to-content link using visually-hidden clipping pattern until focus/focus-visible; spacing tokens; highest layer via `--z-skip-link`. |
 | `spinner` | Loading spinner. |
-| `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose. |
-| `text` | Text with variant/size. |
+| `stack` | Flex stack; direction vertical/horizontal; gap tight/normal/loose; responsive `direction`/`align`/`justify`. |
+| `toggle` | Accessible toggle switch; checked/onCheckedChange; optional disabled, ariaLabel. |
 | `toast` | Dismissible fixed-bottom toast with auto-dismiss + fade-out; includes exit timer cleanup on unmount; used for account deletion confirmation on home. |
 | `typography` | Re-exports Heading, Text, Mono, Label. |
 
-**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, `Access Terminal` CTA (logged out only), and `Menu` button on all viewports. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes Series I–X (two-column grid), Upgrade to Premium (auth, non-premium only), Saved (auth), Settings (auth), Sign Out (auth), account email with optional Premium badge, and Delete account; active series/saved/settings routes highlighted with `aria-current="page"`.
+**Layout (components/, not ui/):** `navigation.tsx` — client component; uses browser Supabase client (`getUser`, `onAuthStateChange`) and renders `NavigationClient`. `navigation-client.tsx` — client nav: logo + "SCP Reader" link, Sign In CTA (logged out; opens modal or `/login`), and ProfileDropdown (avatar) + Menu button (logged in). ProfileDropdown contains Settings and Sign Out. Menu opens as a right-side drawer on desktop (gradient backdrop + drawer shadow) and full-screen overlay on mobile. Overlay includes Series I–X (two-column grid), Notable Anomalies link, Upgrade to Premium (auth, non-premium only when `premiumEnabled`), and Saved (auth); active series/saved routes highlighted with `aria-current="page"`. Delete Account lives in Settings > Account > Danger Zone.
 
 ---
 
@@ -567,6 +568,7 @@ app/
 │   └── page.tsx             # SCP-themed full-page lockdown (rewrite target when NEXT_PUBLIC_MAINTENANCE_MODE=true)
 ├── layout.tsx               # Fonts, QueryProvider, SkipLink, Navigation, DegradedBanner (when degraded)
 ├── globals.css               # @theme, tokens, .scp-content
+├── hero-section.tsx         # Client: Auth-aware hero ("SECURE CONTAIN PROTECT" / "Welcome back, Researcher")
 ├── home-content.tsx         # Client: Daily Briefing, Notable Anomalies, series grid, guest onboarding, recents (auth-aware)
 ├── page.tsx                 # Home server (createStaticClient; series + daily + top-rated + homepage JSON-LD)
 ├── loading.tsx              # Root route loading state
@@ -575,7 +577,7 @@ app/
 proxy.ts                     # Next.js 16 proxy: maintenance rewrite, Supabase session refresh, /login redirect
 
 components/
-├── ui/                      # Design system (see Component Library table; includes hero-subhead, section-divider, new-to-foundation-section, daily-featured-section, top-rated-section)
+├── ui/                      # Design system (see Component Library table; includes avatar, profile-dropdown, section-label, section-divider, new-to-foundation-section, daily-featured-section, top-rated-section)
 ├── navigation.tsx           # Client nav (getUser, onAuthStateChange, renders NavigationClient)
 └── navigation-client.tsx    # Client nav (top auth+menu, responsive drawer/overlay)
 
@@ -608,9 +610,11 @@ supabase/
 └── migrations/              # SQL migrations (see Database Schema)
     ├── 20260205_create_user_recently_viewed.sql
     ├── 20260215_create_user_profiles_table.sql   # user_profiles, premium_until, trigger
-    └── 20260215_add_preferences_and_update_rpc.sql # preferences column, update_user_preferences RPC
+    ├── 20260215_add_preferences_and_update_rpc.sql # preferences column, update_user_preferences RPC
+    └── 20260215_enforce_premium_preferences.sql  # RPC rejects non-premium imageSafeMode
 
 docs/
+├── scp-data-api-shape.md    # SCP-Data API response shape and field reference
 └── *.md                     # Documentation
 ```
 

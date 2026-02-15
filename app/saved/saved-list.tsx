@@ -59,17 +59,17 @@ export function SavedList({ items, userId }: SavedListProps) {
 
   return (
     <div>
-      <div
+      <Stack
+        direction="horizontal"
+        justify="between"
+        align="center"
+        gap="normal"
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
           marginBottom: 'var(--spacing-2)',
-          gap: 'var(--spacing-2)',
           flexWrap: 'wrap',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
+        <Stack direction="horizontal" align="center" gap="tight">
           <Label htmlFor="sort-select" style={{ whiteSpace: 'nowrap', marginBottom: 0 }}>
             Sort by
           </Label>
@@ -81,8 +81,8 @@ export function SavedList({ items, userId }: SavedListProps) {
             aria-label="Sort saved articles"
             style={{ width: 'auto', minWidth: '150px' }}
           />
-        </div>
-      </div>
+        </Stack>
+      </Stack>
 
       <Stack direction="vertical" gap="tight">
         {sortedItems.map((item) => (

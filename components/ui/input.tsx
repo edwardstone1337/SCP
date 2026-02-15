@@ -1,5 +1,6 @@
 'use client'
 
+import { forwardRef } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface InputProps {
@@ -11,20 +12,28 @@ interface InputProps {
   disabled?: boolean
   required?: boolean
   className?: string
+  style?: React.CSSProperties
+  tabIndex?: number
 }
 
-export function Input({
-  id,
-  type = 'text',
-  value,
-  onChange,
-  placeholder,
-  disabled = false,
-  required = false,
-  className,
-}: InputProps) {
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    id,
+    type = 'text',
+    value,
+    onChange,
+    placeholder,
+    disabled = false,
+    required = false,
+    className,
+    style,
+    tabIndex,
+  },
+  ref
+) {
   return (
     <input
+      ref={ref}
       id={id}
       type={type}
       value={value}
@@ -33,7 +42,9 @@ export function Input({
       disabled={disabled}
       required={required}
       className={cn('input-design-tokens', className)}
+      style={style}
       aria-invalid={required && !value}
+      tabIndex={tabIndex}
     />
   )
-}
+})

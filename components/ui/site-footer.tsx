@@ -2,12 +2,7 @@ import type { CSSProperties } from 'react'
 import { Container } from '@/components/ui/container'
 import { Link } from '@/components/ui/link'
 import { Stack } from '@/components/ui/stack'
-
-const bodyTextStyle: CSSProperties = {
-  color: 'var(--color-text-muted)',
-  fontSize: 'var(--font-size-xs)',
-  lineHeight: 'var(--line-height-sm)',
-}
+import { Text } from '@/components/ui/typography'
 
 const linkStyle: CSSProperties = {
   color: 'var(--color-text-secondary)',
@@ -41,17 +36,17 @@ export function SiteFooter() {
           }}
         >
           <Stack direction="vertical" gap="tight" align="center" style={{ textAlign: 'center' }}>
-            <p style={bodyTextStyle}>
+            <Text as="p" variant="muted" size="xs" style={{ lineHeight: 'var(--line-height-sm)' }}>
               SCP Reader is an independent fan project - not affiliated with the SCP Foundation.
-            </p>
-            <p style={bodyTextStyle}>
+            </Text>
+            <Text as="p" variant="muted" size="xs" style={{ lineHeight: 'var(--line-height-sm)' }}>
               SCP content is licensed under CC BY-SA 3.0 and originates from scpwiki.com and its
               authors. This project is also released under CC BY-SA 3.0.
-            </p>
-            <p style={bodyTextStyle}>
+            </Text>
+            <Text as="p" variant="muted" size="xs" style={{ lineHeight: 'var(--line-height-sm)' }}>
               Data provided by the SCP Data API.
-            </p>
-            <p>
+            </Text>
+            <Text as="p" size="xs">
               <Link href="/about" variant="default" style={linkStyle}>
                 About &amp; Attribution
               </Link>
@@ -63,7 +58,7 @@ export function SiteFooter() {
               <Link href="/terms" variant="default" style={linkStyle}>
                 Terms
               </Link>
-            </p>
+            </Text>
           </Stack>
         </div>
       </Container>

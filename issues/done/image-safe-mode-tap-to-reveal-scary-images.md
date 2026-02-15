@@ -1,5 +1,9 @@
 # Image safe mode: tap/click to reveal potentially scary images
 
+## Status: Complete (2026-02)
+
+Implemented as premium feature: toggle in Settings (Reading Preferences), tap-to-reveal placeholders in reader, `useImageSafeMode` hook, full keyboard/screen-reader accessibility. See CHANGELOG [Unreleased].
+
 ## TL;DR
 
 Add an optional image safe mode in the SCP reader that hides inline images by default and reveals each image only after explicit user interaction (tap/click), reducing jump-scare moments without removing content access.

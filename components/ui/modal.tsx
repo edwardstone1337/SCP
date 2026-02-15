@@ -3,8 +3,8 @@
 import { CSSProperties, ReactNode, useEffect, useRef } from 'react'
 
 const SIZE_MAX_WIDTH: Record<'sm' | 'md' | 'lg', string> = {
-  sm: 'var(--container-xs)',
-  md: 'var(--container-sm)',
+  sm: '400px',
+  md: 'var(--container-xs)',
   lg: 'var(--container-md)',
 }
 

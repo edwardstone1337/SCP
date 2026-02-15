@@ -6,14 +6,13 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
-import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Text } from '@/components/ui/typography'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
-import { DeleteAccountModal } from '@/components/ui/delete-account-modal'
 import { UpgradeModal } from '@/components/ui/upgrade-modal'
 import { signOut } from '@/app/actions/auth'
+import { ProfileDropdown } from '@/components/ui/profile-dropdown'
 import { trackSignInModalOpen } from '@/lib/analytics'
 import { seriesToRoman } from '@/lib/utils/series'
 import { usePremium } from '@/lib/hooks/use-premium'
@@ -85,16 +84,6 @@ const signInLinkStyle: React.CSSProperties = {
   borderRadius: 'var(--radius-button)',
 }
 
-const premiumBadgeStyle: React.CSSProperties = {
-  display: 'inline-block',
-  fontSize: 'var(--font-size-xs)',
-  lineHeight: 'var(--line-height-xs)',
-  color: 'var(--color-accent)',
-  letterSpacing: '0.05em',
-  textTransform: 'uppercase',
-  marginLeft: 'var(--spacing-1)',
-}
-
 interface NavigationClientProps {
   user: { id?: string; email?: string } | null
 }
@@ -105,7 +94,6 @@ export function NavigationClient({ user }: NavigationClientProps) {
   const searchParams = useSearchParams()
   const { isPremium } = usePremium(user?.id ?? null)
   const isSaved = pathname === '/saved'
-  const isSettings = pathname === '/settings'
   const queryString = searchParams.toString()
   const redirectPath = `${pathname}${queryString ? `?${queryString}` : ''}`
   const signInHref =
@@ -114,13 +102,22 @@ export function NavigationClient({ user }: NavigationClientProps) {
       : `/login?redirect=${encodeURIComponent(redirectPath)}`
 
   const [isOpen, setIsOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const firstOverlayLinkRef = useRef<HTMLAnchorElement>(null)
   const prevOpenRef = useRef(false)
   const navDrawerRef = useRef<HTMLDivElement>(null)
 
   const closeOverlay = () => setIsOpen(false)
-  const toggleOverlay = () => setIsOpen((open) => !open)
+  const closeProfile = () => setIsProfileOpen(false)
+  const toggleOverlay = () => {
+    if (isProfileOpen) setIsProfileOpen(false)
+    setIsOpen((open) => !open)
+  }
+  const toggleProfile = () => {
+    if (isOpen) setIsOpen(false)
+    setIsProfileOpen((prev) => !prev)
+  }
   const openSignInModal = () => {
     const redirectTo =
       typeof window !== 'undefined'
@@ -208,8 +205,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
   return (
     <>
       <nav aria-label="Main navigation" style={navStyles}>
-        <Container size="lg">
-          <div style={paddingStyles}>
+        <div style={paddingStyles}>
             <Stack direction="horizontal" align="center" justify="between" gap="normal">
               {/* Left: Logo */}
               <Link href="/" variant="nav" style={linkTouchStyle}>
@@ -228,8 +224,17 @@ export function NavigationClient({ user }: NavigationClientProps) {
                     style={signInLinkStyle}
                     data-variant="primary"
                   >
-                    Access Terminal
+                    Sign In
                   </NextLink>
+                )}
+                {user && (
+                  <ProfileDropdown
+                    email={user.email ?? ''}
+                    isOpen={isProfileOpen}
+                    onToggle={toggleProfile}
+                    onClose={closeProfile}
+                    signOut={signOut}
+                  />
                 )}
                 <Button
                   ref={menuButtonRef}
@@ -246,7 +251,6 @@ export function NavigationClient({ user }: NavigationClientProps) {
               </Stack>
             </Stack>
           </div>
-        </Container>
       </nav>
 
       {/* Full-screen navigation overlay */}
@@ -255,6 +259,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
         aria-label="Navigation menu"
         aria-hidden={!isOpen}
         className={`nav-overlay ${isOpen ? 'open' : ''}`}
+        onClick={(e) => { if (e.target === e.currentTarget) closeOverlay() }}
       >
         <nav ref={navDrawerRef} aria-label="Series navigation" className="nav-drawer">
           <Stack
@@ -263,24 +268,13 @@ export function NavigationClient({ user }: NavigationClientProps) {
             gap="normal"
             style={{ gap: 'var(--spacing-2)', width: '100%' }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <Text
-                size="sm"
-                variant="secondary"
-                style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-              >
-                Series
-              </Text>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={closeOverlay}
-                aria-label="Close navigation menu"
-              >
-                ✕
-              </Button>
-            </div>
+            <Text
+              size="sm"
+              variant="secondary"
+              style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+            >
+              Series
+            </Text>
 
             <div
               style={{
@@ -309,6 +303,15 @@ export function NavigationClient({ user }: NavigationClientProps) {
               ))}
             </div>
 
+            <Link
+              href="/#notable-anomalies"
+              variant="nav"
+              style={linkTouchStyle}
+              onClick={closeOverlay}
+            >
+              Notable Anomalies
+            </Link>
+
             <div
               style={{
                 width: '100%',
@@ -321,26 +324,22 @@ export function NavigationClient({ user }: NavigationClientProps) {
             {user && (
               <>
                 {flags.premiumEnabled && !isPremium && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
                     onClick={() => {
                       closeOverlay()
                       openModal(<UpgradeModal />, 'Upgrade to Premium')
                     }}
                     style={{
                       ...linkTouchStyle,
-                      background: 'none',
-                      border: 'none',
                       padding: 0,
-                      cursor: 'pointer',
                       color: 'var(--color-accent)',
                       fontSize: 'var(--font-size-base)',
-                      fontFamily: 'var(--font-family-sans)',
                       fontWeight: 600,
                     }}
                   >
                     Upgrade to Premium
-                  </button>
+                  </Button>
                 )}
                 <Link
                   href="/saved"
@@ -354,61 +353,6 @@ export function NavigationClient({ user }: NavigationClientProps) {
                 >
                   Saved
                 </Link>
-                <Link
-                  href="/settings"
-                  variant="nav"
-                  style={{
-                    ...linkTouchStyle,
-                    ...(isSettings && { color: 'var(--color-accent)' }),
-                  }}
-                  aria-current={isSettings ? 'page' : undefined}
-                  onClick={closeOverlay}
-                >
-                  Settings
-                </Link>
-                <form action={signOut}>
-                  <button
-                    type="submit"
-                    style={{
-                      ...linkTouchStyle,
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      cursor: 'pointer',
-                      color: 'var(--color-text-secondary)',
-                      fontSize: 'var(--font-size-base)',
-                      fontFamily: 'var(--font-family-sans)',
-                    }}
-                  >
-                    Sign Out
-                  </button>
-                </form>
-                {user.email && (
-                  <Text size="sm" variant="secondary">
-                    {user.email}
-                    {flags.premiumEnabled && isPremium && <span style={premiumBadgeStyle}>Premium</span>}
-                  </Text>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeOverlay()
-                    openModal(<DeleteAccountModal />, 'Delete account')
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    color: 'var(--color-text-muted)',
-                    fontSize: 'var(--font-size-xs)',
-                    lineHeight: 'var(--line-height-xs)',
-                    fontFamily: 'var(--font-family-sans)',
-                    marginTop: 'var(--spacing-1)',
-                  }}
-                >
-                  Delete account
-                </button>
               </>
             )}
           </Stack>

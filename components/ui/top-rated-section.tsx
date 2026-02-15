@@ -1,5 +1,6 @@
 import { Stack } from '@/components/ui/stack'
 import { Heading, Mono, Text } from '@/components/ui/typography'
+import { SectionLabel } from '@/components/ui/section-label'
 import { Card } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { Grid } from '@/components/ui/grid'
@@ -44,35 +45,9 @@ export function TopRatedSection({ scps }: TopRatedSectionProps) {
             display: none;
           }
         }
-
-        /* Card content layout - vertical by default (md+) */
-        .top-rated-card-content {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-1);
-        }
-
-        /* Horizontal layout on mobile */
-        @media (max-width: 767px) {
-          .top-rated-card-content {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--spacing-3);
-          }
-
-          .top-rated-card-content-left {
-            min-width: 0;
-            flex: 1;
-          }
-
-          .top-rated-card-content-right {
-            flex-shrink: 0;
-          }
-        }
       `}</style>
 
-      <section style={{ marginBottom: 'var(--spacing-6)' }}>
+      <section id="notable-anomalies" style={{ marginBottom: 'var(--spacing-6)' }}>
         <Stack direction="vertical" gap="normal">
           {/* Heading row with inline button */}
           <div
@@ -83,13 +58,7 @@ export function TopRatedSection({ scps }: TopRatedSectionProps) {
               gap: 'var(--spacing-2)',
             }}
           >
-            <Heading
-              level={2}
-              className="text-sm font-normal text-[var(--color-text-secondary)]"
-              style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-            >
-              Notable Anomalies
-            </Heading>
+            <SectionLabel>Notable Anomalies</SectionLabel>
             <Button variant="secondary" href="/top-rated" style={{ fontSize: 'var(--font-size-sm)' }}>
               View All
             </Button>
@@ -105,17 +74,24 @@ export function TopRatedSection({ scps }: TopRatedSectionProps) {
                   variant="default"
                 >
                   <Card variant="interactive" padding="md">
-                    <div className="top-rated-card-content">
-                      <div className="top-rated-card-content-left">
-                        <Mono size="sm">{scp.scp_id}</Mono>
-                        <Heading level={3}>{scp.title}</Heading>
+                    <Stack
+                      direction={{ base: 'horizontal', md: 'vertical' }}
+                      align={{ base: 'center', md: 'stretch' }}
+                      justify={{ base: 'between', md: 'start' }}
+                      gap={{ base: 'relaxed', md: 'tight' }}
+                    >
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <Mono size="lg">{scp.scp_id}</Mono>
+                        {scp.title && scp.title !== scp.scp_id && (
+                          <Heading level={3}>{scp.title}</Heading>
+                        )}
                       </div>
-                      <div className="top-rated-card-content-right">
+                      <div style={{ flexShrink: 0 }}>
                         <Text size="sm" variant="secondary">
                           Rating: {scp.rating}
                         </Text>
                       </div>
-                    </div>
+                    </Stack>
                   </Card>
                 </Link>
               ))}

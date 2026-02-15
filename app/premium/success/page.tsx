@@ -3,6 +3,7 @@ import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Heading, Text, Mono } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { PremiumCacheInvalidator } from '@/app/premium/success/premium-cache-invalidator'
 
 export const metadata = {
@@ -28,19 +29,11 @@ export default function PremiumSuccessPage() {
             Your security clearance has been elevated. Premium access is now active on your account.
           </Text>
 
-          <div
-            style={{
-              padding: 'var(--spacing-3)',
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-surface-border)',
-              marginTop: 'var(--spacing-2)',
-            }}
-          >
+          <Card variant="bordered" padding="md" style={{ marginTop: 'var(--spacing-2)' }}>
             <Text size="sm" variant="secondary">
               All premium features are now available. Return to the archive to continue your research.
             </Text>
-          </div>
+          </Card>
 
           <Button href="/" variant="primary" style={{ marginTop: 'var(--spacing-4)' }}>
             Return to Archive

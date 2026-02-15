@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 type ContainerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -15,12 +15,14 @@ interface ContainerProps {
   children: ReactNode
   size?: ContainerSize
   className?: string
+  style?: CSSProperties
 }
 
 export function Container({
   children,
   size = 'lg',
   className,
+  style,
 }: ContainerProps) {
   return (
     <div
@@ -28,6 +30,7 @@ export function Container({
       style={{
         maxWidth: sizeToToken[size],
         margin: '0 auto',
+        ...style,
       }}
     >
       {children}

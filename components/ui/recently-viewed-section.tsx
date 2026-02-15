@@ -3,9 +3,11 @@
 import NextLink from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Stack } from '@/components/ui/stack'
-import { Heading, Mono, Text } from '@/components/ui/typography'
+import { Mono, Text } from '@/components/ui/typography'
+import { SectionLabel } from '@/components/ui/section-label'
 import { Card } from '@/components/ui/card'
-import { Link } from '@/components/ui/link'
+import { BookmarkButton } from '@/components/ui/bookmark-button'
+import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { useModal } from '@/components/ui/modal-provider'
 import { SignInPanel } from '@/components/ui/sign-in-panel'
 import { trackSignInModalOpen } from '@/lib/analytics'
@@ -14,11 +16,15 @@ export interface RecentlyViewedItem {
   scp_id: string    // e.g. "SCP-173"
   title: string
   viewed_at: string
+  id?: string
+  is_read?: boolean
+  is_bookmarked?: boolean
 }
 
 interface RecentlyViewedSectionProps {
   items: RecentlyViewedItem[]
   isAuthenticated: boolean
+  userId?: string | null
 }
 
 const signInLinkStyle: React.CSSProperties = {
@@ -44,7 +50,7 @@ const signInLinkStyle: React.CSSProperties = {
   borderRadius: 'var(--radius-button)',
 }
 
-export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewedSectionProps) {
+export function RecentlyViewedSection({ items, isAuthenticated, userId }: RecentlyViewedSectionProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { openModal } = useModal()
@@ -74,13 +80,7 @@ export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewed
     return (
       <section style={{ marginBottom: 'var(--spacing-6)' }}>
         <Stack direction="vertical" gap="normal">
-          <Heading
-            level={2}
-            className="text-sm font-normal text-[var(--color-text-secondary)]"
-            style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-          >
-            Recent Files
-          </Heading>
+          <SectionLabel>Recent Files</SectionLabel>
           <Text variant="secondary">Clearance required to track accessed files.</Text>
           <NextLink
             href={signInHref}
@@ -100,44 +100,65 @@ export function RecentlyViewedSection({ items, isAuthenticated }: RecentlyViewed
     return (
       <section style={{ marginBottom: 'var(--spacing-6)' }}>
         <Stack direction="vertical" gap="normal">
-          <Heading
-            level={2}
-            className="text-sm font-normal text-[var(--color-text-secondary)]"
-            style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-          >
-            Recent Files
-          </Heading>
+          <SectionLabel>Recent Files</SectionLabel>
           <Text variant="secondary">Accessed files will appear here.</Text>
         </Stack>
       </section>
     )
   }
 
-  // Authenticated with items
+  // Authenticated with items — horizontal scroll
   return (
     <section style={{ marginBottom: 'var(--spacing-6)' }}>
       <Stack direction="vertical" gap="normal">
-        <Heading
-          level={2}
-          className="text-sm font-normal text-[var(--color-text-secondary)]"
-          style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+        <SectionLabel>Recent Files</SectionLabel>
+        <div
+          style={{
+            display: 'flex',
+            gap: 'var(--spacing-2)',
+            overflowX: 'auto',
+            paddingBottom: 'var(--spacing-1)',
+            scrollbarWidth: 'thin',
+          }}
         >
-          Recent Files
-        </Heading>
-        <Stack direction="vertical" gap="tight">
           {items.map((item) => (
-            <Link key={item.scp_id} href={`/scp/${item.scp_id}`} variant="default">
-              <Card variant="interactive" padding="sm">
-                <Stack direction="horizontal" align="center" justify="between">
-                  <Stack direction="vertical" gap="tight">
-                    <Text>{item.title}</Text>
-                    <Mono size="sm">{item.scp_id}</Mono>
-                  </Stack>
+            <div
+              key={item.scp_id}
+              style={{
+                minWidth: '260px',
+                maxWidth: '300px',
+                flexShrink: 0,
+              }}
+            >
+              <Card variant="interactive" padding="sm" href={`/scp/${item.scp_id}`}>
+                <Stack direction="vertical" gap="tight">
+                  <Mono size="base">{item.scp_id}</Mono>
+                  {item.title && item.title !== item.scp_id && (
+                    <Text size="sm" variant="secondary">{item.title}</Text>
+                  )}
+                  {userId && item.id && (
+                    <div style={{ display: 'flex', gap: 'var(--spacing-1)', marginTop: 'var(--spacing-1)' }}>
+                      <BookmarkButton
+                        scpId={item.id}
+                        scpRouteId={item.scp_id}
+                        isBookmarked={item.is_bookmarked ?? false}
+                        userId={userId}
+                        size="sm"
+                      />
+                      <ReadToggleButton
+                        scpId={item.id}
+                        routeId={item.scp_id}
+                        isRead={item.is_read ?? false}
+                        userId={userId}
+                        size="sm"
+                      />
+                    </div>
+                  )}
                 </Stack>
               </Card>
-            </Link>
+            </div>
           ))}
-        </Stack>
+        </div>
       </Stack>
     </section>
   )

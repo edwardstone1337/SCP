@@ -3,60 +3,27 @@
 import { CSSProperties, useCallback, useState } from 'react'
 import { usePreferences } from '@/lib/hooks/use-preferences'
 import { PremiumGate } from '@/components/ui/premium-gate'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { DeleteAccountModal } from '@/components/ui/delete-account-modal'
+import { useModal } from '@/components/ui/modal-provider'
 import { Stack } from '@/components/ui/stack'
-import { Text } from '@/components/ui/typography'
+import { Toggle } from '@/components/ui/toggle'
+import { Heading, Text } from '@/components/ui/typography'
 import { logger } from '@/lib/logger'
 import { flags } from '@/lib/flags'
 import { usePremium } from '@/lib/hooks/use-premium'
+import { PremiumBadge } from '@/components/ui/premium-badge'
 
 interface SettingsContentProps {
   userId: string
-}
-
-const sectionHeadingStyle: CSSProperties = {
-  fontSize: 'var(--font-size-lg)',
-  lineHeight: 'var(--line-height-lg)',
-  fontWeight: 700,
-  color: 'var(--color-text-primary)',
-  margin: 0,
+  userEmail?: string
 }
 
 const sectionStyle: CSSProperties = {
   borderBottom: '1px solid var(--color-surface-border)',
   paddingBottom: 'var(--spacing-4)',
 }
-
-const toggleRowStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: 'var(--spacing-2)',
-}
-
-const switchTrackStyle = (checked: boolean): CSSProperties => ({
-  position: 'relative',
-  width: '44px',
-  height: '24px',
-  backgroundColor: checked ? 'var(--color-accent)' : 'var(--color-grey-7)',
-  borderRadius: '12px',
-  cursor: 'pointer',
-  transition: 'background-color var(--transition-base)',
-  flexShrink: 0,
-  border: 'none',
-  padding: 0,
-})
-
-const switchThumbStyle = (checked: boolean): CSSProperties => ({
-  position: 'absolute',
-  top: '2px',
-  left: checked ? '22px' : '2px',
-  width: '20px',
-  height: '20px',
-  backgroundColor: 'var(--color-text-primary)',
-  borderRadius: '50%',
-  transition: 'left var(--transition-base)',
-  pointerEvents: 'none',
-})
 
 const savedIndicatorStyle: CSSProperties = {
   color: 'var(--color-green-5)',
@@ -65,40 +32,52 @@ const savedIndicatorStyle: CSSProperties = {
   transition: 'opacity var(--transition-base)',
 }
 
-export function SettingsContent({ userId }: SettingsContentProps) {
+const dangerZoneHeadingStyle: CSSProperties = {
+  color: 'var(--color-red-7)',
+  fontSize: 'var(--font-size-sm)',
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  marginTop: 'var(--spacing-3)',
+}
+
+export function SettingsContent({ userId, userEmail }: SettingsContentProps) {
+  const { openModal } = useModal()
   const { preferences, updatePreference, isLoading } = usePreferences(userId)
   const { isPremium } = usePremium(userId)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const showPremiumFeatures = flags.premiumEnabled || isPremium
 
-  const handleImageSafeModeToggle = useCallback(async () => {
-    const newValue = !preferences.imageSafeMode
-    setSaveMessage(null)
+  const handleImageSafeModeToggle = useCallback(
+    async (newValue: boolean) => {
+      setSaveMessage(null)
 
-    try {
-      await updatePreference('imageSafeMode', newValue)
-      setSaveMessage('Saved')
-      setTimeout(() => setSaveMessage(null), 2000)
-    } catch (err) {
-      logger.error('Failed to toggle image safe mode', {
-        error: err instanceof Error ? err.message : String(err),
-        component: 'SettingsContent',
-      })
-      setSaveMessage('Failed to save')
-      setTimeout(() => setSaveMessage(null), 3000)
-    }
-  }, [preferences.imageSafeMode, updatePreference])
+      try {
+        await updatePreference('imageSafeMode', newValue)
+        setSaveMessage('Saved')
+        setTimeout(() => setSaveMessage(null), 2000)
+      } catch (err) {
+        logger.error('Failed to toggle image safe mode', {
+          error: err instanceof Error ? err.message : String(err),
+          component: 'SettingsContent',
+        })
+        setSaveMessage('Failed to save')
+        setTimeout(() => setSaveMessage(null), 3000)
+      }
+    },
+    [updatePreference]
+  )
 
   return (
-    <Stack direction="vertical" gap="loose">
+      <Stack direction="vertical" gap="loose">
       {/* Reading Preferences */}
       <section style={sectionStyle}>
         <Stack direction="vertical" gap="normal">
-          <h2 style={sectionHeadingStyle}>Reading Preferences</h2>
+          <Heading level={2}>Reading Preferences</Heading>
 
           {showPremiumFeatures ? (
             <PremiumGate userId={userId} featureName="Image Safe Mode">
-              <div style={toggleRowStyle}>
+              <Stack direction="horizontal" align="center" justify="between" gap="normal">
                 <div>
                   <Text size="sm" style={{ fontWeight: 500 }}>
                     Image Safe Mode
@@ -120,19 +99,14 @@ export function SettingsContent({ userId }: SettingsContentProps) {
                       {saveMessage}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={!!preferences.imageSafeMode}
-                    aria-label="Toggle image safe mode"
+                  <Toggle
+                    checked={!!preferences.imageSafeMode}
+                    onCheckedChange={handleImageSafeModeToggle}
                     disabled={isLoading}
-                    onClick={handleImageSafeModeToggle}
-                    style={switchTrackStyle(!!preferences.imageSafeMode)}
-                  >
-                    <span style={switchThumbStyle(!!preferences.imageSafeMode)} />
-                  </button>
+                    ariaLabel="Toggle image safe mode"
+                  />
                 </Stack>
-              </div>
+              </Stack>
             </PremiumGate>
           ) : (
             <Text variant="secondary" size="sm">
@@ -147,13 +121,38 @@ export function SettingsContent({ userId }: SettingsContentProps) {
       {/* Account section */}
       <section>
         <Stack direction="vertical" gap="normal">
-          <h2 style={sectionHeadingStyle}>Account</h2>
-          <Text variant="secondary" size="sm">
-            Account management options are available in the navigation menu.
-          </Text>
-          {/* TODO: Move Delete Account functionality here from nav in a future phase */}
+          <Heading level={2}>Account</Heading>
+          {userEmail && (
+            <Text size="sm" variant="secondary" as="p" style={{ margin: 0 }}>
+              Signed in as {userEmail}
+              {flags.premiumEnabled && isPremium && (
+                <span style={{ marginLeft: 'var(--spacing-1)' }}>
+                  <PremiumBadge />
+                </span>
+              )}
+            </Text>
+          )}
+          <Heading level={3} style={dangerZoneHeadingStyle}>Danger Zone</Heading>
+          <Card variant="bordered" accentBorder>
+            <Stack
+              direction={{ base: 'vertical', md: 'horizontal' }}
+              align={{ base: 'stretch', md: 'center' }}
+              justify={{ md: 'between' }}
+              gap="normal"
+            >
+              <div>
+                <Text as="span" size="sm" style={{ fontWeight: 700, display: 'block' }}>Delete Account</Text>
+                <Text as="p" size="sm" variant="secondary" style={{ margin: 'var(--spacing-1) 0 0' }}>
+                  Permanently delete your account and all associated data. This action cannot be undone.
+                </Text>
+              </div>
+              <Button variant="danger" onClick={() => openModal(<DeleteAccountModal />, 'Delete Account')}>
+                Delete Account
+              </Button>
+            </Stack>
+          </Card>
         </Stack>
       </section>
-    </Stack>
+      </Stack>
   )
 }

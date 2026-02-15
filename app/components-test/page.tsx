@@ -18,7 +18,6 @@ import { ReadToggleButton } from '@/components/ui/read-toggle-button'
 import { BookmarkButton } from '@/components/ui/bookmark-button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Message } from '@/components/ui/message'
 import { Logo } from '@/components/ui/logo'
 import { PageHeader } from '@/components/ui/page-header'
 import { SeriesCard } from '@/components/ui/series-card'
@@ -47,7 +46,7 @@ export default function ComponentsTestPage() {
 
             {/* Color swatches */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Color Swatches
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -123,7 +122,7 @@ export default function ComponentsTestPage() {
 
             {/* Typography scale */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Typography Scale
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -144,7 +143,7 @@ export default function ComponentsTestPage() {
 
             {/* Spacing scale */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Spacing Scale
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -182,7 +181,7 @@ export default function ComponentsTestPage() {
 
             {/* Border radius (design token) */}
             <div>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Border Radius
               </Heading>
               <div style={{ display: 'flex', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
@@ -214,7 +213,7 @@ export default function ComponentsTestPage() {
 
             {/* Icon */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Icon
               </Heading>
               <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -229,7 +228,7 @@ export default function ComponentsTestPage() {
 
             {/* Badge */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Badge
               </Heading>
               <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -241,7 +240,7 @@ export default function ComponentsTestPage() {
 
             {/* Spinner */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Spinner
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -265,7 +264,7 @@ export default function ComponentsTestPage() {
 
             {/* Logo */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Logo
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -280,7 +279,7 @@ export default function ComponentsTestPage() {
 
             {/* Typography: Heading */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Typography — Heading
               </Heading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
@@ -294,7 +293,7 @@ export default function ComponentsTestPage() {
 
             {/* Typography: Text */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Typography — Text
               </Heading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
@@ -306,7 +305,7 @@ export default function ComponentsTestPage() {
 
             {/* Typography: Text sizes */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Typography — Text Sizes
               </Heading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
@@ -320,7 +319,7 @@ export default function ComponentsTestPage() {
 
             {/* Typography: Mono */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Typography — Mono
               </Heading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
@@ -331,24 +330,24 @@ export default function ComponentsTestPage() {
 
             {/* Typography: Label */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Typography — Label
               </Heading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                 <div>
                   <Label htmlFor="test">Regular Label</Label>
-                  <input id="test" type="text" className="px-4 py-2 border rounded" />
+                  <Input id="test" value="" onChange={() => {}} />
                 </div>
                 <div>
                   <Label htmlFor="test2" required>Required Label</Label>
-                  <input id="test2" type="text" className="px-4 py-2 border rounded" />
+                  <Input id="test2" value="" onChange={() => {}} />
                 </div>
               </div>
             </div>
 
             {/* Input */}
             <div>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Input
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -386,7 +385,7 @@ export default function ComponentsTestPage() {
 
             {/* Select */}
             <div style={{ marginTop: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Select
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -414,7 +413,7 @@ export default function ComponentsTestPage() {
 
             {/* Breadcrumb */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Breadcrumb
               </Heading>
               <Breadcrumb items={[
@@ -427,7 +426,7 @@ export default function ComponentsTestPage() {
 
             {/* Button */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Button
               </Heading>
               <div style={{ marginBottom: 'var(--spacing-4)' }}>
@@ -469,23 +468,9 @@ export default function ComponentsTestPage() {
               </div>
             </div>
 
-            {/* Message */}
-            <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
-                Message
-              </Heading>
-              <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
-                Success and error feedback
-              </Text>
-              <Stack gap="normal" style={{ maxWidth: 400 }}>
-                <Message type="success">Operation completed successfully.</Message>
-                <Message type="error">Something went wrong. Please try again.</Message>
-              </Stack>
-            </div>
-
             {/* Link */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Link
               </Heading>
               <Stack gap="normal">
@@ -506,7 +491,7 @@ export default function ComponentsTestPage() {
 
             {/* Card */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Card
               </Heading>
               <Stack gap="normal">
@@ -545,7 +530,7 @@ export default function ComponentsTestPage() {
 
             {/* ProgressRing */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 ProgressRing
               </Heading>
               <div style={{ marginBottom: 'var(--spacing-4)' }}>
@@ -585,7 +570,7 @@ export default function ComponentsTestPage() {
 
             {/* ProgressText */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 ProgressText
               </Heading>
               <div style={{ marginBottom: 'var(--spacing-4)' }}>
@@ -624,7 +609,7 @@ export default function ComponentsTestPage() {
 
             {/* ReadToggleButton */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 ReadToggleButton
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -663,7 +648,7 @@ export default function ComponentsTestPage() {
 
             {/* BookmarkButton */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 BookmarkButton
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -703,7 +688,7 @@ export default function ComponentsTestPage() {
 
             {/* PageHeader */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 PageHeader
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -718,7 +703,7 @@ export default function ComponentsTestPage() {
 
             {/* SeriesCard */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 SeriesCard
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -732,7 +717,7 @@ export default function ComponentsTestPage() {
 
             {/* RangeListItem */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 RangeListItem
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -746,7 +731,7 @@ export default function ComponentsTestPage() {
 
             {/* ScpListItem */}
             <div>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 ScpListItem
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -785,7 +770,7 @@ export default function ComponentsTestPage() {
 
             {/* Main */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Main
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-2)' }}>
@@ -798,7 +783,7 @@ export default function ComponentsTestPage() {
 
             {/* Container */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Container
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -826,7 +811,7 @@ export default function ComponentsTestPage() {
 
             {/* Stack */}
             <div style={{ marginBottom: 'var(--spacing-6)' }}>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Stack
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>
@@ -856,7 +841,7 @@ export default function ComponentsTestPage() {
 
             {/* Grid */}
             <div>
-              <Heading level={3} className="mb-2" style={{ marginBottom: 'var(--spacing-2)' }}>
+              <Heading level={3} style={{ marginBottom: 'var(--spacing-2)' }}>
                 Grid
               </Heading>
               <Text variant="secondary" size="sm" style={{ marginBottom: 'var(--spacing-3)' }}>

@@ -71,7 +71,7 @@ export function ScpListItem({
             {title}
           </Heading>
           <div style={metaStyle}>
-            <Icon name="star" size="sm" className="text-[var(--color-text-secondary)]" />
+            <Icon name="star" size="sm" style={{ color: 'var(--color-text-secondary)' }} />
             <Text variant="secondary" size="sm">{rating}</Text>
           </div>
         </div>

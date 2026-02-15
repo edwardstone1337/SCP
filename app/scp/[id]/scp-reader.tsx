@@ -152,12 +152,11 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                         ·{' '}
                       </>
                     ) : null}
-                    <a
+                    <Link
                       href={getSafeUrl(content?.url ?? scp.url, scp.scp_id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      variant="default"
+                      external
                       onClick={() => trackOutboundWikiClick(scp.scp_id)}
-                      data-variant="default"
                       style={{
                         color: 'var(--color-text-secondary)',
                         textDecoration: 'underline',
@@ -165,7 +164,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                       }}
                     >
                       View original on SCP Wiki
-                    </a>
+                    </Link>
                   </Text>
                 </Stack>
               </Stack>
@@ -254,10 +253,10 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                     >
                       Retry
                     </Button>
-                    <a
+                    <Link
                       href={getSafeUrl(scp.url, scp.scp_id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      variant="default"
+                      external
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -267,13 +266,12 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                         borderRadius: 'var(--radius-button)',
                         border: 'var(--border-width-normal) solid var(--color-surface-border)',
                         color: 'var(--color-text-primary)',
-                        textDecoration: 'none',
                         fontSize: 'var(--font-size-sm)',
                         fontWeight: 700,
                       }}
                     >
                       Open Original Article
-                    </a>
+                    </Link>
                   </Stack>
                 </Stack>
               </Card>

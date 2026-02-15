@@ -139,18 +139,23 @@
   --container-xl: 1280px;
   --container-2xl: 1536px;
 
+  /* Sizing - UI components */
+  --size-dropdown-min: 180px;
+
   /* Z-Index Scale */
   --z-base: 0;
   --z-dropdown: 1000;
   --z-sticky: 1100;
   --z-overlay: 1200;
   --z-nav: 1210;
+  --z-nav-dropdown: 1220;
   --z-modal: 1300;
   --z-toast: 1400;
   --z-skip-link: 1500;
 
   /* Shadows - Semantic */
   --shadow-elevated: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-drawer:
     -24px 0 48px rgba(0, 0, 0, 0.6),
     -1px 0 0 rgba(255, 255, 255, 0.05),

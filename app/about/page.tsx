@@ -6,6 +6,7 @@ import { Container } from '@/components/ui/container'
 import { Card } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
 import { Heading, Text } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -30,13 +31,6 @@ export const metadata: Metadata = {
 const sectionHeadingStyle: CSSProperties = {
   fontSize: 'var(--font-size-lg)',
   lineHeight: 'var(--line-height-lg)',
-  color: 'var(--color-text-primary)',
-}
-
-const paragraphStyle: CSSProperties = {
-  color: 'var(--color-text-secondary)',
-  fontSize: 'var(--font-size-base)',
-  lineHeight: 'var(--line-height-base)',
 }
 
 const linkStyle: CSSProperties = {
@@ -57,16 +51,16 @@ export default function AboutPage() {
 
             <section aria-labelledby="about-what-is-this">
               <Stack direction="vertical" gap="normal">
-                <h2 id="about-what-is-this" style={sectionHeadingStyle}>
+                <Heading level={2} id="about-what-is-this" style={sectionHeadingStyle}>
                   What is this?
-                </h2>
-                <Text style={paragraphStyle}>
+                </Heading>
+                <Text variant="secondary">
                   SCP Reader is an independent fan-built reading companion for the SCP Foundation
                   collaborative fiction archive. It helps readers track their progress across the
                   full catalogue of SCP entries - bookmark articles, mark them as read, and pick up
                   where they left off.
                 </Text>
-                <Text style={paragraphStyle}>
+                <Text variant="secondary">
                   This project is not affiliated with, endorsed by, or officially connected to the
                   SCP Foundation wiki or its staff.
                 </Text>
@@ -75,27 +69,27 @@ export default function AboutPage() {
 
             <section aria-labelledby="about-content-license">
               <Stack direction="vertical" gap="normal">
-                <h2 id="about-content-license" style={sectionHeadingStyle}>
+                <Heading level={2} id="about-content-license" style={sectionHeadingStyle}>
                   Content License
-                </h2>
-                <Text style={paragraphStyle}>
+                </Heading>
+                <Text variant="secondary">
                   All SCP Foundation content - including article text, titles, and associated
                   concepts - is licensed under Creative Commons Attribution-ShareAlike 3.0 Unported
                   (CC BY-SA 3.0) and originates from{' '}
-                  <a href="https://scpwiki.com" data-variant="default" style={linkStyle}>
+                  <Link href="https://scpwiki.com" variant="default" style={linkStyle}>
                     scpwiki.com
-                  </a>{' '}
+                  </Link>{' '}
                   and its authors.
                 </Text>
-                <Text style={paragraphStyle}>
+                <Text variant="secondary">
                   SCP Reader, as a derivative work, is also released under{' '}
-                  <a
+                  <Link
                     href="https://creativecommons.org/licenses/by-sa/3.0/"
-                    data-variant="default"
+                    variant="default"
                     style={linkStyle}
                   >
                     CC BY-SA 3.0
-                  </a>
+                  </Link>
                   . You are free to share and adapt this work under the same license terms.
                 </Text>
               </Stack>
@@ -103,18 +97,18 @@ export default function AboutPage() {
 
             <section aria-labelledby="about-data-source">
               <Stack direction="vertical" gap="normal">
-                <h2 id="about-data-source" style={sectionHeadingStyle}>
+                <Heading level={2} id="about-data-source" style={sectionHeadingStyle}>
                   Data Source
-                </h2>
-                <Text style={paragraphStyle}>
+                </Heading>
+                <Text variant="secondary">
                   Article data is provided by the{' '}
-                  <a
+                  <Link
                     href="https://scp-data.tedivm.com"
-                    data-variant="default"
+                    variant="default"
                     style={linkStyle}
                   >
                     SCP Data API
-                  </a>{' '}
+                  </Link>{' '}
                   (maintained by tedivm), a daily-updated static dataset of the SCP Wiki. The API
                   itself is not affiliated with the SCP Wiki.
                 </Text>
@@ -123,16 +117,16 @@ export default function AboutPage() {
 
             <section aria-labelledby="about-author-attribution">
               <Stack direction="vertical" gap="normal">
-                <h2 id="about-author-attribution" style={sectionHeadingStyle}>
+                <Heading level={2} id="about-author-attribution" style={sectionHeadingStyle}>
                   Author Attribution
-                </h2>
-                <Text style={paragraphStyle}>
+                </Heading>
+                <Text variant="secondary">
                   Individual SCP articles are written by contributors to the SCP Wiki. Where
                   available, the original author is credited on each article page. For full
                   revision history, visit the original entry on{' '}
-                  <a href="https://scpwiki.com" data-variant="default" style={linkStyle}>
+                  <Link href="https://scpwiki.com" variant="default" style={linkStyle}>
                     scpwiki.com
-                  </a>
+                  </Link>
                   .
                 </Text>
               </Stack>
@@ -140,19 +134,19 @@ export default function AboutPage() {
 
             <section aria-labelledby="about-contact">
               <Stack direction="vertical" gap="normal">
-                <h2 id="about-contact" style={sectionHeadingStyle}>
+                <Heading level={2} id="about-contact" style={sectionHeadingStyle}>
                   Contact
-                </h2>
-                <Text style={paragraphStyle}>
+                </Heading>
+                <Text variant="secondary">
                   SCP Reader is built by Edward Stone. For questions, concerns, or attribution
                   requests, reach out via{' '}
-                  <a
+                  <Link
                     href="https://edwardstone.design"
-                    data-variant="default"
+                    variant="default"
                     style={linkStyle}
                   >
                     edwardstone.design
-                  </a>
+                  </Link>
                   .
                 </Text>
               </Stack>

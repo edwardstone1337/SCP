@@ -22,27 +22,27 @@ It intentionally focuses on user value, not internal implementation details.
 - Guest users get a "New to the Foundation?" onboarding block with quick-start paths (classics, highest rated, random file).
 
 ### Personalized home briefing
-- Home hero subhead adapts by auth state (returning-user message vs guest discovery prompt).
+- Home hero (HeroSection) adapts by auth state: guests see "SECURE CONTAIN PROTECT" with discovery copy; signed-in users see "Welcome back, Researcher. Your assignment continues."
 - Series progress labels adapt by auth state (`accessed` for signed-in users, `catalogued` for guests).
 - Home sections use dossier-style dividers and themed terminology for a consistent archive UX.
 
 ### Sign in with preferred method
-- Users can sign in with either Google (`Continue with Google`) or email magic link.
-- Same sign-in options appear in both the modal and the `/login` page.
+- Google OAuth is the primary sign-in method (`Continue with Google`), presented first in both the modal and `/login` page.
+- Email magic link is available as a secondary option via "Request Email Clearance", which expands an inline email form.
 - App preserves redirect context so users return to their original page after auth.
 
 ### Manage account lifecycle
-- Signed-in users can sign out and delete their account from the navigation menu.
-- Account deletion requires explicit confirmation in a modal before execution.
+- Signed-in users access Settings and Sign Out via the avatar profile dropdown in the top bar.
+- Account deletion is in Settings > Account > Danger Zone; requires explicit confirmation in a modal before execution.
 - After deletion, users are returned to home with a success confirmation toast.
 
 ### Upgrade to Premium (Clearance Level 5)
-- Signed-in users can upgrade via "Upgrade to Premium" in the nav menu.
+- Signed-in users can upgrade via "Upgrade to Premium" in the nav overlay (when premium feature is enabled).
 - Stripe checkout flow; one-time payment for lifetime premium.
 - Success and cancel redirects to dedicated confirmation pages.
 
 ### Configure reading preferences
-- Settings page (`/settings`) for reading preferences (protected).
+- Settings page (`/settings`) for reading preferences and account management (protected).
 - Image Safe Mode: hide article images by default; tap to reveal individually (Premium feature).
 
 ### Access legal information
@@ -82,6 +82,9 @@ It intentionally focuses on user value, not internal implementation details.
 - Signed-in users can hide already-read entries where applicable.
 - Top 100 keeps rank-first experience (default rating-desc; sort control hidden).
 
+### Profile and navigation
+- Signed-in users see an avatar in the top bar; click opens dropdown with Settings and Sign Out.
+
 ## Accessibility Features
 
 ### Keyboard and screen reader support
@@ -98,13 +101,13 @@ It intentionally focuses on user value, not internal implementation details.
 
 - Guests can browse and read all public SCP content.
 - Personal tracking features (read state, bookmarks, saved list, recent files) are available after sign-in.
-- Primary logged-out navigation CTA is labeled "Access Terminal" to open sign-in flow.
+- Primary logged-out navigation CTA is labeled "Sign In" to open sign-in flow (modal or `/login`).
 
 ## Premium vs Free Experience
 
 - Free users can access all core reading and tracking features.
 - Premium (Clearance Level 5) unlocks Image Safe Mode and future premium features (reading settings, achievements).
-- Nav menu shows "Upgrade to Premium" for signed-in free users; premium users see a "Premium" badge next to their email.
+- Nav overlay shows "Upgrade to Premium" for signed-in free users (when premium feature is enabled); premium users see "Premium" badge in Settings when signed in.
 
 ## Incident Response (Ops)
 
