@@ -7,7 +7,6 @@
  * Usage: import { sanitizeHtmlServer } from '@/lib/utils/sanitize-server'
  * Only import in server components or server-only modules.
  */
-import { JSDOM } from 'jsdom'
 import DOMPurifyFactory from 'dompurify'
 import { applyInlineStyleLegibilityFixes, SANITIZE_CONFIG } from './sanitize'
 import { logger } from '@/lib/logger'
@@ -17,8 +16,10 @@ let purifyInstance: ReturnType<typeof DOMPurifyFactory> | null = null
 let jsdomDoc: Document | null = null
 let hooksRegistered = false
 
-function ensureInitialized() {
+async function ensureInitialized() {
   if (purifyInstance && jsdomDoc) return
+  // Dynamic import avoids Turbopack bundling jsdom (CJS/ESM conflict with @exodus/bytes)
+  const { JSDOM } = await import('jsdom')
   const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>')
   // DOMPurify expects WindowLike which needs DOM constructors — JSDOM provides these
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,9 +55,9 @@ function ensureHooks() {
  * Applies the same XSS prevention, licensebox removal, and dark theme
  * legibility fixes as the client-side sanitizeHtml.
  */
-export function sanitizeHtmlServer(html: string): string {
+export async function sanitizeHtmlServer(html: string): Promise<string> {
   try {
-    ensureInitialized()
+    await ensureInitialized()
     ensureHooks()
     const sanitized = purifyInstance!.sanitize(html, SANITIZE_CONFIG)
     return applyInlineStyleLegibilityFixes(sanitized, jsdomDoc!)

@@ -113,7 +113,7 @@ async function getScpContentHtml(contentFile: string, scpId: string): Promise<{
     if (!entry) return null
 
     const recovered = recoverWikidotImages(entry.raw_content, entry.raw_source, scpId)
-    const html = sanitizeHtmlServer(recovered)
+    const html = await sanitizeHtmlServer(recovered)
     return { html, creator: entry.creator, url: entry.url }
   } catch (error) {
     logger.error('Failed to process SCP content server-side', { error, scpId })
