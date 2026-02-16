@@ -115,8 +115,9 @@ export function useFootnotes(
     }
 
     const container = containerRef.current
-    const refLinks = container.querySelectorAll<HTMLAnchorElement>('a[id^="footnoteref-"]')
-    if (refLinks.length === 0) return
+    const boundRefs = new WeakSet<HTMLAnchorElement>()
+    const teardowns: Array<() => void> = []
+    let observer: MutationObserver | null = null
 
     let tooltipEl = tooltipRef.current
     if (!tooltipEl) {
@@ -137,7 +138,9 @@ export function useFootnotes(
       }
       activeRefId.current = null
       activeRefElementRef.current = null
-      refLinks.forEach((a) => a.removeAttribute('aria-describedby'))
+      container
+        .querySelectorAll('a[aria-describedby="' + TOOLTIP_ID + '"]')
+        .forEach((a) => a.removeAttribute('aria-describedby'))
     }
 
     function handleClickOutside(e: MouseEvent): void {
@@ -195,40 +198,62 @@ export function useFootnotes(
       }, 0)
     }
 
-    const teardowns: Array<() => void> = []
+    function attachHandlers(): void {
+      const refLinks = container.querySelectorAll<HTMLAnchorElement>('a[id^="footnoteref-"]')
+      refLinks.forEach((refEl) => {
+        if (boundRefs.has(refEl)) return
+        boundRefs.add(refEl)
 
-    refLinks.forEach((refEl) => {
-      const match = refEl.id.match(/^footnoteref-(\d+)$/)
-      const num = match ? parseInt(match[1], 10) : 0
-      if (!num) return
+        const match = refEl.id.match(/^footnoteref-(\d+)$/)
+        const num = match ? parseInt(match[1], 10) : 0
+        if (!num) return
 
-      refEl.style.cursor = 'pointer'
-      refEl.setAttribute('tabindex', '0')
-      refEl.setAttribute('role', 'button')
-      refEl.setAttribute('aria-label', `Footnote ${num}`)
+        refEl.style.cursor = 'pointer'
+        refEl.setAttribute('tabindex', '0')
+        refEl.setAttribute('role', 'button')
+        refEl.setAttribute('aria-label', `Footnote ${num}`)
 
-      const onClick = (e: MouseEvent): void => {
-        e.preventDefault()
-        e.stopPropagation()
-        openTooltip(refEl, num)
-      }
-
-      const onKeyDown = (e: KeyboardEvent): void => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        const onClick = (e: MouseEvent): void => {
           e.preventDefault()
+          e.stopPropagation()
           openTooltip(refEl, num)
         }
-      }
 
-      refEl.addEventListener('click', onClick)
-      refEl.addEventListener('keydown', onKeyDown)
-      teardowns.push(() => {
-        refEl.removeEventListener('click', onClick)
-        refEl.removeEventListener('keydown', onKeyDown)
+        const onKeyDown = (e: KeyboardEvent): void => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            openTooltip(refEl, num)
+          }
+        }
+
+        refEl.addEventListener('click', onClick)
+        refEl.addEventListener('keydown', onKeyDown)
+        teardowns.push(() => {
+          refEl.removeEventListener('click', onClick)
+          refEl.removeEventListener('keydown', onKeyDown)
+        })
       })
-    })
+
+      // Once we've found refs, stop observing — the content is stable
+      if (refLinks.length > 0 && observer) {
+        observer.disconnect()
+        observer = null
+      }
+    }
+
+    // Try immediately — content may already be in the DOM
+    attachHandlers()
+
+    // If no refs found yet, observe for DOM mutations (dangerouslySetInnerHTML commit)
+    if (!container.querySelector('a[id^="footnoteref-"]')) {
+      observer = new MutationObserver(() => {
+        attachHandlers()
+      })
+      observer.observe(container, { childList: true, subtree: true })
+    }
 
     cleanupRef.current = () => {
+      observer?.disconnect()
       teardowns.forEach((f) => f())
       document.removeEventListener('click', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
