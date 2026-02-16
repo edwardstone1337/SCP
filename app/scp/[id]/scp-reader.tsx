@@ -321,6 +321,26 @@ export function ScpReader({ scp, userId, prev, next, contextInfo, serverContent 
                   userId={userId ?? null}
                   size="sm"
                 />
+                {process.env.NEXT_PUBLIC_HOTJAR_SURVEY_URL && (
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_HOTJAR_SURVEY_URL}?scp_id=${scp.scp_id}`}
+                    external
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minHeight: '44px',
+                      padding: 'var(--spacing-1) var(--spacing-2)',
+                      borderRadius: 'var(--radius-button)',
+                      border: 'var(--border-width-normal) solid var(--color-surface-border)',
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontWeight: 700,
+                    }}
+                  >
+                    Report Issue
+                  </Link>
+                )}
               </Stack>
               <Stack
                 direction="horizontal"
