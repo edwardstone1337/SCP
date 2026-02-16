@@ -4,6 +4,22 @@ All notable changes to SCP Reader are documented here.
 
 ## [Unreleased]
 ### Added
+- **Server-side article content rendering:** SCP article HTML is now rendered in the initial server response via ISR (`revalidate = 86400`), so search engines index full article text. Server-side pipeline: `fetchScpContentData` → `recoverWikidotImages` → `sanitizeHtmlServer` (JSDOM + DOMPurify singleton in `lib/utils/sanitize-server.ts`). Next.js fetch deduplication ensures a single upstream request per ISR cycle. Client-side fetch (`useScpContent`) is retained as automatic fallback when server content is unavailable.
+- **SSR content verification script** (`scripts/verify-ssr-content.ts`): One-time QA script that fetches SCP pages from localhost and verifies `<article>` contains server-rendered content.
+- **SEO: noindex on auth/utility routes:** `/login`, `/auth/error`, `/saved`, `/settings`, `/premium/success`, `/premium/cancelled` now emit `robots: { index: false, follow: false }` metadata.
+- **SEO: sitemap improvements:** Added `/terms` and `/privacy` to sitemap; base URL now uses `NEXT_PUBLIC_SITE_URL` env var with `https://scp-reader.co` fallback instead of hardcoded value.
+- **SEO: www → non-www redirect:** `next.config.ts` now returns a 308 permanent redirect from `www.scp-reader.co` to `scp-reader.co`.
+
+### Changed
+- `jsdom` moved from `devDependencies` to `dependencies` (required at runtime for server-side sanitization)
+- `lib/utils/sanitize.ts`: `SANITIZE_CONFIG` and `applyInlineStyleLegibilityFixes` exported for shared use by server sanitizer; legibility fixes accept optional `doc` parameter for JSDOM compatibility
+- `app/scp/[id]/page.tsx`: Content fetch refactored into `fetchScpContentData` (shared), `getScpContentText` (metadata), `getScpContentHtml` (server render); adjacent SCP and content fetches run in parallel via `Promise.all`
+- `scp-content.tsx` and `scp-reader.tsx`: Accept and forward `serverContent` prop; client-side content fetch disabled when server content is present
+
+### Fixed
+- Pre-existing lint failures in `scripts/dark-theme-scanner.ts`: resolved 3 `no-explicit-any` errors (eslint-disable for JSDOM/global casts, `Record<string, unknown>` for issue details) and 2 unused variable warnings (removed `parseColor` import and `OUR_BACKGROUND` constant)
+
+### Added (previous)
 - **HeroSection** (`app/hero-section.tsx`): Auth-aware hero ("SECURE CONTAIN PROTECT" for guests; "Welcome back, Researcher" for signed-in)
 - **ProfileDropdown**: Avatar-based account menu for signed-in users; Settings and Sign Out in dropdown
 - **Avatar, MenuItem, PremiumBadge, SectionLabel, Toggle** UI components

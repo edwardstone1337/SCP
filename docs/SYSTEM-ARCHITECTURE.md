@@ -48,7 +48,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 | `/series` | Redirects to `/` | — |
 | `/series/[seriesId]` | Range list for a series (001–099, 100–199, …) + CollectionPage/Breadcrumb JSON-LD | Public |
 | `/series/[seriesId]/[range]` | SCP list for a range; sort + read/bookmark toggles | Public |
-| `/scp/[id]` | SCP reader (content via direct SCP-Data API fetch, prev/next, bookmark/read) + CreativeWork/Breadcrumb JSON-LD | Public (toggles require login) |
+| `/scp/[id]` | SCP reader (server-rendered article content via ISR, prev/next, bookmark/read) + CreativeWork/Breadcrumb JSON-LD | Public (toggles require login) |
 | `/saved` | Bookmarked SCPs with sort | **Protected** (redirects to login) |
 | `/settings` | Reading preferences (Image Safe Mode toggle); premium-gated features | **Protected** |
 | `/premium/success` | Post-checkout success; invalidates premium/preferences cache | Public (redirects after Stripe) |
@@ -83,7 +83,7 @@ SCP Reader is a web application for tracking reading progress through the SCP Fo
 
 - **Metadata (series, ranges, list):** Server Components read from Supabase (anon key, RLS). Guest users get `read=0`; authenticated get real progress/bookmarks.
 - **Top-rated landing data:** Home fetches top 4 rated SCP rows server-side; `/top-rated` fetches top 100 rows server-side, then hydrates user read/bookmark state client-side after auth check.
-- **Article content:** Server passes `content_file` to client; `useScpContent` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`. TanStack Query caches client-side (1h stale, 24h gc) with retry/backoff.
+- **Article content:** Server fetches article HTML from `scp-data.tedivm.com`, runs image recovery and sanitization (JSDOM + DOMPurify), and includes the full rendered content in the ISR-cached page. Client-side fetch (`useScpContent`) is retained as an automatic fallback when server content is unavailable. See "Content Loading" below.
 - **Mutations:** Bookmark and read toggles call Server Actions; actions use Supabase server client (cookies), then `revalidatePath()` so the next request gets fresh data.
 
 ---
@@ -362,14 +362,23 @@ For protected client actions (nav Sign In, bookmark, mark-as-read, recently view
 - **Series page (`/series/[seriesId]`):** Injects `CollectionPage` and `BreadcrumbList` JSON-LD via `lib/utils/json-ld.ts`.
 - **Name handling:** `CreativeWork` name uses `SCP-XXX — Title` only when title differs from `scp_id`.
 
+### SEO & Indexing
+
+- **Server-rendered article content:** SCP pages include full article HTML in the initial server response (ISR-cached for 24h), ensuring search engine crawlers index complete article text without requiring JavaScript execution.
+- **noindex directives:** Auth/utility routes emit `robots: { index: false, follow: false }` metadata: `/login`, `/auth/error`, `/saved`, `/settings`, `/premium/success`, `/premium/cancelled`.
+- **Sitemap:** Dynamic sitemap at `/sitemap.xml` covers all SCP, series, and static pages. Base URL uses `NEXT_PUBLIC_SITE_URL` env var (fallback: `https://scp-reader.co`). Includes `/terms` and `/privacy`.
+- **Domain canonicalization:** `next.config.ts` returns a 308 permanent redirect from `www.scp-reader.co` to `scp-reader.co` to consolidate crawl equity.
+
 ### Content Loading
 
 - **Metadata:** Server loads `scps` row (including `content_file`) in `/scp/[id]/page.tsx`. `generateMetadata` sets document title to `Title | SCP-XXX` when `title !== scp_id`, else `scp_id`; meta description includes title when present. If `content_file` is null, reader shows "Content is not available."
-- **Body:** Client `useScpContent(contentFile, scpId)` fetches directly from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`, returns JSON keyed by scp_id; hook selects `data[scpId]` (raw_content, raw_source). TanStack Query: 1h stale, 24h gc, retry/backoff for transient failures.
-- **Image recovery:** `recoverWikidotImages(raw_content, raw_source, scpId)` parses `raw_source` for Wikidot image refs (`[[image ...]]`, `component:image-block`) not present in `raw_content`, injects `<div class="recovered-image"><img ...></div>` at segment boundaries; supports bare filenames and Wikidot URLs (sandbox, cross-wiki).
-- **Rendering:** `sanitizeHtml(content.raw_content)` (DOMPurify, client-side by default; optional custom instance for Node/JSDOM tooling) then `dangerouslySetInnerHTML` in an `article` with class `scp-content` and `aria-labelledby` for semantic association to the page title.
+- **Server-side body (primary):** `getScpContentHtml` in `page.tsx` calls `fetchScpContentData` (shared fetch function, `revalidate: 86400`) to retrieve `raw_content` and `raw_source` from `https://scp-data.tedivm.com/data/scp/items/{contentFile}`. The response is keyed by `scp_id`. Content then passes through `recoverWikidotImages` (image recovery) and `sanitizeHtmlServer` (JSDOM + DOMPurify singleton in `lib/utils/sanitize-server.ts`, applying XSS prevention + dark theme legibility fixes). The resulting HTML is passed as `serverContent` through `ScpContent` → `ScpReader` and rendered via `dangerouslySetInnerHTML` in an `<article>` with class `scp-content`. Next.js fetch deduplication ensures `fetchScpContentData` is called once per ISR render cycle even though both `generateMetadata` and `ScpPage` use it.
+- **Client-side fallback:** When `serverContent` is null (fetch/sanitization failure), `useScpContent(contentFile, scpId)` fires a client-side fetch from the same API. TanStack Query caches client-side (1h stale, 24h gc, retry/backoff). The loading skeleton and error UI only render in this fallback path.
+- **Image recovery:** `recoverWikidotImages(raw_content, raw_source, scpId)` parses `raw_source` for Wikidot image refs (`[[image ...]]`, `component:image-block`) not present in `raw_content`, injects `<div class="recovered-image"><img ...></div>` at segment boundaries; supports bare filenames and Wikidot URLs (sandbox, cross-wiki). Runs server-side as part of `getScpContentHtml`.
+- **Server sanitization:** `sanitizeHtmlServer` in `lib/utils/sanitize-server.ts` uses a lazy JSDOM + DOMPurify singleton (created once per Node.js process). Shares `SANITIZE_CONFIG` and `applyInlineStyleLegibilityFixes` with the client-side `sanitize.ts`. Registers the same DOMPurify hooks (licensebox removal, `javascript:` href neutralization).
+- **Post-render hooks:** `useFootnotes`, `useContentLinks`, and `useImageSafeMode` attach event handlers and DOM modifications after hydration via `useEffect`. They operate on the server-rendered DOM and do not modify the initial HTML — no hydration mismatch risk.
 - **Image Safe Mode:** When `preferences.imageSafeMode` is true (premium feature), `useImageSafeMode` hides images in `.scp-content`, inserts clickable placeholders, and reveals on tap. Operates on real DOM; styles in `globals.css` (`.image-safe-placeholder`, `.image-safe-hidden`).
-- **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback).
+- **Failure recovery:** Reader error UI includes `Retry` (query refetch) and `Open Original Article` (external fallback). Only rendered in the client-side fallback path.
 
 ### Reader typography & layout
 
@@ -606,13 +615,14 @@ lib/
 │   ├── use-scp-content.ts   # TanStack Query content fetch from SCP-Data API (direct)
 │   └── use-top-rated-list.ts # Top 100 ranked `scp_id` list for reader contextual prev/next
 ├── providers/query-provider.tsx
-├── utils/cn.ts, daily-scp.ts, json-ld.ts, loading-messages.ts, recover-wikidot-images.ts, sanitize.ts, series.ts, site-url.ts
+├── utils/cn.ts, daily-scp.ts, json-ld.ts, loading-messages.ts, recover-wikidot-images.ts, sanitize.ts, sanitize-server.ts, series.ts, site-url.ts
 └── logger.ts
 
 scripts/
 ├── dark-theme-scanner.ts    # QA: scan top 100 SCPs for dark-theme legibility issues
 ├── README-dark-theme-scanner.md # Scanner usage and interpretation guide
 ├── enrich-titles.ts         # Wiki series index → scps.title (service role)
+├── verify-ssr-content.ts    # QA: verify SSR article content in dev server responses
 ├── output/                  # Scanner JSON reports, enrichment dry-run (generated artifacts)
 └── seed-scps.ts             # SCP-Data API → scps table (service role)
 

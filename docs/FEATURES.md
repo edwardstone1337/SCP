@@ -13,9 +13,10 @@ It intentionally focuses on user value, not internal implementation details.
 
 ### Read SCP articles in-app
 - SCP reader opens full article content inside the app.
+- Article content is server-rendered and included in the initial page load for fast display and search engine indexing.
 - Reader includes Previous/Next navigation between SCPs.
 - Images that were missing from the upstream render are recovered from source when possible, so more articles display complete imagery.
-- If content load fails, reader provides retry and original-article fallback.
+- If server-side content is unavailable, the reader automatically falls back to client-side loading with a skeleton placeholder.
 
 ### Discover what to read next
 - Home "Daily Briefing" appears as a deterministic daily SCP pick.
@@ -97,7 +98,11 @@ It intentionally focuses on user value, not internal implementation details.
 
 ## Search & Discoverability
 
+- SCP article content is server-rendered, ensuring search engines index full article text without requiring JavaScript.
 - Home, SCP, and series pages include structured metadata for richer search result context.
+- Auth and utility pages are excluded from search indexes via noindex directives.
+- Sitemap includes all public pages (SCPs, series, legal pages) with appropriate change frequencies.
+- Domain is canonicalized with a www → non-www redirect.
 
 ## Guest vs Signed-In Experience
 
