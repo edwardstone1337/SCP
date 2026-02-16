@@ -40,6 +40,12 @@ interface AdjacentScp {
   title: string
 }
 
+interface ServerContent {
+  html: string
+  creator?: string
+  url?: string
+}
+
 interface ScpReaderProps {
   scp: {
     id: string
@@ -57,24 +63,36 @@ interface ScpReaderProps {
   prev?: AdjacentScp | null
   next?: AdjacentScp | null
   contextInfo?: { context: string; rank: number } | null
+  serverContent?: ServerContent | null
 }
 
-export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderProps) {
+export function ScpReader({ scp, userId, prev, next, contextInfo, serverContent }: ScpReaderProps) {
   const hasRecordedView = useRef(false)
   const contentContainerRef = useRef<HTMLElement>(null)
 
-  const { data: content, isLoading, isFetching, error: contentError, refetch } = useScpContent(
-    scp.content_file,
+  const hasServerContent = !!serverContent?.html
+
+  // Only fetch client-side when no server content was provided
+  const { data: clientContent, isLoading, isFetching, error: contentError, refetch } = useScpContent(
+    hasServerContent ? null : scp.content_file,
     scp.scp_id
   )
 
-  useFootnotes(contentContainerRef, !!content)
-  useContentLinks(contentContainerRef, !!content)
+  // Resolve content metadata from server or client
+  const contentLoaded = hasServerContent || !!clientContent
+  const creator = serverContent?.creator ?? clientContent?.creator
+  const articleUrl = serverContent?.url ?? clientContent?.url ?? scp.url
+  const contentHtml = hasServerContent
+    ? serverContent.html
+    : (clientContent ? sanitizeHtml(clientContent.raw_content) : null)
+
+  useFootnotes(contentContainerRef, contentLoaded)
+  useContentLinks(contentContainerRef, contentLoaded)
 
   const { preferences, isLoading: prefsLoading } = usePreferences(userId ?? null)
   useImageSafeMode({
     containerRef: contentContainerRef,
-    isEnabled: !!content && preferences.imageSafeMode === true,
+    isEnabled: contentLoaded && preferences.imageSafeMode === true,
     isLoading: prefsLoading,
     contentKey: scp.id,
   })
@@ -146,14 +164,14 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
                   </Text>
                   <Mono size="sm">{scp.scp_id}</Mono>
                   <Text size="sm" style={{ color: 'var(--color-text-muted)' }}>
-                    {content?.creator ? (
+                    {creator ? (
                       <>
-                        Written by <span style={{ color: 'var(--color-text-secondary)' }}>{content.creator}</span>{' '}
+                        Written by <span style={{ color: 'var(--color-text-secondary)' }}>{creator}</span>{' '}
                         ·{' '}
                       </>
                     ) : null}
                     <Link
-                      href={getSafeUrl(content?.url ?? scp.url, scp.scp_id)}
+                      href={getSafeUrl(articleUrl, scp.scp_id)}
                       variant="default"
                       external
                       onClick={() => trackOutboundWikiClick(scp.scp_id)}
@@ -209,7 +227,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
             </div>
           )}
 
-          {isLoading && (
+          {!hasServerContent && isLoading && (
             <Card padding="lg" style={{ marginTop: 'var(--spacing-2)' }} role="status" aria-live="polite" aria-busy="true">
               <span className="sr-only">Loading SCP content...</span>
               <Stack gap="normal">
@@ -233,7 +251,7 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
             </Card>
           )}
 
-          {contentError && !content && (
+          {!hasServerContent && contentError && !clientContent && (
             <div role="alert">
               <Card variant="bordered" accentBorder padding="md">
                 <Stack direction="vertical" gap="normal">
@@ -278,14 +296,14 @@ export function ScpReader({ scp, userId, prev, next, contextInfo }: ScpReaderPro
             </div>
           )}
 
-          {content && (
+          {contentHtml && (
             <>
               <Card padding="lg">
                 <article
                   ref={contentContainerRef}
                   className="scp-content"
                   aria-labelledby="scp-title"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.raw_content) }}
+                  dangerouslySetInnerHTML={{ __html: contentHtml }}
                 />
               </Card>
               <Stack direction="horizontal" gap="tight" justify="center" style={{ marginTop: 'var(--spacing-4)' }}>

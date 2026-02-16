@@ -6,6 +6,9 @@ import { notFound } from 'next/navigation'
 import { ScpContent } from './scp-content'
 import { generateCreativeWorkJsonLd, generateBreadcrumbJsonLd } from '@/lib/utils/json-ld'
 import { SITE_NAME } from '@/lib/constants'
+import { recoverWikidotImages } from '@/lib/utils/recover-wikidot-images'
+import { sanitizeHtmlServer } from '@/lib/utils/sanitize-server'
+import { logger } from '@/lib/logger'
 
 async function getAdjacentScps(
   supabase: ReturnType<typeof createStaticClient>,
@@ -52,11 +55,22 @@ async function getScpData(scpId: string) {
   }
 }
 
-async function getScpContentText(contentFile: string, scpId: string): Promise<string | null> {
+interface ScpContentEntry {
+  raw_content: string
+  raw_source: string
+  creator?: string
+  url?: string
+}
+
+/**
+ * Shared fetch for SCP article data from SCP-Data API.
+ * Next.js deduplicates calls with the same URL + revalidate within a single render.
+ */
+async function fetchScpContentData(contentFile: string, scpId: string): Promise<ScpContentEntry | null> {
   try {
     const url = `https://scp-data.tedivm.com/data/scp/items/${encodeURIComponent(contentFile)}`
     const response = await fetch(url, {
-      next: { revalidate: 86400 }, // Cache for 24 hours
+      next: { revalidate: 86400 },
     })
 
     if (!response.ok) return null
@@ -66,14 +80,43 @@ async function getScpContentText(contentFile: string, scpId: string): Promise<st
 
     if (!entry?.raw_content) return null
 
-    // Strip HTML tags and extract plain text
-    const textOnly = entry.raw_content
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim()
-
-    return textOnly
+    return {
+      raw_content: entry.raw_content,
+      raw_source: entry.raw_source ?? '',
+      creator: entry.creator,
+      url: entry.url,
+    }
   } catch {
+    return null
+  }
+}
+
+/** Extract plain text for metadata descriptions. */
+async function getScpContentText(contentFile: string, scpId: string): Promise<string | null> {
+  const entry = await fetchScpContentData(contentFile, scpId)
+  if (!entry) return null
+
+  return entry.raw_content
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Fetch, recover images, sanitize — returns HTML ready for server rendering. */
+async function getScpContentHtml(contentFile: string, scpId: string): Promise<{
+  html: string
+  creator?: string
+  url?: string
+} | null> {
+  try {
+    const entry = await fetchScpContentData(contentFile, scpId)
+    if (!entry) return null
+
+    const recovered = recoverWikidotImages(entry.raw_content, entry.raw_source, scpId)
+    const html = sanitizeHtmlServer(recovered)
+    return { html, creator: entry.creator, url: entry.url }
+  } catch (error) {
+    logger.error('Failed to process SCP content server-side', { error, scpId })
     return null
   }
 }
@@ -153,11 +196,12 @@ export default async function ScpPage({
   }
 
   const supabase = createStaticClient()
-  const { prev, next } = await getAdjacentScps(
-    supabase,
-    scpData.series,
-    scpData.scp_number
-  )
+  const [{ prev, next }, serverContent] = await Promise.all([
+    getAdjacentScps(supabase, scpData.series, scpData.scp_number),
+    scpData.content_file
+      ? getScpContentHtml(scpData.content_file, scpData.scp_id)
+      : Promise.resolve(null),
+  ])
 
   // Generate JSON-LD structured data
   const siteUrl = getSiteUrl()
@@ -194,7 +238,7 @@ export default async function ScpPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <ScpContent scp={scpData} prev={prev} next={next} />
+      <ScpContent scp={scpData} prev={prev} next={next} serverContent={serverContent} />
     </>
   )
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
@@ -6,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PremiumCacheInvalidator } from '@/app/premium/success/premium-cache-invalidator'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Clearance Upgraded — SCP Reader',
+  robots: { index: false, follow: false },
 }
 
 export default function PremiumSuccessPage() {

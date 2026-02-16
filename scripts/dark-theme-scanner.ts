@@ -20,16 +20,19 @@ dotenv.config({ path: '.env.local' })
 
 // We need to set up a minimal DOM environment for DOMPurify
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>')
-const window = dom.window as any
-const DOMPurify = DOMPurifyFactory(window)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const domWindow = dom.window as any
+const DOMPurify = DOMPurifyFactory(domWindow)
 
 // Set up global references for the color utilities
-global.window = window
-global.document = window.document
-global.DOMParser = window.DOMParser as any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+;(global as any).window = domWindow
+;(global as any).document = domWindow.document
+;(global as any).DOMParser = domWindow.DOMParser
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Now we can import sanitizeHtml and color utilities
-import { sanitizeHtml, parseColor, getRelativeLuminance } from '../lib/utils/sanitize'
+import { sanitizeHtml, getRelativeLuminance } from '../lib/utils/sanitize'
 
 interface ScpRecord {
   id: string
@@ -46,7 +49,7 @@ interface Issue {
   element: string
   selector: string
   inlineStyle: string
-  details: Record<string, any>
+  details: Record<string, unknown>
   suggestion: string
 }
 
@@ -72,7 +75,6 @@ interface Report {
 
 const API_BASE = 'https://scp-data.tedivm.com/data/scp/items'
 const FETCH_DELAY_MS = 200
-const OUR_BACKGROUND = '#141414' // --color-grey-9
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))

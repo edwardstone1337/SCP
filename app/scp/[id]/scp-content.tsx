@@ -25,13 +25,20 @@ interface ScpData {
   is_bookmarked: boolean
 }
 
+interface ServerContent {
+  html: string
+  creator?: string
+  url?: string
+}
+
 interface ScpContentProps {
   scp: ScpData
   prev: AdjacentScp | null
   next: AdjacentScp | null
+  serverContent?: ServerContent | null
 }
 
-export function ScpContent({ scp: initialScp, prev, next }: ScpContentProps) {
+export function ScpContent({ scp: initialScp, prev, next, serverContent }: ScpContentProps) {
   const [scp, setScp] = useState(initialScp)
   const [userId, setUserId] = useState<string | undefined>(undefined)
   const searchParams = useSearchParams()
@@ -119,6 +126,7 @@ export function ScpContent({ scp: initialScp, prev, next }: ScpContentProps) {
       prev={contextualPrev}
       next={contextualNext}
       contextInfo={contextInfo}
+      serverContent={serverContent}
     />
   )
 }

@@ -1,15 +1,10 @@
 /**
  * HTML Sanitization for SCP Content
  *
- * IMPORTANT: This sanitization currently only runs CLIENT-SIDE.
- * The sanitizeHtml function is designed to be used in Client Components only.
+ * Client-side: sanitizeHtml() uses browser DOMPurify + document APIs.
+ * Server-side: sanitizeHtmlServer() in lib/utils/sanitize-server.ts uses JSDOM.
  *
- * Server-side sanitization is planned for v1.1 using isomorphic-dompurify.
- *
- * Current usage:
- * - app/scp/[id]/scp-reader.tsx (Client Component) ✓
- *
- * DO NOT USE in Server Components until server-side sanitization is implemented.
+ * Both share SANITIZE_CONFIG and applyInlineStyleLegibilityFixes (exported).
  *
  * WORKFLOW: After modifying applyInlineStyleLegibilityFixes or sanitizeHtml logic,
  * verify dark theme legibility across the top 100 SCPs:
@@ -322,8 +317,9 @@ function replaceNearBlackColorsInValue(value: string, replacementColor: string):
   })
 }
 
-function applyInlineStyleLegibilityFixes(html: string): string {
-  const template = document.createElement('template')
+export function applyInlineStyleLegibilityFixes(html: string, doc?: Document): string {
+  const d = doc ?? document
+  const template = d.createElement('template')
   template.innerHTML = html
 
   template.content.querySelectorAll<HTMLElement>('[style]').forEach((element) => {
@@ -436,6 +432,17 @@ function registerSanitizeHooks(purifyInstance?: DOMPurifyInstance) {
   sanitizeHooksRegistered = true
 }
 
+/** Shared DOMPurify configuration — used by both client and server sanitizers. */
+export const SANITIZE_CONFIG = {
+  ALLOWED_TAGS: [
+    'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'blockquote', 'ul', 'ol', 'li', 'a', 'img', 'table', 'thead', 'tbody',
+    'tr', 'th', 'td', 'div', 'span', 'code', 'pre', 'hr', 'sup', 'sub'
+  ],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id', 'style'],
+  ALLOW_DATA_ATTR: false,
+}
+
 /**
  * Sanitize HTML content from external sources to prevent XSS
  * Uses DOMPurify with a safe configuration
@@ -453,17 +460,7 @@ export function sanitizeHtml(html: string, customDOMPurify?: DOMPurifyInstance):
   const purify = customDOMPurify || DOMPurify
   registerSanitizeHooks(customDOMPurify)
 
-  const sanitized = purify.sanitize(html, {
-    // Allow common HTML tags used in SCP articles
-    ALLOWED_TAGS: [
-      'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'blockquote', 'ul', 'ol', 'li', 'a', 'img', 'table', 'thead', 'tbody',
-      'tr', 'th', 'td', 'div', 'span', 'code', 'pre', 'hr', 'sup', 'sub'
-    ],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id', 'style'],
-    // Keep relative URLs for internal wiki links
-    ALLOW_DATA_ATTR: false,
-  })
+  const sanitized = purify.sanitize(html, SANITIZE_CONFIG)
 
   return applyInlineStyleLegibilityFixes(sanitized)
 }

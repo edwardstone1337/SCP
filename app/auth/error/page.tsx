@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
+
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Authentication Error — SCP Reader',
+  robots: { index: false, follow: false },
+}
 
 import { Suspense } from 'react'
 import { AuthErrorClient } from './client'

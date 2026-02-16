@@ -1,11 +1,13 @@
+import type { Metadata } from 'next'
 import { Main } from '@/components/ui/main'
 import { Container } from '@/components/ui/container'
 import { Stack } from '@/components/ui/stack'
 import { Heading, Text, Mono } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Upgrade Cancelled — SCP Reader',
+  robots: { index: false, follow: false },
 }
 
 export default function PremiumCancelledPage() {

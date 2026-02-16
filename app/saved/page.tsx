@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { redirect } from 'next/navigation'
@@ -9,6 +10,11 @@ import { Text } from '@/components/ui/typography'
 import { SavedList, type SavedScpItem } from '@/app/saved/saved-list'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Saved Articles — SCP Reader',
+  robots: { index: false, follow: false },
+}
 
 interface BookmarkRow {
   scp_id: string

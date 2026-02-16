@@ -4,6 +4,8 @@ import { getRange } from '@/lib/utils/series'
 
 export const revalidate = 86400 // 24 hours
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scp-reader.co'
+
 interface ScpRow {
   scp_id: string
   series: string
@@ -12,7 +14,6 @@ interface ScpRow {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createStaticClient()
-  const baseUrl = 'https://scp-reader.co'
 
   // Fetch all SCPs from database
   const { data: scps } = await supabase
@@ -83,6 +84,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
     },
   ]
 
