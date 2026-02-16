@@ -234,23 +234,16 @@ export function useFootnotes(
         })
       })
 
-      // Once we've found refs, stop observing — the content is stable
-      if (refLinks.length > 0 && observer) {
-        observer.disconnect()
-        observer = null
-      }
     }
 
     // Try immediately — content may already be in the DOM
     attachHandlers()
 
-    // If no refs found yet, observe for DOM mutations (dangerouslySetInnerHTML commit)
-    if (!container.querySelector('a[id^="footnoteref-"]')) {
-      observer = new MutationObserver(() => {
-        attachHandlers()
-      })
-      observer.observe(container, { childList: true, subtree: true })
-    }
+    // Keep observing so re-renders that replace innerHTML get re-bound
+    observer = new MutationObserver(() => {
+      attachHandlers()
+    })
+    observer.observe(container, { childList: true, subtree: true })
 
     cleanupRef.current = () => {
       observer?.disconnect()
